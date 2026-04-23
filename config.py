@@ -9,6 +9,7 @@ VECTORSTORE_DIR = BASE_DIR / "data" / "vectorstore"
 
 CHUNK_SIZE = 500
 CHUNK_OVERLAP = 0
+INDEX_BATCH_SIZE = 100
 RETRIEVER_K = 3
 
 EMBEDDING_MODEL = "text-embedding-3-small"
