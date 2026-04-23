@@ -2384,7 +2384,7 @@ name = "jaraco-classes"
 version = "3.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "more-itertools" },
+    { name = "more-itertools", marker = "python_full_version < '3.15' or platform_machine != 's390x' or sys_platform != 'darwin'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/06/c0/ed4a27bc5571b99e3cff68f8a9fa5b56ff7df1c2251cc715a652ddd26402/jaraco.classes-3.4.0.tar.gz", hash = "sha256:47a024b51d0239c0dd8c8540c6c7f484be3b8fcf0b2d85c13825780d3b3f3acd", size = 11780, upload-time = "2024-03-31T07:27:36.643Z" }
 wheels = [
@@ -2408,7 +2408,7 @@ name = "jaraco-functools"
 version = "4.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "more-itertools" },
+    { name = "more-itertools", marker = "python_full_version < '3.15' or platform_machine != 's390x' or sys_platform != 'darwin'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/0f/27/056e0638a86749374d6f57d0b0db39f29509cce9313cf91bdc0ac4d91084/jaraco_functools-4.4.0.tar.gz", hash = "sha256:da21933b0417b89515562656547a77b4931f98176eb173644c0d35032a33d6bb", size = 19943, upload-time = "2025-12-21T09:29:43.6Z" }
 wheels = [
@@ -2890,9 +2890,9 @@ version = "25.7.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "importlib-metadata", marker = "python_full_version < '3.12'" },
-    { name = "jaraco-classes" },
-    { name = "jaraco-context" },
-    { name = "jaraco-functools" },
+    { name = "jaraco-classes", marker = "python_full_version < '3.15' or platform_machine != 's390x' or sys_platform != 'darwin'" },
+    { name = "jaraco-context", marker = "python_full_version < '3.15' or platform_machine != 's390x' or sys_platform != 'darwin'" },
+    { name = "jaraco-functools", marker = "python_full_version < '3.15' or platform_machine != 's390x' or sys_platform != 'darwin'" },
     { name = "jeepney", marker = "sys_platform == 'linux'" },
     { name = "pywin32-ctypes", marker = "sys_platform == 'win32'" },
     { name = "secretstorage", marker = "sys_platform == 'linux'" },
@@ -3929,6 +3929,8 @@ dependencies = [
     { name = "grandalf" },
     { name = "huggingface-hub" },
     { name = "ipykernel" },
+    { name = "ipython", version = "9.10.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
+    { name = "ipython", version = "9.12.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "jq" },
     { name = "jupyter" },
     { name = "kiwipiepy" },
@@ -4006,6 +4008,7 @@ requires-dist = [
     { name = "grandalf", specifier = ">=0,<1" },
     { name = "huggingface-hub", specifier = ">=0,<1" },
     { name = "ipykernel" },
+    { name = "ipython", specifier = ">=9.10.1" },
     { name = "jq", specifier = ">=1.11.0" },
     { name = "jupyter", specifier = ">=1,<2" },
     { name = "kiwipiepy", specifier = ">=0,<1" },

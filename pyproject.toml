@@ -81,4 +81,5 @@ dependencies = [
     "olefile>=0.47",
     "chardet<6",
     "jq>=1.11.0",
+    "ipython>=9.10.1",
 ]
