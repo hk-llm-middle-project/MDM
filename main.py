@@ -12,7 +12,7 @@ from config import (
 from rag.chunker import split_documents
 from rag.indexer import build_vectorstore, load_vectorstore, vectorstore_exists
 from rag.loader import load_pdf
-from rag.retriever import retrieve
+from rag.retriever_pipeline import RetrievalPipelineConfig, run_retrieval_pipeline
 
 
 def get_vectorstore():
@@ -44,9 +44,12 @@ def build_prompt(question: str, context: str) -> str:
 """.strip()
 
 
-def answer_question(question: str) -> tuple[str, list[str]]:
+def answer_question(
+    question: str,
+    pipeline_config: RetrievalPipelineConfig | None = None,
+) -> tuple[str, list[str]]:
     vectorstore = get_vectorstore()
-    documents = retrieve(vectorstore, question)
+    documents = run_retrieval_pipeline(vectorstore, question, pipeline_config=pipeline_config)
     contexts = [document.page_content for document in documents]
     print(f"[retrieved] question={question}")
     for index, context in enumerate(contexts, start=1):
