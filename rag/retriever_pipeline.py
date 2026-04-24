@@ -5,11 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from langchain_core.documents import Document
-from langchain_core.vectorstores import VectorStore
 
 from config import RETRIEVER_K
 from rag.reranker import RerankerConfig, rerank
-from rag.retriever import StrategyConfig, retrieve
+from rag.retriever import RetrievalComponents, StrategyConfig, retrieve
 
 
 @dataclass(frozen=True)
@@ -25,7 +24,7 @@ class RetrievalPipelineConfig:
 
 
 def run_retrieval_pipeline(
-    vectorstore: VectorStore,
+    components: RetrievalComponents,
     query: str,
     filters: dict[str, object] | None = None,
     pipeline_config: RetrievalPipelineConfig | None = None,
@@ -34,7 +33,7 @@ def run_retrieval_pipeline(
     config = pipeline_config or RetrievalPipelineConfig()
     candidate_k = config.candidate_k or config.final_k
     candidate_documents = retrieve(
-        vectorstore=vectorstore,
+        components=components,
         query=query,
         k=candidate_k,
         strategy=config.retriever_strategy,

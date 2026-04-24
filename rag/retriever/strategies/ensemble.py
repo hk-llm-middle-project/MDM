@@ -3,13 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
 
 from langchain.retrievers import EnsembleRetriever
-from langchain_community.retrievers import BM25Retriever
 from langchain_core.documents import Document
 
-from rag.retriever.strategies.common import get_vectorstore_documents, kiwi_tokenize
+from rag.retriever.components import RetrievalComponents, get_or_create_bm25_retriever
 
 
 @dataclass(frozen=True)
@@ -23,7 +21,7 @@ class EnsembleRetrieverConfig:
 
 
 def retrieve_with_ensemble(
-    vectorstore: Any,
+    components: RetrievalComponents,
     query: str,
     k: int,
     filters: dict[str, object] | None = None,
@@ -31,18 +29,18 @@ def retrieve_with_ensemble(
 ) -> list[Document]:
     """Kiwi BM25와 dense 벡터 검색 결과를 결합합니다."""
     config = strategy_config or EnsembleRetrieverConfig()
-    documents = get_vectorstore_documents(vectorstore)
-    if not documents:
+    source_documents = components.get_source_documents()
+    if not source_documents:
         return []
 
-    bm25_retriever = BM25Retriever.from_documents(documents, preprocess_func=kiwi_tokenize)
+    bm25_retriever = get_or_create_bm25_retriever(components)
     bm25_retriever.k = config.bm25_k or k
 
     dense_search_kwargs: dict[str, object] = {"k": config.dense_k or k}
     if filters:
         dense_search_kwargs["filter"] = filters
 
-    dense_retriever = vectorstore.as_retriever(
+    dense_retriever = components.vectorstore.as_retriever(
         search_type=config.search_type,
         search_kwargs=dense_search_kwargs,
     )

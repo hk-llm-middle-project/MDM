@@ -6,6 +6,7 @@ from langchain_core.documents import Document
 
 from rag.chunker import chunk_text, split_documents
 from rag.indexer import build_vectorstore, vectorstore_exists
+from rag.retriever import build_retrieval_components
 from rag.retriever_pipeline import RetrievalPipelineConfig, run_retrieval_pipeline
 from rag.reranker import (
     RERANKER_STRATEGIES,
@@ -37,8 +38,9 @@ class BasicRagTest(unittest.TestCase):
         fake_retriever.invoke.return_value = [Document(page_content="result")]
         vectorstore = MagicMock()
         vectorstore.as_retriever.return_value = fake_retriever
+        components = build_retrieval_components(vectorstore)
 
-        results = retrieve(vectorstore, "query")
+        results = retrieve(components, "query")
 
         self.assertEqual(results[0].page_content, "result")
         vectorstore.as_retriever.assert_called_once_with(
@@ -56,9 +58,9 @@ class BasicRagTest(unittest.TestCase):
             return [Document(page_content="routed")]
 
         with patch.dict(RETRIEVAL_STRATEGIES, {"ensemble": fake_strategy}, clear=False):
-            vectorstore = MagicMock()
+            components = build_retrieval_components(MagicMock())
             results = retrieve(
-                vectorstore,
+                components,
                 "query",
                 strategy="ensemble",
                 filters={"page": 3},
@@ -68,12 +70,12 @@ class BasicRagTest(unittest.TestCase):
         self.assertEqual(results[0].page_content, "routed")
         self.assertEqual(
             called["args"],
-            (vectorstore, "query", 3, {"page": 3}, config),
+            (components, "query", 3, {"page": 3}, config),
         )
 
     def test_retrieve_raises_for_unknown_strategy(self):
         with self.assertRaises(ValueError):
-            retrieve(MagicMock(), "query", strategy="unknown")
+            retrieve(build_retrieval_components(MagicMock()), "query", strategy="unknown")
 
     def test_rerank_with_none_preserves_order(self):
         documents = [
@@ -148,20 +150,28 @@ class BasicRagTest(unittest.TestCase):
             Document(page_content="candidate-2"),
         ]
         final_documents = [Document(page_content="final-1")]
+        components = build_retrieval_components(MagicMock())
 
         with (
-            patch("rag.pipeline.retrieve", return_value=candidate_documents) as retrieve_mock,
-            patch("rag.pipeline.rerank", return_value=final_documents) as rerank_mock,
+            patch("rag.retriever_pipeline.retrieve", return_value=candidate_documents) as retrieve_mock,
+            patch("rag.retriever_pipeline.rerank", return_value=final_documents) as rerank_mock,
         ):
             results = run_retrieval_pipeline(
-                MagicMock(),
+                components,
                 "query",
                 filters={"page": 7},
                 pipeline_config=pipeline_config,
             )
 
         self.assertEqual(results, final_documents)
-        retrieve_mock.assert_called_once()
+        retrieve_mock.assert_called_once_with(
+            components=components,
+            query="query",
+            k=5,
+            strategy="ensemble",
+            filters={"page": 7},
+            strategy_config=retriever_config,
+        )
         rerank_mock.assert_called_once_with(
             query="query",
             documents=candidate_documents,
@@ -172,7 +182,24 @@ class BasicRagTest(unittest.TestCase):
 
     def test_selfquery_strategy_placeholder_raises(self):
         with self.assertRaises(NotImplementedError):
-            retrieve(MagicMock(), "query", strategy="selfquery")
+            retrieve(build_retrieval_components(MagicMock()), "query", strategy="selfquery")
+
+    def test_build_retrieval_components_reuses_bm25_retriever(self):
+        vectorstore = MagicMock()
+        components = build_retrieval_components(
+            vectorstore,
+            source_documents=[Document(page_content="문서")],
+        )
+        fake_bm25 = MagicMock()
+
+        with patch("rag.retriever.components.BM25Retriever.from_documents", return_value=fake_bm25) as bm25_mock:
+            from rag.retriever.components import get_or_create_bm25_retriever
+
+            first = get_or_create_bm25_retriever(components)
+            second = get_or_create_bm25_retriever(components)
+
+        self.assertIs(first, second)
+        bm25_mock.assert_called_once()
 
     def test_vectorstore_exists_ignores_placeholder_files(self):
         self.assertFalse(vectorstore_exists(Path("missing-vectorstore")))

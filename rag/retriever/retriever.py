@@ -1,9 +1,9 @@
 """검색 전략 라우팅 유틸리티."""
 
 from langchain_core.documents import Document
-from langchain_core.vectorstores import VectorStore
 
 from config import RETRIEVER_K
+from rag.retriever.components import RetrievalComponents
 from rag.retriever.strategies import (
     EnsembleRetrieverConfig,
     MultiQueryRetrieverConfig,
@@ -37,7 +37,7 @@ StrategyConfig = (
 
 
 def retrieve(
-    vectorstore: VectorStore,
+    components: RetrievalComponents,
     query: str,
     k: int = RETRIEVER_K,
     strategy: str = "vectorstore",
@@ -51,4 +51,4 @@ def retrieve(
         available = ", ".join(sorted(RETRIEVAL_STRATEGIES))
         raise ValueError(f"알 수 없는 검색 전략입니다: {strategy}. 사용 가능 전략: {available}") from error
 
-    return retrieval_strategy(vectorstore, query, k, filters, strategy_config)
+    return retrieval_strategy(components, query, k, filters, strategy_config)

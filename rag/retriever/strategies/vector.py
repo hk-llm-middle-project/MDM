@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
 
 from langchain_core.documents import Document
+
+from rag.retriever.components import RetrievalComponents
 
 
 @dataclass(frozen=True)
@@ -16,7 +17,7 @@ class VectorStoreRetrieverConfig:
 
 
 def retrieve_with_vectorstore(
-    vectorstore: Any,
+    components: RetrievalComponents,
     query: str,
     k: int,
     filters: dict[str, object] | None = None,
@@ -28,5 +29,8 @@ def retrieve_with_vectorstore(
     if filters:
         search_kwargs["filter"] = filters
 
-    retriever = vectorstore.as_retriever(search_type=config.search_type, search_kwargs=search_kwargs)
+    retriever = components.vectorstore.as_retriever(
+        search_type=config.search_type,
+        search_kwargs=search_kwargs,
+    )
     return list(retriever.invoke(query))

@@ -10,6 +10,7 @@ from langchain_core.documents import Document
 from langchain_openai import ChatOpenAI
 
 from config import LLM_MODEL
+from rag.retriever.components import RetrievalComponents
 
 
 @dataclass(frozen=True)
@@ -24,7 +25,7 @@ class MultiQueryRetrieverConfig:
 
 
 def retrieve_with_multiquery(
-    vectorstore: Any,
+    components: RetrievalComponents,
     query: str,
     k: int,
     filters: dict[str, object] | None = None,
@@ -36,7 +37,7 @@ def retrieve_with_multiquery(
     if filters:
         search_kwargs["filter"] = filters
 
-    base_retriever = vectorstore.as_retriever(
+    base_retriever = components.vectorstore.as_retriever(
         search_type=config.search_type,
         search_kwargs=search_kwargs,
     )

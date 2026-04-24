@@ -39,7 +39,7 @@ def get_vectorstore_documents(vectorstore: Any) -> list[Document]:
     ]
 
 
-def get_embedding_function(vectorstore: Any) -> Any:
+def get_embedding_function_from_vectorstore(vectorstore: Any) -> Any:
     """가능한 경우 벡터스토어에서 임베딩 함수를 읽어옵니다."""
     embedding_function = getattr(vectorstore, "_embedding_function", None)
     if embedding_function is None:

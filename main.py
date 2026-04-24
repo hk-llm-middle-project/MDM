@@ -1,5 +1,7 @@
 """Streamlit chat UI for the basic RAG app."""
 
+from functools import lru_cache
+
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 import streamlit as st
@@ -12,9 +14,11 @@ from config import (
 from rag.chunker import split_documents
 from rag.indexer import build_vectorstore, load_vectorstore, vectorstore_exists
 from rag.loader import load_pdf
+from rag.retriever import build_retrieval_components
 from rag.retriever_pipeline import RetrievalPipelineConfig, run_retrieval_pipeline
 
 
+@lru_cache(maxsize=1)
 def get_vectorstore():
     """Load an existing vector store or build one from the PDF."""
     if vectorstore_exists(VECTORSTORE_DIR):
@@ -23,6 +27,12 @@ def get_vectorstore():
     documents = load_pdf(PDF_PATH)
     chunks = split_documents(documents)
     return build_vectorstore(chunks, VECTORSTORE_DIR)
+
+
+@lru_cache(maxsize=1)
+def get_retrieval_components():
+    """현재 앱에서 재사용할 검색 컴포넌트를 준비합니다."""
+    return build_retrieval_components(get_vectorstore())
 
 
 def build_prompt(question: str, context: str) -> str:
@@ -48,8 +58,8 @@ def answer_question(
     question: str,
     pipeline_config: RetrievalPipelineConfig | None = None,
 ) -> tuple[str, list[str]]:
-    vectorstore = get_vectorstore()
-    documents = run_retrieval_pipeline(vectorstore, question, pipeline_config=pipeline_config)
+    components = get_retrieval_components()
+    documents = run_retrieval_pipeline(components, question, pipeline_config=pipeline_config)
     contexts = [document.page_content for document in documents]
     print(f"[retrieved] question={question}")
     for index, context in enumerate(contexts, start=1):
