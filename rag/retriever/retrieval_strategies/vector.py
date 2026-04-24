@@ -24,10 +24,9 @@ def retrieve_with_vectorstore(
 ) -> list[Document]:
     """벡터스토어 retriever 인터페이스로 문서를 조회합니다."""
     config = strategy_config or VectorStoreRetrieverConfig()
-    search_type = config.search_type
     search_kwargs: dict[str, object] = {"k": k}
     if filters:
         search_kwargs["filter"] = filters
 
-    retriever = vectorstore.as_retriever(search_type=search_type, search_kwargs=search_kwargs)
+    retriever = vectorstore.as_retriever(search_type=config.search_type, search_kwargs=search_kwargs)
     return list(retriever.invoke(query))

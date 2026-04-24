@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from langchain.retrievers import EnsembleRetriever
 from langchain_community.retrievers import BM25Retriever
 from langchain_core.documents import Document
 
-from rag.retrieval_strategies.common import get_vectorstore_documents, kiwi_tokenize
+from rag.retriever.retrieval_strategies.common import get_vectorstore_documents, kiwi_tokenize
 
 
 @dataclass(frozen=True)
@@ -35,10 +35,7 @@ def retrieve_with_ensemble(
     if not documents:
         return []
 
-    bm25_retriever = BM25Retriever.from_documents(
-        documents,
-        preprocess_func=kiwi_tokenize,
-    )
+    bm25_retriever = BM25Retriever.from_documents(documents, preprocess_func=kiwi_tokenize)
     bm25_retriever.k = config.bm25_k or k
 
     dense_search_kwargs: dict[str, object] = {"k": config.dense_k or k}

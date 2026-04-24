@@ -11,7 +11,7 @@ from langchain_core.documents import Document
 from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-from rag.retrieval_strategies.common import get_embedding_function, get_vectorstore_documents
+from rag.retriever.retrieval_strategies.common import get_embedding_function, get_vectorstore_documents
 
 
 @dataclass(frozen=True)

@@ -6,7 +6,7 @@ from langchain_core.documents import Document
 
 from rag.chunker import chunk_text, split_documents
 from rag.indexer import build_vectorstore, vectorstore_exists
-from rag.retrieval_strategies import EnsembleRetrieverConfig
+from rag.retriever import EnsembleRetrieverConfig
 from rag.retriever import RETRIEVAL_STRATEGIES, retrieve
 
 
