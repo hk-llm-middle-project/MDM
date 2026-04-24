@@ -1,22 +1,22 @@
 """검색 전략 구현 모음."""
 
-from rag.retriever.retrieval_strategies.ensemble import (
+from rag.retriever.strategies.ensemble import (
     EnsembleRetrieverConfig,
     retrieve_with_ensemble,
 )
-from rag.retriever.retrieval_strategies.multiquery import (
+from rag.retriever.strategies.multiquery import (
     MultiQueryRetrieverConfig,
     retrieve_with_multiquery,
 )
-from rag.retriever.retrieval_strategies.parent import (
+from rag.retriever.strategies.parent import (
     ParentDocumentRetrieverConfig,
     retrieve_with_parent_documents,
 )
-from rag.retriever.retrieval_strategies.self_query import (
+from rag.retriever.strategies.self_query import (
     SelfQueryRetrieverConfig,
     retrieve_with_self_query,
 )
-from rag.retriever.retrieval_strategies.vector import (
+from rag.retriever.strategies.vector import (
     VectorStoreRetrieverConfig,
     retrieve_with_vectorstore,
 )

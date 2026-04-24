@@ -4,7 +4,7 @@ from langchain_core.documents import Document
 from langchain_core.vectorstores import VectorStore
 
 from config import RETRIEVER_K
-from rag.retriever.retrieval_strategies import (
+from rag.retriever.strategies import (
     EnsembleRetrieverConfig,
     MultiQueryRetrieverConfig,
     ParentDocumentRetrieverConfig,

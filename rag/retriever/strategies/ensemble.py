@@ -9,7 +9,7 @@ from langchain.retrievers import EnsembleRetriever
 from langchain_community.retrievers import BM25Retriever
 from langchain_core.documents import Document
 
-from rag.retriever.retrieval_strategies.common import get_vectorstore_documents, kiwi_tokenize
+from rag.retriever.strategies.common import get_vectorstore_documents, kiwi_tokenize
 
 
 @dataclass(frozen=True)

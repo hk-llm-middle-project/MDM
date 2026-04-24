@@ -6,6 +6,14 @@ from langchain_core.documents import Document
 
 from rag.chunker import chunk_text, split_documents
 from rag.indexer import build_vectorstore, vectorstore_exists
+from rag.retriever_pipeline import RetrievalPipelineConfig, run_retrieval_pipeline
+from rag.reranker import (
+    RERANKER_STRATEGIES,
+    CohereRerankerConfig,
+    FlashrankRerankerConfig,
+    LLMScoreRerankerConfig,
+    rerank,
+)
 from rag.retriever import EnsembleRetrieverConfig
 from rag.retriever import RETRIEVAL_STRATEGIES, retrieve
 
@@ -66,6 +74,101 @@ class BasicRagTest(unittest.TestCase):
     def test_retrieve_raises_for_unknown_strategy(self):
         with self.assertRaises(ValueError):
             retrieve(MagicMock(), "query", strategy="unknown")
+
+    def test_rerank_with_none_preserves_order(self):
+        documents = [
+            Document(page_content="first"),
+            Document(page_content="second"),
+            Document(page_content="third"),
+        ]
+
+        results = rerank("query", documents, k=2)
+
+        self.assertEqual([document.page_content for document in results], ["first", "second"])
+
+    def test_rerank_routes_strategy_config_to_selected_strategy(self):
+        called = {}
+        config = FlashrankRerankerConfig(model_name="test-model")
+
+        def fake_strategy(query, documents, k, strategy_config):
+            called["args"] = (query, documents, k, strategy_config)
+            return [Document(page_content="reranked")]
+
+        with patch.dict(RERANKER_STRATEGIES, {"flashrank": fake_strategy}, clear=False):
+            documents = [Document(page_content="candidate")]
+            results = rerank(
+                "query",
+                documents,
+                k=1,
+                strategy="flashrank",
+                strategy_config=config,
+            )
+
+        self.assertEqual(results[0].page_content, "reranked")
+        self.assertEqual(called["args"], ("query", documents, 1, config))
+
+    def test_reranker_registry_includes_new_strategies(self):
+        self.assertIn("cohere", RERANKER_STRATEGIES)
+        self.assertIn("llm-score", RERANKER_STRATEGIES)
+
+    def test_pipeline_accepts_cohere_reranker_config(self):
+        pipeline_config = RetrievalPipelineConfig(
+            reranker_strategy="cohere",
+            reranker_config=CohereRerankerConfig(model="rerank-v3.5"),
+        )
+
+        self.assertEqual(pipeline_config.reranker_strategy, "cohere")
+        self.assertIsInstance(pipeline_config.reranker_config, CohereRerankerConfig)
+
+    def test_pipeline_accepts_llm_score_reranker_config(self):
+        pipeline_config = RetrievalPipelineConfig(
+            reranker_strategy="llm-score",
+            reranker_config=LLMScoreRerankerConfig(model="gpt-4o-mini"),
+        )
+
+        self.assertEqual(pipeline_config.reranker_strategy, "llm-score")
+        self.assertIsInstance(pipeline_config.reranker_config, LLMScoreRerankerConfig)
+
+    def test_rerank_raises_for_unknown_strategy(self):
+        with self.assertRaises(ValueError):
+            rerank("query", [], k=1, strategy="unknown")
+
+    def test_run_retrieval_pipeline_routes_retriever_and_reranker(self):
+        retriever_config = EnsembleRetrieverConfig(weights=(0.6, 0.4))
+        pipeline_config = RetrievalPipelineConfig(
+            retriever_strategy="ensemble",
+            retriever_config=retriever_config,
+            reranker_strategy="flashrank",
+            reranker_config=FlashrankRerankerConfig(model_name="ranker"),
+            candidate_k=5,
+            final_k=2,
+        )
+        candidate_documents = [
+            Document(page_content="candidate-1"),
+            Document(page_content="candidate-2"),
+        ]
+        final_documents = [Document(page_content="final-1")]
+
+        with (
+            patch("rag.pipeline.retrieve", return_value=candidate_documents) as retrieve_mock,
+            patch("rag.pipeline.rerank", return_value=final_documents) as rerank_mock,
+        ):
+            results = run_retrieval_pipeline(
+                MagicMock(),
+                "query",
+                filters={"page": 7},
+                pipeline_config=pipeline_config,
+            )
+
+        self.assertEqual(results, final_documents)
+        retrieve_mock.assert_called_once()
+        rerank_mock.assert_called_once_with(
+            query="query",
+            documents=candidate_documents,
+            k=2,
+            strategy="flashrank",
+            strategy_config=pipeline_config.reranker_config,
+        )
 
     def test_selfquery_strategy_placeholder_raises(self):
         with self.assertRaises(NotImplementedError):
