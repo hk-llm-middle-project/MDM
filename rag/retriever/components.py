@@ -12,7 +12,7 @@ from langchain_core.documents import Document
 from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-from rag.retriever.strategies.common import (
+from rag.retriever.common import (
     get_embedding_function_from_vectorstore,
     get_vectorstore_documents,
     kiwi_tokenize,
