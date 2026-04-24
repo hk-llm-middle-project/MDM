@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-import json
-
 from langchain_core.documents import Document
+from langchain_core.utils.json import parse_json_markdown
 
 
 def build_scored_document(document: Document, score: float | None) -> Document:
@@ -17,12 +16,7 @@ def build_scored_document(document: Document, score: float | None) -> Document:
 
 def parse_json_response(content: str) -> dict[str, object]:
     """LLM 응답에서 JSON 객체를 파싱합니다."""
-    text = content.strip()
-    if text.startswith("```"):
-        lines = text.splitlines()
-        if len(lines) >= 3:
-            text = "\n".join(lines[1:-1]).strip()
-    parsed = json.loads(text)
+    parsed = parse_json_markdown(content.strip())
     if not isinstance(parsed, dict):
         raise ValueError("리랭커 응답이 JSON 객체가 아닙니다.")
     return parsed
