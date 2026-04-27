@@ -30,6 +30,6 @@ def analyze_question(
         print(f"[retrieved:{index}] {context}")
 
     prompt = build_prompt(question, "\n\n".join(contexts))
-    llm = ChatOpenAI(model=LLM_MODEL)
+    llm = ChatOpenAI(model=LLM_MODEL, temperature=0)
     answer = llm.invoke(prompt).content
     return answer, contexts
