@@ -13,7 +13,7 @@ from langchain_core.documents import Document
 try:
     from parsing.storage import load_documents_json, save_documents_json
 except ModuleNotFoundError:
-    from storage import load_documents_json, save_documents_json
+    from rag.loader.strategies.upstage.storage import load_documents_json, save_documents_json
 
 
 DIAGRAM_ID_PATTERN = r"[\ucc28\ubcf4\uac70]\d+(?:-\d+)?"
