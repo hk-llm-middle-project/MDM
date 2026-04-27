@@ -12,6 +12,16 @@ class UserSearchMetadata:
 
 
 @dataclass(frozen=True)
+class IntakeState:
+    """세션 안에서 누적되는 intake 진행 상태입니다."""
+
+    attempt_count: int = 0
+    search_metadata: UserSearchMetadata = field(default_factory=UserSearchMetadata)
+    last_missing_fields: list[str] = field(default_factory=list)
+    last_follow_up_questions: list[str] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
 class MissingField:
     """분석 전에 더 필요한 정보 한 가지를 나타냅니다."""
 

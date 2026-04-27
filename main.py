@@ -3,7 +3,8 @@
 from dotenv import load_dotenv
 import streamlit as st
 
-from rag.service.app_service import answer_question
+from rag.service.app_service import answer_question_with_intake
+from rag.service.intake.schema import IntakeState
 from rag.service.result_service import format_context_preview
 
 
@@ -15,6 +16,12 @@ def init_state() -> None:
         st.session_state.sessions = {"세션 1": []}
     if "active_session" not in st.session_state:
         st.session_state.active_session = "세션 1"
+    if "intake_states" not in st.session_state:
+        st.session_state.intake_states = {
+            name: IntakeState() for name in st.session_state.sessions
+        }
+    for name in st.session_state.sessions:
+        st.session_state.intake_states.setdefault(name, IntakeState())
 
 
 def render_sidebar() -> None:
@@ -22,6 +29,7 @@ def render_sidebar() -> None:
     if st.sidebar.button("새 세션", use_container_width=True):
         name = f"세션 {len(st.session_state.sessions) + 1}"
         st.session_state.sessions[name] = []
+        st.session_state.intake_states[name] = IntakeState()
         st.session_state.active_session = name
 
     st.sidebar.divider()
@@ -32,7 +40,8 @@ def render_sidebar() -> None:
 
 
 def render_chat() -> None:
-    messages = st.session_state.sessions[st.session_state.active_session]
+    active_session = st.session_state.active_session
+    messages = st.session_state.sessions[active_session]
 
     st.title("MDM")
     st.markdown(
@@ -54,7 +63,13 @@ def render_chat() -> None:
     with st.chat_message("assistant"):
         with st.spinner("검색하고 답변 중..."):
             try:
-                answer, contexts = answer_question(question)
+                result = answer_question_with_intake(
+                    question,
+                    intake_state=st.session_state.intake_states.get(active_session, IntakeState()),
+                )
+                answer = result.answer
+                contexts = result.contexts
+                st.session_state.intake_states[active_session] = result.intake_state
                 st.markdown(answer)
                 context_preview = format_context_preview(contexts)
                 if SHOW_RETRIEVED_CONTEXTS and context_preview:

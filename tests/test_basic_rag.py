@@ -17,10 +17,13 @@ from rag.pipeline.reranker import (
 )
 from rag.pipeline.retriever import EnsembleRetrieverConfig
 from rag.pipeline.retriever import RETRIEVAL_STRATEGIES, retrieve
+from rag.service.app_service import answer_question, answer_question_with_intake
+from rag.service.intake.filter_service import build_metadata_filters
 from rag.service.intake.intake_service import (
     evaluate_input_sufficiency,
     normalize_metadata_response,
 )
+from rag.service.intake.schema import IntakeDecision, IntakeState, UserSearchMetadata
 from rag.service.result_service import format_context_preview, truncate_context
 
 
@@ -298,6 +301,171 @@ class BasicRagTest(unittest.TestCase):
         self.assertFalse(decision.is_sufficient)
         self.assertTrue(decision.follow_up_questions)
         fake_llm.invoke.assert_not_called()
+
+    def test_build_metadata_filters_uses_party_type_and_location(self):
+        filters = build_metadata_filters(
+            UserSearchMetadata(
+                party_type="자동차",
+                location="교차로 사고",
+            )
+        )
+
+        self.assertEqual(filters, {"party_type": "자동차", "location": "교차로 사고"})
+
+    def test_build_metadata_filters_returns_none_without_values(self):
+        self.assertIsNone(build_metadata_filters(UserSearchMetadata()))
+        self.assertIsNone(build_metadata_filters(None))
+
+    def test_answer_question_returns_follow_up_without_analysis_when_intake_is_insufficient(self):
+        with (
+            patch(
+                "rag.service.app_service.evaluate_input_sufficiency",
+                return_value=IntakeDecision(
+                    is_sufficient=False,
+                    normalized_description="사고났어요",
+                    follow_up_questions=["사고 상대는 무엇인가요?"],
+                ),
+            ) as intake_mock,
+            patch("rag.service.app_service.analyze_question") as analyze_mock,
+        ):
+            answer, contexts = answer_question("사고났어요")
+
+        self.assertIn("사고 상대는 보행자, 자동차, 자전거 중 무엇인가요?", answer)
+        self.assertEqual(contexts, [])
+        intake_mock.assert_called_once_with("사고났어요")
+        analyze_mock.assert_not_called()
+
+    def test_answer_question_with_intake_allows_two_follow_up_attempts(self):
+        with (
+            patch(
+                "rag.service.app_service.evaluate_input_sufficiency",
+                return_value=IntakeDecision(
+                    is_sufficient=False,
+                    normalized_description="애매한 입력",
+                    follow_up_questions=["사고 상대는 무엇인가요?"],
+                ),
+            ),
+            patch("rag.service.app_service.analyze_question") as analyze_mock,
+        ):
+            result = answer_question_with_intake(
+                "애매한 입력",
+                intake_state=IntakeState(attempt_count=1),
+            )
+
+        self.assertTrue(result.needs_more_input)
+        self.assertIn("사고 상대는 보행자, 자동차, 자전거 중 무엇인가요?", result.answer)
+        self.assertEqual(result.contexts, [])
+        self.assertEqual(result.intake_state.attempt_count, 2)
+        analyze_mock.assert_not_called()
+
+    def test_answer_question_with_intake_falls_back_after_two_follow_up_attempts(self):
+        metadata = UserSearchMetadata()
+        with (
+            patch(
+                "rag.service.app_service.evaluate_input_sufficiency",
+                return_value=IntakeDecision(
+                    is_sufficient=False,
+                    normalized_description="계속 애매한 입력",
+                    search_metadata=metadata,
+                    follow_up_questions=["사고 상대는 무엇인가요?"],
+                ),
+            ),
+            patch("rag.service.app_service.analyze_question", return_value=("fallback answer", ["context"])) as analyze_mock,
+        ):
+            result = answer_question_with_intake(
+                "계속 애매한 입력",
+                intake_state=IntakeState(attempt_count=2),
+            )
+
+        self.assertFalse(result.needs_more_input)
+        self.assertIn("정확도가 낮을 수 있습니다", result.answer)
+        self.assertIn("fallback answer", result.answer)
+        self.assertEqual(result.contexts, ["context"])
+        self.assertEqual(result.intake_state, IntakeState())
+        analyze_mock.assert_called_once_with(
+            "계속 애매한 입력",
+            search_metadata=metadata,
+            pipeline_config=None,
+        )
+
+    def test_answer_question_with_intake_accumulates_metadata_across_turns(self):
+        previous_state = IntakeState(
+            attempt_count=1,
+            search_metadata=UserSearchMetadata(party_type="자동차"),
+            last_missing_fields=["location"],
+            last_follow_up_questions=["사고 상황은 어디에 가까운가요?"],
+        )
+        with (
+            patch(
+                "rag.service.app_service.evaluate_input_sufficiency",
+                return_value=IntakeDecision(
+                    is_sufficient=False,
+                    normalized_description="교차로였어요",
+                    search_metadata=UserSearchMetadata(location="교차로 사고"),
+                ),
+            ),
+            patch("rag.service.app_service.analyze_question", return_value=("answer", ["context"])) as analyze_mock,
+        ):
+            result = answer_question_with_intake(
+                "교차로였어요",
+                intake_state=previous_state,
+            )
+
+        self.assertFalse(result.needs_more_input)
+        self.assertEqual(result.answer, "answer")
+        self.assertEqual(result.intake_state, IntakeState())
+        analyze_mock.assert_called_once_with(
+            "교차로였어요",
+            search_metadata=UserSearchMetadata(party_type="자동차", location="교차로 사고"),
+            pipeline_config=None,
+        )
+
+    def test_answer_question_passes_intake_metadata_to_analysis(self):
+        metadata = UserSearchMetadata(party_type="자동차", location="교차로 사고")
+        with (
+            patch(
+                "rag.service.app_service.evaluate_input_sufficiency",
+                return_value=IntakeDecision(
+                    is_sufficient=True,
+                    normalized_description="정규화된 설명",
+                    search_metadata=metadata,
+                ),
+            ),
+            patch("rag.service.app_service.analyze_question", return_value=("answer", ["context"])) as analyze_mock,
+        ):
+            answer, contexts = answer_question("원문 입력")
+
+        self.assertEqual(answer, "answer")
+        self.assertEqual(contexts, ["context"])
+        analyze_mock.assert_called_once_with(
+            "정규화된 설명",
+            search_metadata=metadata,
+            pipeline_config=None,
+        )
+
+    def test_analyze_question_passes_metadata_filters_to_retrieval_pipeline(self):
+        from rag.service.analysis_service import analyze_question
+
+        metadata = UserSearchMetadata(party_type="자동차", location="교차로 사고")
+        fake_document = Document(page_content="context")
+        fake_llm = MagicMock()
+        fake_llm.invoke.return_value = MagicMock(content="answer")
+
+        with (
+            patch("rag.service.analysis_service.get_retrieval_components", return_value="components"),
+            patch("rag.service.analysis_service.run_retrieval_pipeline", return_value=[fake_document]) as pipeline_mock,
+            patch("rag.service.analysis_service.ChatOpenAI", return_value=fake_llm),
+        ):
+            answer, contexts = analyze_question("query", search_metadata=metadata)
+
+        self.assertEqual(answer, "answer")
+        self.assertEqual(contexts, ["context"])
+        pipeline_mock.assert_called_once_with(
+            "components",
+            "query",
+            filters={"party_type": "자동차", "location": "교차로 사고"},
+            pipeline_config=None,
+        )
 
 
 if __name__ == "__main__":

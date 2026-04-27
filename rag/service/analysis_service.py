@@ -4,17 +4,26 @@ from langchain_openai import ChatOpenAI
 
 from config import LLM_MODEL
 from rag.pipeline.retrieval import RetrievalPipelineConfig, run_retrieval_pipeline
+from rag.service.intake.filter_service import build_metadata_filters
+from rag.service.intake.schema import UserSearchMetadata
 from rag.service.prompt import build_prompt
 from rag.service.vectorstore_service import get_retrieval_components
 
 
 def analyze_question(
     question: str,
+    search_metadata: UserSearchMetadata | None = None,
     pipeline_config: RetrievalPipelineConfig | None = None,
 ) -> tuple[str, list[str]]:
     """질문을 검색하고 LLM 답변과 검색 컨텍스트를 반환합니다."""
     components = get_retrieval_components()
-    documents = run_retrieval_pipeline(components, question, pipeline_config=pipeline_config)
+    filters = build_metadata_filters(search_metadata)
+    documents = run_retrieval_pipeline(
+        components,
+        question,
+        filters=filters,
+        pipeline_config=pipeline_config,
+    )
     contexts = [document.page_content for document in documents]
     print(f"[retrieved] question={question}")
     for index, context in enumerate(contexts, start=1):
