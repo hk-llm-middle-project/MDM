@@ -1,0 +1,23 @@
+pdf_path=/home/nyong/mdm/data/raw/230630_자동차사고 과실비율 인정기준_최종.pdf
+example_pages_path=/home/nyong/mdm/experiments/parser/example_pages.json
+output_format=md
+save_mode=both
+download_images=True
+include_screenshot_images=True
+include_object_images=True
+page_number_base=one-based
+target_pages=4,9,23,31,32,34,50,148,389,583,588
+
+[llamaparse]
+adaptive_long_table=True
+auto_mode=True
+auto_mode_trigger_on_image_in_page=True
+auto_mode_trigger_on_table_in_page=True
+disable_image_extraction=False
+disable_ocr=False
+do_not_unroll_columns=True
+extract_layout=True
+language=ko
+result_type=markdown
+split_by_page=True
+target_pages=3,8,22,30,31,33,49,147,388,582,587

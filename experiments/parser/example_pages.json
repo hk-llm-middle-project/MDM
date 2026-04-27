@@ -1,0 +1,13 @@
+{
+  "metadata": {
+    "source_pdf": "data/raw/230630_자동차사고 과실비율 인정기준_최종.pdf",
+    "page_number_base": "one-based",
+    "page_number_description": "Page numbers match the page number shown in a PDF reader. LlamaParse target_pages converts these values to zero-based numbers internally.",
+    "purpose": "Representative pages for parser output comparison."
+  },
+  "pages": {
+    "text": [4, 9, 31, 32],
+    "table": [23, 34, 583, 588],
+    "image": [50, 148, 389]
+  }
+}
