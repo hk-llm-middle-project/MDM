@@ -10,7 +10,7 @@ from langchain_core.documents import Document
 from langchain_openai import ChatOpenAI
 
 from config import LLM_MODEL
-from rag.retriever.components import RetrievalComponents
+from rag.pipeline.retriever.components import RetrievalComponents
 
 
 @dataclass(frozen=True)

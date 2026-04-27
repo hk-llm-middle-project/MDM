@@ -24,7 +24,13 @@ mdm/
 │  ├─ loader.py
 │  ├─ chunker.py
 │  ├─ indexer.py
-│  ├─ retriever.py
+│  ├─ service/
+│  │  ├─ app_service.py
+│  │  └─ vectorstore_service.py
+│  ├─ pipeline/
+│  │  ├─ retrieval.py
+│  │  ├─ retriever/
+│  │  └─ reranker/
 │  └─ evaluator.py
 ├─ data/
 │  ├─ raw/
@@ -38,8 +44,8 @@ mdm/
 
 ### [main.py](/home/nyong/mdm/main.py)
 
-RAG 파이프라인 실행 진입점이다.  
-문서 로드, 색인, 검색, 평가 실행 흐름을 연결하는 역할을 맡는다.
+Streamlit UI 실행 진입점이다.  
+앱 설정, 세션 상태, 사이드바, 채팅 화면 렌더링만 맡는다.
 
 ### [config.py](/home/nyong/mdm/config.py)
 
@@ -76,14 +82,46 @@ PDF 문서를 읽고 텍스트와 메타데이터를 정리한다.
 - Chroma 또는 FAISS 저장
 - 재색인 처리
 
-### [rag/retriever.py](/home/nyong/mdm/rag/retriever.py)
+### [rag/service/app_service.py](/home/nyong/mdm/rag/service/app_service.py)
+
+질문에 답변하는 애플리케이션 서비스다.
+
+- 검색 파이프라인 실행
+- 검색 컨텍스트 조립
+- 답변 프롬프트 생성
+- LLM 호출
+
+### [rag/service/vectorstore_service.py](/home/nyong/mdm/rag/service/vectorstore_service.py)
+
+앱 프로세스에서 재사용할 벡터스토어와 검색 컴포넌트를 준비한다.
+
+- 기존 벡터스토어 로드
+- 필요 시 PDF 로드, 청킹, 색인 생성
+- 실행 중 캐시 정책
+
+### [rag/pipeline/retrieval.py](/home/nyong/mdm/rag/pipeline/retrieval.py)
+
+검색과 reranker를 묶어 최종 컨텍스트 문서를 만든다.
+
+- retriever 전략 실행
+- reranker 전략 실행
+- candidate/final top-k 조정
+
+### [rag/pipeline/retriever/](/home/nyong/mdm/rag/pipeline/retriever/)
 
 질문을 받아 관련 청크를 검색한다.
 
 - 쿼리 임베딩
 - similarity search
 - top-k 결과 반환
-- 필요하면 이후 답변 생성 로직 연결
+
+### [rag/pipeline/reranker/](/home/nyong/mdm/rag/pipeline/reranker/)
+
+검색 후보 문서의 순서를 다시 매긴다.
+
+- no-op reranker
+- Flashrank/Cohere/LLM score 기반 reranker
+- 최종 문서 수 제한
 
 ### [rag/evaluator.py](/home/nyong/mdm/rag/evaluator.py)
 

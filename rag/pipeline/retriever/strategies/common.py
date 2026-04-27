@@ -1,6 +1,6 @@
 """호환용 재수출 모듈."""
 
-from rag.retriever.common import (
+from rag.pipeline.retriever.common import (
     get_embedding_function_from_vectorstore,
     get_kiwi,
     get_vectorstore_documents,

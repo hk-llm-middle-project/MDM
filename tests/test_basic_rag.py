@@ -6,17 +6,17 @@ from langchain_core.documents import Document
 
 from rag.chunker import chunk_text, split_documents
 from rag.indexer import build_vectorstore, vectorstore_exists
-from rag.retriever import build_retrieval_components
-from rag.retriever_pipeline import RetrievalPipelineConfig, run_retrieval_pipeline
-from rag.reranker import (
+from rag.pipeline.retriever import build_retrieval_components
+from rag.pipeline.retrieval import RetrievalPipelineConfig, run_retrieval_pipeline
+from rag.pipeline.reranker import (
     RERANKER_STRATEGIES,
     CohereRerankerConfig,
     FlashrankRerankerConfig,
     LLMScoreRerankerConfig,
     rerank,
 )
-from rag.retriever import EnsembleRetrieverConfig
-from rag.retriever import RETRIEVAL_STRATEGIES, retrieve
+from rag.pipeline.retriever import EnsembleRetrieverConfig
+from rag.pipeline.retriever import RETRIEVAL_STRATEGIES, retrieve
 
 
 class BasicRagTest(unittest.TestCase):
@@ -153,8 +153,8 @@ class BasicRagTest(unittest.TestCase):
         components = build_retrieval_components(MagicMock())
 
         with (
-            patch("rag.retriever_pipeline.retrieve", return_value=candidate_documents) as retrieve_mock,
-            patch("rag.retriever_pipeline.rerank", return_value=final_documents) as rerank_mock,
+            patch("rag.pipeline.retrieval.retrieve", return_value=candidate_documents) as retrieve_mock,
+            patch("rag.pipeline.retrieval.rerank", return_value=final_documents) as rerank_mock,
         ):
             results = run_retrieval_pipeline(
                 components,
@@ -192,8 +192,8 @@ class BasicRagTest(unittest.TestCase):
         )
         fake_bm25 = MagicMock()
 
-        with patch("rag.retriever.components.BM25Retriever.from_documents", return_value=fake_bm25) as bm25_mock:
-            from rag.retriever.components import get_or_create_bm25_retriever
+        with patch("rag.pipeline.retriever.components.BM25Retriever.from_documents", return_value=fake_bm25) as bm25_mock:
+            from rag.pipeline.retriever.components import get_or_create_bm25_retriever
 
             first = get_or_create_bm25_retriever(components)
             second = get_or_create_bm25_retriever(components)

@@ -7,8 +7,8 @@ from dataclasses import dataclass
 from langchain_core.documents import Document
 
 from config import RETRIEVER_K
-from rag.reranker import RerankerConfig, rerank
-from rag.retriever import RetrievalComponents, StrategyConfig, retrieve
+from rag.pipeline.reranker import RerankerConfig, rerank
+from rag.pipeline.retriever import RetrievalComponents, StrategyConfig, retrieve
 
 
 @dataclass(frozen=True)

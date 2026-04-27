@@ -9,8 +9,8 @@ from langchain_core.documents import Document
 from langchain_openai import ChatOpenAI
 
 from config import LLM_MODEL
-from rag.reranker.prompts import build_llm_score_reranker_prompt
-from rag.reranker.strategies.common import build_scored_document, parse_json_response
+from rag.pipeline.reranker.prompts import build_llm_score_reranker_prompt
+from rag.pipeline.reranker.strategies.common import build_scored_document, parse_json_response
 
 
 @dataclass(frozen=True)

@@ -6,7 +6,7 @@ from dataclasses import dataclass
 
 from langchain_core.documents import Document
 
-from rag.retriever.components import RetrievalComponents, get_or_create_parent_retriever
+from rag.pipeline.retriever.components import RetrievalComponents, get_or_create_parent_retriever
 
 
 @dataclass(frozen=True)

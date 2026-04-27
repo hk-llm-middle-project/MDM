@@ -7,7 +7,7 @@ from typing import Any
 
 from langchain_core.documents import Document
 
-from rag.reranker.strategies.common import build_scored_document
+from rag.pipeline.reranker.strategies.common import build_scored_document
 
 
 @dataclass(frozen=True)

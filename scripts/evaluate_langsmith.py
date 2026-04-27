@@ -21,7 +21,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from config import BASE_DIR
-from main import answer_question
+from rag.service.app_service import answer_question
 
 
 DEFAULT_TESTSET_PATH = BASE_DIR / "data" / "testsets" / "accident_ragas_eval_dataset.jsonl"
