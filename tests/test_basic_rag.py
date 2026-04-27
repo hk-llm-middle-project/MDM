@@ -33,13 +33,14 @@ class BasicRagTest(unittest.TestCase):
 
         self.assertEqual([len(chunk) for chunk in chunks], [500, 500, 201])
 
-    def test_split_documents_does_not_add_metadata(self):
+    def test_split_documents_preserves_metadata(self):
         documents = [Document(page_content="abcdef", metadata={"page": 1})]
 
         chunks = split_documents(documents, chunk_size=3, overlap=0)
 
         self.assertEqual([chunk.page_content for chunk in chunks], ["abc", "def"])
-        self.assertEqual([chunk.metadata for chunk in chunks], [{}, {}])
+        self.assertEqual([chunk.metadata for chunk in chunks], [{"page": 1}, {"page": 1}])
+        self.assertIsNot(chunks[0].metadata, documents[0].metadata)
 
     def test_retrieve_uses_vectorstore_strategy_by_default(self):
         fake_retriever = MagicMock()
@@ -233,6 +234,29 @@ class BasicRagTest(unittest.TestCase):
 
         self.assertEqual([len(batch) for batch in vectorstore.batches], [2, 2, 1])
 
+    def test_vectorstore_service_uses_loader_specific_directory(self):
+        from rag.service import vectorstore_service
+
+        vectorstore_service.get_vectorstore.cache_clear()
+
+        with (
+            patch("rag.service.vectorstore_service.get_vectorstore_dir", return_value=Path("vectorstore/llamaparser")) as dir_mock,
+            patch("rag.service.vectorstore_service.vectorstore_exists", return_value=False),
+            patch("rag.service.vectorstore_service.load_pdf", return_value=[Document(page_content="doc")]) as load_mock,
+            patch("rag.service.vectorstore_service.split_documents", return_value=[Document(page_content="chunk")]),
+            patch("rag.service.vectorstore_service.build_vectorstore", return_value="vectorstore") as build_mock,
+        ):
+            result = vectorstore_service.get_vectorstore("llamaparser")
+
+        self.assertEqual(result, "vectorstore")
+        dir_mock.assert_called_once_with("llamaparser")
+        load_mock.assert_called_once()
+        self.assertEqual(load_mock.call_args.kwargs["strategy"], "llamaparser")
+        build_mock.assert_called_once()
+        self.assertEqual(build_mock.call_args.args[1], Path("vectorstore/llamaparser"))
+
+        vectorstore_service.get_vectorstore.cache_clear()
+
     def test_format_context_preview_returns_empty_without_contexts(self):
         self.assertEqual(format_context_preview([]), "")
 
@@ -394,6 +418,7 @@ class BasicRagTest(unittest.TestCase):
             "계속 애매한 입력",
             search_metadata=metadata,
             pipeline_config=None,
+            loader_strategy="pdfplumber",
         )
 
     def test_answer_question_with_intake_accumulates_metadata_across_turns(self):
@@ -426,6 +451,7 @@ class BasicRagTest(unittest.TestCase):
             "교차로였어요",
             search_metadata=UserSearchMetadata(party_type="자동차", location="교차로 사고"),
             pipeline_config=None,
+            loader_strategy="pdfplumber",
         )
 
     def test_answer_question_passes_intake_metadata_to_analysis(self):
@@ -449,6 +475,31 @@ class BasicRagTest(unittest.TestCase):
             "정규화된 설명",
             search_metadata=metadata,
             pipeline_config=None,
+            loader_strategy="pdfplumber",
+        )
+
+    def test_answer_question_passes_loader_strategy_to_analysis(self):
+        metadata = UserSearchMetadata(party_type="자동차", location="교차로 사고")
+        with (
+            patch(
+                "rag.service.app_service.evaluate_input_sufficiency",
+                return_value=IntakeDecision(
+                    is_sufficient=True,
+                    normalized_description="정규화된 설명",
+                    search_metadata=metadata,
+                ),
+            ),
+            patch("rag.service.app_service.analyze_question", return_value=("answer", ["context"])) as analyze_mock,
+        ):
+            answer, contexts = answer_question("원문 입력", loader_strategy="llamaparser")
+
+        self.assertEqual(answer, "answer")
+        self.assertEqual(contexts, ["context"])
+        analyze_mock.assert_called_once_with(
+            "정규화된 설명",
+            search_metadata=metadata,
+            pipeline_config=None,
+            loader_strategy="llamaparser",
         )
 
     def test_analyze_question_passes_metadata_filters_to_retrieval_pipeline(self):
@@ -474,6 +525,24 @@ class BasicRagTest(unittest.TestCase):
             filters={"$and": [{"party_type": "자동차"}, {"location": "교차로 사고"}]},
             pipeline_config=None,
         )
+
+    def test_analyze_question_uses_loader_strategy_for_retrieval_components(self):
+        from rag.service.analysis_service import analyze_question
+
+        fake_document = Document(page_content="context")
+        fake_llm = MagicMock()
+        fake_llm.invoke.return_value = MagicMock(content="answer")
+
+        with (
+            patch("rag.service.analysis_service.get_retrieval_components", return_value="components") as components_mock,
+            patch("rag.service.analysis_service.run_retrieval_pipeline", return_value=[fake_document]),
+            patch("rag.service.analysis_service.ChatOpenAI", return_value=fake_llm),
+        ):
+            answer, contexts = analyze_question("query", loader_strategy="llamaparser")
+
+        self.assertEqual(answer, "answer")
+        self.assertEqual(contexts, ["context"])
+        components_mock.assert_called_once_with("llamaparser")
 
 
 if __name__ == "__main__":

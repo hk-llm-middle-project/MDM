@@ -27,9 +27,9 @@ def split_documents(
     chunk_size: int = CHUNK_SIZE,
     overlap: int = CHUNK_OVERLAP,
 ) -> list[Document]:
-    """Split documents into fixed-size chunks without metadata."""
+    """Split documents into fixed-size chunks while preserving metadata."""
     chunks: list[Document] = []
     for document in documents:
         for chunk in chunk_text(document.page_content, chunk_size=chunk_size, overlap=overlap):
-            chunks.append(Document(page_content=chunk, metadata={}))
+            chunks.append(Document(page_content=chunk, metadata=dict(document.metadata)))
     return chunks
