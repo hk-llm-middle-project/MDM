@@ -5,6 +5,8 @@ from unittest.mock import MagicMock, patch
 from langchain_core.documents import Document
 
 from rag.chunker import chunk_text, split_documents
+from rag.embeddings import EMBEDDING_STRATEGIES, create_embeddings
+from rag.embeddings.strategies.bge import BGEM3Embeddings
 from rag.indexer import build_vectorstore, vectorstore_exists
 from rag.pipeline.retriever import build_retrieval_components
 from rag.pipeline.retrieval import RetrievalPipelineConfig, run_retrieval_pipeline
@@ -233,6 +235,34 @@ class BasicRagTest(unittest.TestCase):
             vectorstore = build_vectorstore(documents, Path("vectorstore"), batch_size=2)
 
         self.assertEqual([len(batch) for batch in vectorstore.batches], [2, 2, 1])
+
+    def test_create_embeddings_returns_bge_provider(self):
+        with patch.dict(EMBEDDING_STRATEGIES, {"bge": lambda: "bge"}, clear=False):
+            self.assertEqual(create_embeddings("bge"), "bge")
+
+    def test_embedding_registry_includes_current_providers(self):
+        self.assertIn("openai", EMBEDDING_STRATEGIES)
+        self.assertIn("bge", EMBEDDING_STRATEGIES)
+
+    def test_bge_embeddings_calls_embedding_endpoint(self):
+        response = MagicMock()
+        response.json.return_value = {"data": [{"dense": [0.1, 0.2]}, {"dense": [0.3, 0.4]}]}
+
+        with (
+            patch.dict("os.environ", {"BGE_BASE_URL": "https://bge.example", "BGE_API_KEY": "secret"}),
+            patch("rag.embeddings.strategies.bge.requests.post", return_value=response) as post_mock,
+        ):
+            embeddings = BGEM3Embeddings()
+            result = embeddings.embed_documents(["one", "two"])
+
+        self.assertEqual(result, [[0.1, 0.2], [0.3, 0.4]])
+        post_mock.assert_called_once_with(
+            "https://bge.example/v1/embeddings/m3",
+            headers={"Authorization": "Bearer secret"},
+            json={"input": ["one", "two"], "return_dense": True},
+            timeout=120,
+        )
+        response.raise_for_status.assert_called_once()
 
     def test_vectorstore_service_uses_loader_specific_directory(self):
         from rag.service import vectorstore_service

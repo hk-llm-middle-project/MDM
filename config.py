@@ -20,6 +20,7 @@ CHUNK_OVERLAP = 0
 INDEX_BATCH_SIZE = 100
 RETRIEVER_K = 3
 
+EMBEDDING_PROVIDER = "bge"
 EMBEDDING_MODEL = "text-embedding-3-small"
 LLM_MODEL = "gpt-4o-mini"
 

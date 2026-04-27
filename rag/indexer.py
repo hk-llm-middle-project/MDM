@@ -1,18 +1,13 @@
-"""Embedding and vector store indexing utilities."""
+"""Vector store indexing utilities."""
 
 import sqlite3
 from pathlib import Path
 
 from langchain_chroma import Chroma
 from langchain_core.documents import Document
-from langchain_openai import OpenAIEmbeddings
 
-from config import EMBEDDING_MODEL, INDEX_BATCH_SIZE, VECTORSTORE_DIR
-
-
-def create_embeddings() -> OpenAIEmbeddings:
-    """Create the embedding model used for indexing and retrieval."""
-    return OpenAIEmbeddings(model=EMBEDDING_MODEL)
+from config import INDEX_BATCH_SIZE, VECTORSTORE_DIR
+from rag.embeddings import create_embeddings
 
 
 def build_vectorstore(
