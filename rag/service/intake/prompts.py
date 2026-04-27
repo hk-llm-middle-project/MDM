@@ -27,6 +27,7 @@ location 허용값:
 - confidence는 0.0부터 1.0 사이 숫자로 작성하세요.
 - missing_fields에는 값이 null이거나 confidence가 낮은 필드명을 넣으세요.
 - follow_up_questions에는 부족한 정보를 확인하기 위한 질문을 넣으세요.
+- 누락된 필드가 있으면 follow_up_questions에 사용자에게 물어볼 자연스러운 한국어 질문을 작성해라. 단, 질문은 최대 2개만 작성하고, party_type/location 선택지를 반드시 포함해라.
 
 출력 JSON 형식:
 {{

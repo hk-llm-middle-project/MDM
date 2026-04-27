@@ -75,7 +75,10 @@ def answer_question_with_intake(
 
     if missing_field_names:
         if current_state.attempt_count < MAX_FOLLOW_UP_ATTEMPTS:
-            follow_up_questions = build_default_follow_up_questions(missing_field_names)
+            follow_up_questions = (
+                intake_decision.follow_up_questions
+                or build_default_follow_up_questions(missing_field_names)
+            )
             next_state = IntakeState(
                 attempt_count=current_state.attempt_count + 1,
                 search_metadata=merged_metadata,

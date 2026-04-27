@@ -338,9 +338,28 @@ class BasicRagTest(unittest.TestCase):
         ):
             answer, contexts = answer_question("사고났어요")
 
-        self.assertIn("사고 상대는 보행자, 자동차, 자전거 중 무엇인가요?", answer)
+        self.assertIn("사고 상대는 무엇인가요?", answer)
         self.assertEqual(contexts, [])
         intake_mock.assert_called_once_with("사고났어요")
+        analyze_mock.assert_not_called()
+
+    def test_answer_question_uses_llm_follow_up_questions_first(self):
+        with (
+            patch(
+                "rag.service.app_service.evaluate_input_sufficiency",
+                return_value=IntakeDecision(
+                    is_sufficient=False,
+                    normalized_description="사고났어요",
+                    follow_up_questions=["LLM이 만든 추가 질문입니다."],
+                ),
+            ),
+            patch("rag.service.app_service.analyze_question") as analyze_mock,
+        ):
+            answer, contexts = answer_question("사고났어요")
+
+        self.assertIn("LLM이 만든 추가 질문입니다.", answer)
+        self.assertNotIn("사고 상대는 보행자", answer)
+        self.assertEqual(contexts, [])
         analyze_mock.assert_not_called()
 
     def test_answer_question_with_intake_allows_two_follow_up_attempts(self):
@@ -361,7 +380,7 @@ class BasicRagTest(unittest.TestCase):
             )
 
         self.assertTrue(result.needs_more_input)
-        self.assertIn("사고 상대는 보행자, 자동차, 자전거 중 무엇인가요?", result.answer)
+        self.assertIn("사고 상대는 무엇인가요?", result.answer)
         self.assertEqual(result.contexts, [])
         self.assertEqual(result.intake_state.attempt_count, 2)
         analyze_mock.assert_not_called()
@@ -457,7 +476,9 @@ class BasicRagTest(unittest.TestCase):
         metadata = UserSearchMetadata(party_type="자동차", location="교차로 사고")
         fake_document = Document(page_content="context")
         fake_llm = MagicMock()
-        fake_llm.invoke.return_value = MagicMock(content="answer")
+        fake_llm.invoke.return_value = MagicMock(
+            content='{"fault_ratio_a":70,"fault_ratio_b":30,"response":"answer"}'
+        )
 
         with (
             patch("rag.service.analysis_service.get_retrieval_components", return_value="components"),
