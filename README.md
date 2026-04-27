@@ -21,7 +21,10 @@ mdm/
 ├─ config.py
 ├─ rag/
 │  ├─ __init__.py
-│  ├─ loader.py
+│  ├─ loader/
+│  │  ├─ __init__.py
+│  │  ├─ loader.py
+│  │  └─ strategies/
 │  ├─ chunker.py
 │  ├─ indexer.py
 │  ├─ service/
@@ -48,39 +51,46 @@ mdm/
 
 ## 파일 역할
 
-### [main.py](/home/nyong/mdm/main.py)
+### [main.py](main.py)
 
 Streamlit UI 실행 진입점이다.  
 앱 설정, 세션 상태, 사이드바, 채팅 화면 렌더링만 맡는다.
 
-### [config.py](/home/nyong/mdm/config.py)
+### [config.py](config.py)
 
 환경 변수와 공통 설정을 모아두는 파일이다.
 
 - PDF 경로
 - 벡터스토어 저장 경로
+- 로더 전략별 벡터스토어 저장 경로
+- LlamaParse markdown 저장 경로
+- 기본 문서 로더 전략
 - chunk size / overlap
 - top-k
 - 임베딩 모델명
 - LLM 모델명
 
-### [rag/loader.py](/home/nyong/mdm/rag/loader.py)
+### [rag/loader/](rag/loader/)
 
-PDF 문서를 읽고 텍스트와 메타데이터를 정리한다.
+PDF 문서를 읽고 텍스트와 메타데이터를 정리하는 로더 전략 패키지다.
 
-- 문서 로드
-- 페이지 단위 텍스트 추출
-- `source`, `page` 같은 메타데이터 부여
+- `pdfplumber` 기본 로더 전략
+- `llamaparser` / `llama-parse` LlamaParse 로더 전략
+- 페이지 단위 텍스트 또는 markdown 추출
+- `source`, `page`, `parser` 메타데이터 부여
+- LlamaParse 결과를 `data/llama_md/main_pdf/`에 페이지별 markdown으로 저장
+- LlamaParse 전략은 기존 markdown이 있으면 API를 다시 호출하지 않고 해당 파일로 문서를 재구성
 
-### [rag/chunker.py](/home/nyong/mdm/rag/chunker.py)
+### [rag/chunker.py](rag/chunker.py)
 
 로드한 문서를 검색 가능한 단위로 나눈다.
 
 - 문단 또는 고정 길이 청킹
 - overlap 적용
+- 로더에서 부여한 메타데이터 보존
 - 의미 단위가 최대한 유지되도록 분할
 
-### [rag/indexer.py](/home/nyong/mdm/rag/indexer.py)
+### [rag/indexer.py](rag/indexer.py)
 
 청크를 임베딩하고 벡터스토어에 저장한다.
 
@@ -88,7 +98,7 @@ PDF 문서를 읽고 텍스트와 메타데이터를 정리한다.
 - Chroma 또는 FAISS 저장
 - 재색인 처리
 
-### [rag/service/app_service.py](/home/nyong/mdm/rag/service/app_service.py)
+### [rag/service/app_service.py](rag/service/app_service.py)
 
 사용자 흐름을 조율하는 애플리케이션 서비스다.
 
@@ -96,7 +106,7 @@ PDF 문서를 읽고 텍스트와 메타데이터를 정리한다.
 - 분석 서비스 호출
 - 기존 UI와 평가 스크립트가 사용하는 답변 API 유지
 
-### [rag/service/analysis_service.py](/home/nyong/mdm/rag/service/analysis_service.py)
+### [rag/service/analysis_service.py](rag/service/analysis_service.py)
 
 사고 질의를 분석하고 RAG 답변을 생성한다.
 
@@ -105,7 +115,7 @@ PDF 문서를 읽고 텍스트와 메타데이터를 정리한다.
 - 답변 프롬프트 생성
 - LLM 호출
 
-### [rag/service/result_service.py](/home/nyong/mdm/rag/service/result_service.py)
+### [rag/service/result_service.py](rag/service/result_service.py)
 
 분석 결과를 화면이나 평가에서 쓰기 좋은 형태로 정리한다.
 
@@ -113,15 +123,16 @@ PDF 문서를 읽고 텍스트와 메타데이터를 정리한다.
 - 검색 문서 조각 첨부
 - 이후 예상 사고유형, 과실비율, 주의사항 화면 모델 확장
 
-### [rag/service/vectorstore_service.py](/home/nyong/mdm/rag/service/vectorstore_service.py)
+### [rag/service/vectorstore_service.py](rag/service/vectorstore_service.py)
 
 앱 프로세스에서 재사용할 벡터스토어와 검색 컴포넌트를 준비한다.
 
-- 기존 벡터스토어 로드
+- 선택한 로더 전략에 맞는 벡터스토어 로드
 - 필요 시 PDF 로드, 청킹, 색인 생성
+- `pdfplumber`와 `llamaparser` 색인 결과 분리
 - 실행 중 캐시 정책
 
-### [rag/service/intake/](/home/nyong/mdm/rag/service/intake/)
+### [rag/service/intake/](rag/service/intake/)
 
 사고 입력 수집과 충분성 판단을 담당한다.
 
@@ -129,7 +140,7 @@ PDF 문서를 읽고 텍스트와 메타데이터를 정리한다.
 - 추가 질문 후보
 - 분석용 사고 설명 정규화
 
-### [rag/pipeline/retrieval.py](/home/nyong/mdm/rag/pipeline/retrieval.py)
+### [rag/pipeline/retrieval.py](rag/pipeline/retrieval.py)
 
 검색과 reranker를 묶어 최종 컨텍스트 문서를 만든다.
 
@@ -137,7 +148,7 @@ PDF 문서를 읽고 텍스트와 메타데이터를 정리한다.
 - reranker 전략 실행
 - candidate/final top-k 조정
 
-### [rag/pipeline/retriever/](/home/nyong/mdm/rag/pipeline/retriever/)
+### [rag/pipeline/retriever/](rag/pipeline/retriever/)
 
 질문을 받아 관련 청크를 검색한다.
 
@@ -145,7 +156,7 @@ PDF 문서를 읽고 텍스트와 메타데이터를 정리한다.
 - similarity search
 - top-k 결과 반환
 
-### [rag/pipeline/reranker/](/home/nyong/mdm/rag/pipeline/reranker/)
+### [rag/pipeline/reranker/](rag/pipeline/reranker/)
 
 검색 후보 문서의 순서를 다시 매긴다.
 
@@ -153,7 +164,7 @@ PDF 문서를 읽고 텍스트와 메타데이터를 정리한다.
 - Flashrank/Cohere/LLM score 기반 reranker
 - 최종 문서 수 제한
 
-### [rag/evaluator.py](/home/nyong/mdm/rag/evaluator.py)
+### [rag/evaluator.py](rag/evaluator.py)
 
 검색과 답변 품질을 점검하는 모듈이다.
 
@@ -162,32 +173,42 @@ PDF 문서를 읽고 텍스트와 메타데이터를 정리한다.
 - 답변 정확도와 출처 확인
 - 문서 밖 질문에 대한 거절 품질 확인
 
-### [docs/rag-quick-guide.md](/home/nyong/mdm/docs/rag-quick-guide.md)
+### [docs/rag-quick-guide.md](docs/rag-quick-guide.md)
 
 허접 버전 RAG를 만들 때 무엇을 우선 봐야 하는지 정리한 메모다.  
 설계 기준이나 구현 체크리스트로 참고하면 된다.
 
 ## 데이터 경로
 
-- 원본 문서: [data/raw/230630_자동차사고 과실비율 인정기준_최종.pdf](/home/nyong/mdm/data/raw/230630_%EC%9E%90%EB%8F%99%EC%B0%A8%EC%82%AC%EA%B3%A0%20%EA%B3%BC%EC%8B%A4%EB%B9%84%EC%9C%A8%20%EC%9D%B8%EC%A0%95%EA%B8%B0%EC%A4%80_%EC%B5%9C%EC%A2%85.pdf)
+- 원본 문서: [data/raw/230630_자동차사고 과실비율 인정기준_최종.pdf](data/raw/230630_%EC%9E%90%EB%8F%99%EC%B0%A8%EC%82%AC%EA%B3%A0%20%EA%B3%BC%EC%8B%A4%EB%B9%84%EC%9C%A8%20%EC%9D%B8%EC%A0%95%EA%B8%B0%EC%A4%80_%EC%B5%9C%EC%A2%85.pdf)
 - 벡터스토어 저장 위치: `data/vectorstore/`
+- pdfplumber 벡터스토어: `data/vectorstore/pdfplumber/`
+- LlamaParse 벡터스토어: `data/vectorstore/llamaparser/`
+- LlamaParse markdown 저장 위치: `data/llama_md/main_pdf/`
 
 `data/vectorstore/`는 로컬 색인 결과물이 저장되는 위치이며 `.gitignore`에 포함되어 있다.
+
+LlamaParse 전략의 색인 우선순위는 아래 순서다.
+
+1. `data/vectorstore/llamaparser/`에 기존 DB가 있으면 그대로 사용한다.
+2. DB가 없고 `data/llama_md/main_pdf/*.md`가 있으면 markdown 파일로 청킹과 임베딩을 진행한다.
+3. DB와 markdown 파일이 모두 없을 때만 PDF를 LlamaParse로 파싱하고, 페이지별 markdown을 저장한다.
 
 ## 구현 기준
 
 이 프로젝트는 아래 원칙으로 MVP를 만든다.
 
 - 처음엔 문서 1개로 시작한다.
+- 문서 로더는 전략으로 분리해 `pdfplumber`와 `LlamaParse`를 바꿔 쓸 수 있게 한다.
 - 검색은 복잡하게 가지 않고 벡터 검색 + `top-k`부터 시작한다.
-- 청크 메타데이터에 `source`, `page`를 남긴다.
+- 청크 메타데이터에 `source`, `page`, `parser`를 남긴다.
 - 답변은 문맥 기반으로만 하게 하고, 근거가 없으면 모른다고 하게 만든다.
 - 결과에는 출처를 같이 보여준다.
 - "잘 되는 느낌"이 아니라 샘플 질문셋으로 평가한다.
 
 ## 추천 구현 순서
 
-1. `loader.py`에서 PDF 텍스트 추출 구현
+1. `rag/loader/`에서 PDF 로더 전략 구현
 2. `chunker.py`에서 청킹 구현
 3. `indexer.py`에서 임베딩 및 저장 구현
 4. `retriever.py`에서 검색 구현
@@ -196,7 +217,7 @@ PDF 문서를 읽고 텍스트와 메타데이터를 정리한다.
 
 ## 참고
 
-- RAG 체크리스트 문서: [docs/rag-quick-guide.md](/home/nyong/mdm/docs/rag-quick-guide.md)
+- RAG 체크리스트 문서: [docs/rag-quick-guide.md](docs/rag-quick-guide.md)
 
 ## Git 컨벤션
 

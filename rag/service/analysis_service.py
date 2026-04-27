@@ -2,7 +2,7 @@
 
 from langchain_openai import ChatOpenAI
 
-from config import LLM_MODEL
+from config import DEFAULT_LOADER_STRATEGY, LLM_MODEL
 from rag.pipeline.retrieval import RetrievalPipelineConfig, run_retrieval_pipeline
 from rag.service.answer_schema import parse_structured_answer
 from rag.service.intake.filter_service import build_metadata_filters
@@ -15,9 +15,10 @@ def analyze_question(
     question: str,
     search_metadata: UserSearchMetadata | None = None,
     pipeline_config: RetrievalPipelineConfig | None = None,
+    loader_strategy: str = DEFAULT_LOADER_STRATEGY,
 ) -> tuple[str, list[str]]:
     """질문을 검색하고 LLM 답변과 검색 컨텍스트를 반환합니다."""
-    components = get_retrieval_components()
+    components = get_retrieval_components(loader_strategy)
     filters = build_metadata_filters(search_metadata)
     documents = run_retrieval_pipeline(
         components,

@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass, field
 
+from config import DEFAULT_LOADER_STRATEGY
 from rag.pipeline.retrieval import RetrievalPipelineConfig
 from rag.service.analysis_service import analyze_question
 from rag.service.intake.intake_service import (
@@ -63,6 +64,7 @@ def answer_question_with_intake(
     question: str,
     pipeline_config: RetrievalPipelineConfig | None = None,
     intake_state: IntakeState | None = None,
+    loader_strategy: str = DEFAULT_LOADER_STRATEGY,
 ) -> AnswerResult:
     """intake 결과에 따라 추가 질문 또는 RAG 답변을 반환합니다."""
     current_state = intake_state or IntakeState()
@@ -97,6 +99,7 @@ def answer_question_with_intake(
             intake_decision.normalized_description or question,
             search_metadata=merged_metadata,
             pipeline_config=pipeline_config,
+            loader_strategy=loader_strategy,
         )
         return AnswerResult(
             answer=build_fallback_notice(answer),
@@ -109,6 +112,7 @@ def answer_question_with_intake(
         intake_decision.normalized_description,
         search_metadata=merged_metadata,
         pipeline_config=pipeline_config,
+        loader_strategy=loader_strategy,
     )
     return AnswerResult(
         answer=answer,
@@ -121,11 +125,13 @@ def answer_question_with_intake(
 def answer_question(
     question: str,
     pipeline_config: RetrievalPipelineConfig | None = None,
+    loader_strategy: str = DEFAULT_LOADER_STRATEGY,
 ) -> tuple[str, list[str]]:
     """사용자 질문에 대한 RAG 답변을 반환합니다."""
     result = answer_question_with_intake(
         question,
         pipeline_config=pipeline_config,
+        loader_strategy=loader_strategy,
     )
     return result.answer, result.contexts
 
