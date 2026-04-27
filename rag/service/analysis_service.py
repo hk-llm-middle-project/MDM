@@ -4,27 +4,8 @@ from langchain_openai import ChatOpenAI
 
 from config import LLM_MODEL
 from rag.pipeline.retrieval import RetrievalPipelineConfig, run_retrieval_pipeline
+from rag.service.prompt import build_prompt
 from rag.service.vectorstore_service import get_retrieval_components
-
-
-def build_prompt(question: str, context: str) -> str:
-    """검색된 공식 문서 조각과 사용자 질문으로 답변 프롬프트를 만듭니다."""
-    return f"""
-아래 공식 문서 내용을 참고해서 답변해.
-
-[공식 문서 내용]
-{context}
-
-[사용자 질문]
-{question}
-
-아래 형식으로 답변해.
-1. 의심 사고유형
-2. 관련 공식 문서 근거
-3. 수정요소 후보
-4. 예상 과실비율
-5. 설명
-""".strip()
 
 
 def analyze_question(
@@ -43,4 +24,3 @@ def analyze_question(
     llm = ChatOpenAI(model=LLM_MODEL)
     answer = llm.invoke(prompt).content
     return answer, contexts
-
