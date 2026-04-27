@@ -24,7 +24,19 @@ mdm/
 │  ├─ loader.py
 │  ├─ chunker.py
 │  ├─ indexer.py
-│  ├─ retriever.py
+│  ├─ service/
+│  │  ├─ app_service.py
+│  │  ├─ analysis_service.py
+│  │  ├─ result_service.py
+│  │  ├─ vectorstore_service.py
+│  │  └─ intake/
+│  │     ├─ intake_service.py
+│  │     ├─ prompts.py
+│  │     └─ schema.py
+│  ├─ pipeline/
+│  │  ├─ retrieval.py
+│  │  ├─ retriever/
+│  │  └─ reranker/
 │  └─ evaluator.py
 ├─ data/
 │  ├─ raw/
@@ -38,8 +50,8 @@ mdm/
 
 ### [main.py](/home/nyong/mdm/main.py)
 
-RAG 파이프라인 실행 진입점이다.  
-문서 로드, 색인, 검색, 평가 실행 흐름을 연결하는 역할을 맡는다.
+Streamlit UI 실행 진입점이다.  
+앱 설정, 세션 상태, 사이드바, 채팅 화면 렌더링만 맡는다.
 
 ### [config.py](/home/nyong/mdm/config.py)
 
@@ -76,14 +88,70 @@ PDF 문서를 읽고 텍스트와 메타데이터를 정리한다.
 - Chroma 또는 FAISS 저장
 - 재색인 처리
 
-### [rag/retriever.py](/home/nyong/mdm/rag/retriever.py)
+### [rag/service/app_service.py](/home/nyong/mdm/rag/service/app_service.py)
+
+사용자 흐름을 조율하는 애플리케이션 서비스다.
+
+- 입력 처리 흐름의 대표 진입점
+- 분석 서비스 호출
+- 기존 UI와 평가 스크립트가 사용하는 답변 API 유지
+
+### [rag/service/analysis_service.py](/home/nyong/mdm/rag/service/analysis_service.py)
+
+사고 질의를 분석하고 RAG 답변을 생성한다.
+
+- 검색 파이프라인 실행
+- 검색 컨텍스트 조립
+- 답변 프롬프트 생성
+- LLM 호출
+
+### [rag/service/result_service.py](/home/nyong/mdm/rag/service/result_service.py)
+
+분석 결과를 화면이나 평가에서 쓰기 좋은 형태로 정리한다.
+
+- 답변 표시 형식 정리
+- 검색 문서 조각 첨부
+- 이후 예상 사고유형, 과실비율, 주의사항 화면 모델 확장
+
+### [rag/service/vectorstore_service.py](/home/nyong/mdm/rag/service/vectorstore_service.py)
+
+앱 프로세스에서 재사용할 벡터스토어와 검색 컴포넌트를 준비한다.
+
+- 기존 벡터스토어 로드
+- 필요 시 PDF 로드, 청킹, 색인 생성
+- 실행 중 캐시 정책
+
+### [rag/service/intake/](/home/nyong/mdm/rag/service/intake/)
+
+사고 입력 수집과 충분성 판단을 담당한다.
+
+- 입력 충분성 판단 결과 구조
+- 추가 질문 후보
+- 분석용 사고 설명 정규화
+
+### [rag/pipeline/retrieval.py](/home/nyong/mdm/rag/pipeline/retrieval.py)
+
+검색과 reranker를 묶어 최종 컨텍스트 문서를 만든다.
+
+- retriever 전략 실행
+- reranker 전략 실행
+- candidate/final top-k 조정
+
+### [rag/pipeline/retriever/](/home/nyong/mdm/rag/pipeline/retriever/)
 
 질문을 받아 관련 청크를 검색한다.
 
 - 쿼리 임베딩
 - similarity search
 - top-k 결과 반환
-- 필요하면 이후 답변 생성 로직 연결
+
+### [rag/pipeline/reranker/](/home/nyong/mdm/rag/pipeline/reranker/)
+
+검색 후보 문서의 순서를 다시 매긴다.
+
+- no-op reranker
+- Flashrank/Cohere/LLM score 기반 reranker
+- 최종 문서 수 제한
 
 ### [rag/evaluator.py](/home/nyong/mdm/rag/evaluator.py)
 

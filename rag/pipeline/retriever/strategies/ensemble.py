@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from langchain.retrievers import EnsembleRetriever
 from langchain_core.documents import Document
 
-from rag.retriever.components import RetrievalComponents, get_or_create_bm25_retriever
+from rag.pipeline.retriever.components import RetrievalComponents, get_or_create_bm25_retriever
 
 
 @dataclass(frozen=True)

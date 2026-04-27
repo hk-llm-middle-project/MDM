@@ -12,14 +12,14 @@ from langchain_core.documents import Document
 from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-from rag.retriever.strategies.common import (
+from rag.pipeline.retriever.common import (
     get_embedding_function_from_vectorstore,
     get_vectorstore_documents,
     kiwi_tokenize,
 )
 
 if TYPE_CHECKING:
-    from rag.retriever.strategies.parent import ParentDocumentRetrieverConfig
+    from rag.pipeline.retriever.strategies.parent import ParentDocumentRetrieverConfig
 
 
 @dataclass

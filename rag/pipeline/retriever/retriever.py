@@ -3,8 +3,8 @@
 from langchain_core.documents import Document
 
 from config import RETRIEVER_K
-from rag.retriever.components import RetrievalComponents
-from rag.retriever.strategies import (
+from rag.pipeline.retriever.components import RetrievalComponents
+from rag.pipeline.retriever.strategies import (
     EnsembleRetrieverConfig,
     MultiQueryRetrieverConfig,
     ParentDocumentRetrieverConfig,

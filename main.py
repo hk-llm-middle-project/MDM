@@ -1,87 +1,35 @@
 """Streamlit chat UI for the basic RAG app."""
 
-from functools import lru_cache
-
 from dotenv import load_dotenv
-from langchain_openai import ChatOpenAI
 import streamlit as st
 
-from config import (
-    LLM_MODEL,
-    PDF_PATH,
-    VECTORSTORE_DIR,
-)
-from rag.chunker import split_documents
-from rag.indexer import build_vectorstore, load_vectorstore, vectorstore_exists
-from rag.loader import load_pdf
-from rag.retriever import build_retrieval_components
-from rag.retriever_pipeline import RetrievalPipelineConfig, run_retrieval_pipeline
+from rag.service.app_service import answer_question_with_intake
+from rag.service.intake.schema import IntakeState
+from rag.service.result_service import format_context_preview
 
 
-@lru_cache(maxsize=1)
-def get_vectorstore():
-    """Load an existing vector store or build one from the PDF."""
-    if vectorstore_exists(VECTORSTORE_DIR):
-        return load_vectorstore(VECTORSTORE_DIR)
-
-    documents = load_pdf(PDF_PATH)
-    chunks = split_documents(documents)
-    return build_vectorstore(chunks, VECTORSTORE_DIR)
-
-
-@lru_cache(maxsize=1)
-def get_retrieval_components():
-    """현재 앱에서 재사용할 검색 컴포넌트를 준비합니다."""
-    return build_retrieval_components(get_vectorstore())
-
-
-def build_prompt(question: str, context: str) -> str:
-    return f"""
-아래 공식 문서 내용을 참고해서 답변해.
-
-[공식 문서 내용]
-{context}
-
-[사용자 질문]
-{question}
-
-아래 형식으로 답변해.
-1. 의심 사고유형
-2. 관련 공식 문서 근거
-3. 수정요소 후보
-4. 예상 과실비율
-5. 설명
-""".strip()
-
-
-def answer_question(
-    question: str,
-    pipeline_config: RetrievalPipelineConfig | None = None,
-) -> tuple[str, list[str]]:
-    components = get_retrieval_components()
-    documents = run_retrieval_pipeline(components, question, pipeline_config=pipeline_config)
-    contexts = [document.page_content for document in documents]
-    print(f"[retrieved] question={question}")
-    for index, context in enumerate(contexts, start=1):
-        print(f"[retrieved:{index}] {context}")
-    prompt = build_prompt(question, "\n\n".join(contexts))
-    llm = ChatOpenAI(model=LLM_MODEL)
-    answer = llm.invoke(prompt).content
-    return answer, contexts
+SHOW_RETRIEVED_CONTEXTS = True
 
 
 def init_state() -> None:
     if "sessions" not in st.session_state:
-        st.session_state.sessions = {"새션 1": []}
+        st.session_state.sessions = {"세션 1": []}
     if "active_session" not in st.session_state:
-        st.session_state.active_session = "새션 1"
+        st.session_state.active_session = "세션 1"
+    if "intake_states" not in st.session_state:
+        st.session_state.intake_states = {
+            name: IntakeState() for name in st.session_state.sessions
+        }
+    for name in st.session_state.sessions:
+        st.session_state.intake_states.setdefault(name, IntakeState())
 
 
 def render_sidebar() -> None:
-    st.sidebar.title("새션 목록")
-    if st.sidebar.button("새 새션", use_container_width=True):
-        name = f"새션 {len(st.session_state.sessions) + 1}"
+    st.sidebar.title("세션 목록")
+    if st.sidebar.button("새 세션", use_container_width=True):
+        name = f"세션 {len(st.session_state.sessions) + 1}"
         st.session_state.sessions[name] = []
+        st.session_state.intake_states[name] = IntakeState()
         st.session_state.active_session = name
 
     st.sidebar.divider()
@@ -92,7 +40,8 @@ def render_sidebar() -> None:
 
 
 def render_chat() -> None:
-    messages = st.session_state.sessions[st.session_state.active_session]
+    active_session = st.session_state.active_session
+    messages = st.session_state.sessions[active_session]
 
     st.title("MDM")
     st.markdown(
@@ -114,12 +63,21 @@ def render_chat() -> None:
     with st.chat_message("assistant"):
         with st.spinner("검색하고 답변 중..."):
             try:
-                answer, contexts = answer_question(question)
-                if contexts:
-                    answer = f"{answer}\n\n---\n\n검색된 문서 조각\n\n" + "\n\n---\n\n".join(contexts)
+                result = answer_question_with_intake(
+                    question,
+                    intake_state=st.session_state.intake_states.get(active_session, IntakeState()),
+                )
+                answer = result.answer
+                contexts = result.contexts
+                st.session_state.intake_states[active_session] = result.intake_state
+                st.markdown(answer)
+                context_preview = format_context_preview(contexts)
+                if SHOW_RETRIEVED_CONTEXTS and context_preview:
+                    with st.expander("검색된 문서 조각"):
+                        st.markdown(context_preview)
             except Exception as exc:
                 answer = f"오류가 발생했습니다: {exc}"
-            st.markdown(answer)
+                st.markdown(answer)
 
     messages.append({"role": "assistant", "content": answer})
 

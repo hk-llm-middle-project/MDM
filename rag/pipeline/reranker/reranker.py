@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from langchain_core.documents import Document
 
-from rag.reranker.strategies import (
+from rag.pipeline.reranker.strategies import (
     CohereRerankerConfig,
     FlashrankRerankerConfig,
     LLMScoreRerankerConfig,
