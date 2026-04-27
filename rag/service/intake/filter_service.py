@@ -8,11 +8,14 @@ def build_metadata_filters(metadata: UserSearchMetadata | None) -> dict[str, obj
     if metadata is None:
         return None
 
-    filters: dict[str, object] = {}
+    conditions: list[dict[str, object]] = []
     if metadata.party_type:
-        filters["party_type"] = metadata.party_type
+        conditions.append({"party_type": metadata.party_type})
     if metadata.location:
-        filters["location"] = metadata.location
+        conditions.append({"location": metadata.location})
 
-    return filters or None
-
+    if not conditions:
+        return None
+    if len(conditions) == 1:
+        return conditions[0]
+    return {"$and": conditions}
