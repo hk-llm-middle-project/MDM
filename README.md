@@ -70,7 +70,7 @@ Streamlit UI 실행 진입점이다.
 - 임베딩 모델명
 - LLM 모델명
 
-### [rag/loader/](/home/nyong/mdm/rag/loader)
+### [rag/loader/](rag/loader/)
 
 PDF 문서를 읽고 텍스트와 메타데이터를 정리하는 로더 전략 패키지다.
 
