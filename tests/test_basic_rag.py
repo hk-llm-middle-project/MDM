@@ -310,7 +310,15 @@ class BasicRagTest(unittest.TestCase):
             )
         )
 
-        self.assertEqual(filters, {"party_type": "자동차", "location": "교차로 사고"})
+        self.assertEqual(
+            filters,
+            {"$and": [{"party_type": "자동차"}, {"location": "교차로 사고"}]},
+        )
+
+    def test_build_metadata_filters_uses_single_condition_without_and(self):
+        filters = build_metadata_filters(UserSearchMetadata(party_type="자전거"))
+
+        self.assertEqual(filters, {"party_type": "자전거"})
 
     def test_build_metadata_filters_returns_none_without_values(self):
         self.assertIsNone(build_metadata_filters(UserSearchMetadata()))
@@ -463,7 +471,7 @@ class BasicRagTest(unittest.TestCase):
         pipeline_mock.assert_called_once_with(
             "components",
             "query",
-            filters={"party_type": "자동차", "location": "교차로 사고"},
+            filters={"$and": [{"party_type": "자동차"}, {"location": "교차로 사고"}]},
             pipeline_config=None,
         )
 
