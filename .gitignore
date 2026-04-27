@@ -12,6 +12,9 @@ wheels/
 # Local vector store artifacts
 data/vectorstore/
 
+# Parser experiment image artifacts
+experiments/parser/llamaparser/**/images/
+
 .env
 .codex
 .claude
