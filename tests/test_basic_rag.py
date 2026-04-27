@@ -7,6 +7,7 @@ from langchain_core.documents import Document
 from rag.chunker import chunk_text, split_documents
 from rag.embeddings import EMBEDDING_STRATEGIES, create_embeddings
 from rag.embeddings.strategies.bge import BGEM3Embeddings
+from rag.embeddings.strategies.google import GoogleGeminiEmbeddings
 from rag.indexer import build_vectorstore, vectorstore_exists
 from rag.pipeline.retriever import build_retrieval_components
 from rag.pipeline.retrieval import RetrievalPipelineConfig, run_retrieval_pipeline
@@ -243,6 +244,7 @@ class BasicRagTest(unittest.TestCase):
     def test_embedding_registry_includes_current_providers(self):
         self.assertIn("openai", EMBEDDING_STRATEGIES)
         self.assertIn("bge", EMBEDDING_STRATEGIES)
+        self.assertIn("google", EMBEDDING_STRATEGIES)
 
     def test_bge_embeddings_calls_embedding_endpoint(self):
         response = MagicMock()
@@ -263,6 +265,16 @@ class BasicRagTest(unittest.TestCase):
             timeout=120,
         )
         response.raise_for_status.assert_called_once()
+
+    def test_google_embeddings_use_default_dimension(self):
+        with patch("rag.embeddings.strategies.google.GoogleGenerativeAIEmbeddings") as google_mock:
+            embeddings = GoogleGeminiEmbeddings()
+            embeddings.embed_documents(["one", "two"])
+            embeddings.embed_query("query")
+
+        google_mock.assert_called_once_with(model="models/gemini-embedding-001")
+        google_mock.return_value.embed_documents.assert_called_once_with(["one", "two"])
+        google_mock.return_value.embed_query.assert_called_once_with("query")
 
     def test_vectorstore_service_uses_loader_specific_directory(self):
         from rag.service import vectorstore_service

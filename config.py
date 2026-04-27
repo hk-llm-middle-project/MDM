@@ -20,8 +20,9 @@ CHUNK_OVERLAP = 0
 INDEX_BATCH_SIZE = 100
 RETRIEVER_K = 3
 
-EMBEDDING_PROVIDER = "bge"
-EMBEDDING_MODEL = "text-embedding-3-small"
+DEFAULT_EMBEDDING_PROVIDER = "bge"
+OPENAI_EMBEDDING_MODEL = "text-embedding-3-small"
+GOOGLE_EMBEDDING_MODEL = "models/gemini-embedding-001"
 LLM_MODEL = "gpt-4o-mini"
 
 
