@@ -17,6 +17,10 @@ from rag.pipeline.reranker import (
 )
 from rag.pipeline.retriever import EnsembleRetrieverConfig
 from rag.pipeline.retriever import RETRIEVAL_STRATEGIES, retrieve
+from rag.service.intake.intake_service import (
+    evaluate_input_sufficiency,
+    normalize_metadata_response,
+)
 from rag.service.result_service import format_context_preview, truncate_context
 
 
@@ -239,6 +243,61 @@ class BasicRagTest(unittest.TestCase):
         self.assertIn("[1]", result)
         self.assertIn("[2]", result)
         self.assertLessEqual(len(truncate_context("a" * 50, 20)), 20)
+
+    def test_normalize_metadata_response_accepts_confident_allowed_values(self):
+        decision = normalize_metadata_response(
+            {
+                "party_type": "자동차",
+                "location": "교차로 사고",
+                "confidence": {"party_type": 0.95, "location": 0.9},
+                "missing_fields": [],
+                "follow_up_questions": [],
+            }
+        )
+
+        self.assertTrue(decision.is_sufficient)
+        self.assertEqual(decision.search_metadata.party_type, "자동차")
+        self.assertEqual(decision.search_metadata.location, "교차로 사고")
+        self.assertEqual(decision.missing_fields, [])
+
+    def test_normalize_metadata_response_rejects_invalid_or_low_confidence_values(self):
+        decision = normalize_metadata_response(
+            {
+                "party_type": "오토바이",
+                "location": "교차로 사고",
+                "confidence": {"party_type": 0.95, "location": 0.3},
+                "follow_up_questions": [],
+            }
+        )
+
+        self.assertFalse(decision.is_sufficient)
+        self.assertIsNone(decision.search_metadata.party_type)
+        self.assertIsNone(decision.search_metadata.location)
+        self.assertEqual([field.name for field in decision.missing_fields], ["party_type", "location"])
+        self.assertTrue(decision.follow_up_questions)
+
+    def test_evaluate_input_sufficiency_uses_llm_metadata_response(self):
+        fake_llm = MagicMock()
+        fake_llm.invoke.return_value = MagicMock(
+            content='{"party_type":"보행자","location":"횡단보도 내","confidence":{"party_type":0.9,"location":0.9},"missing_fields":[],"follow_up_questions":[]}'
+        )
+
+        decision = evaluate_input_sufficiency("횡단보도에서 보행자와 사고가 났어요.", llm=fake_llm)
+
+        self.assertTrue(decision.is_sufficient)
+        self.assertEqual(decision.normalized_description, "횡단보도에서 보행자와 사고가 났어요.")
+        self.assertEqual(decision.search_metadata.party_type, "보행자")
+        self.assertEqual(decision.search_metadata.location, "횡단보도 내")
+        fake_llm.invoke.assert_called_once()
+
+    def test_evaluate_input_sufficiency_rejects_empty_input_without_llm_call(self):
+        fake_llm = MagicMock()
+
+        decision = evaluate_input_sufficiency("   ", llm=fake_llm)
+
+        self.assertFalse(decision.is_sufficient)
+        self.assertTrue(decision.follow_up_questions)
+        fake_llm.invoke.assert_not_called()
 
 
 if __name__ == "__main__":
