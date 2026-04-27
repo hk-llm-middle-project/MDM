@@ -4,6 +4,7 @@ from langchain_openai import ChatOpenAI
 
 from config import LLM_MODEL
 from rag.pipeline.retrieval import RetrievalPipelineConfig, run_retrieval_pipeline
+from rag.service.answer_schema import parse_structured_answer
 from rag.service.intake.filter_service import build_metadata_filters
 from rag.service.intake.schema import UserSearchMetadata
 from rag.service.prompt import build_prompt
@@ -31,5 +32,6 @@ def analyze_question(
 
     prompt = build_prompt(question, "\n\n".join(contexts))
     llm = ChatOpenAI(model=LLM_MODEL, temperature=0)
-    answer = llm.invoke(prompt).content
-    return answer, contexts
+    content = llm.invoke(prompt).content
+    structured_answer = parse_structured_answer(str(content))
+    return structured_answer.response, contexts
