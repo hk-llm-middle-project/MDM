@@ -128,3 +128,15 @@ def answer_question(
         pipeline_config=pipeline_config,
     )
     return result.answer, result.contexts
+
+
+def answer_question_without_intake(
+    question: str,
+    pipeline_config: RetrievalPipelineConfig | None = None,
+) -> tuple[str, list[str]]:
+    """intake 없이 바로 RAG 답변을 반환합니다."""
+    return analyze_question(
+        question,
+        search_metadata=None,
+        pipeline_config=pipeline_config,
+    )

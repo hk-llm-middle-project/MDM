@@ -18,6 +18,7 @@ from rag.pipeline.reranker import (
 from rag.pipeline.retriever import EnsembleRetrieverConfig
 from rag.pipeline.retriever import RETRIEVAL_STRATEGIES, retrieve
 from rag.service.app_service import answer_question, answer_question_with_intake
+from rag.service.app_service import answer_question_without_intake
 from rag.service.intake.filter_service import build_metadata_filters
 from rag.service.intake.intake_service import (
     evaluate_input_sufficiency,
@@ -467,6 +468,22 @@ class BasicRagTest(unittest.TestCase):
         analyze_mock.assert_called_once_with(
             "정규화된 설명",
             search_metadata=metadata,
+            pipeline_config=None,
+        )
+
+    def test_answer_question_without_intake_bypasses_intake(self):
+        with (
+            patch("rag.service.app_service.evaluate_input_sufficiency") as intake_mock,
+            patch("rag.service.app_service.analyze_question", return_value=("answer", ["context"])) as analyze_mock,
+        ):
+            answer, contexts = answer_question_without_intake("평가용 질문")
+
+        self.assertEqual(answer, "answer")
+        self.assertEqual(contexts, ["context"])
+        intake_mock.assert_not_called()
+        analyze_mock.assert_called_once_with(
+            "평가용 질문",
+            search_metadata=None,
             pipeline_config=None,
         )
 
