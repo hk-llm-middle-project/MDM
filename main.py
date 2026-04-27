@@ -4,6 +4,10 @@ from dotenv import load_dotenv
 import streamlit as st
 
 from rag.service.app_service import answer_question
+from rag.service.result_service import format_context_preview
+
+
+SHOW_RETRIEVED_CONTEXTS = True
 
 
 def init_state() -> None:
@@ -51,11 +55,14 @@ def render_chat() -> None:
         with st.spinner("검색하고 답변 중..."):
             try:
                 answer, contexts = answer_question(question)
-                if contexts:
-                    answer = f"{answer}\n\n---\n\n검색된 문서 조각\n\n" + "\n\n---\n\n".join(contexts)
+                st.markdown(answer)
+                context_preview = format_context_preview(contexts)
+                if SHOW_RETRIEVED_CONTEXTS and context_preview:
+                    with st.expander("검색된 문서 조각"):
+                        st.markdown(context_preview)
             except Exception as exc:
                 answer = f"오류가 발생했습니다: {exc}"
-            st.markdown(answer)
+                st.markdown(answer)
 
     messages.append({"role": "assistant", "content": answer})
 

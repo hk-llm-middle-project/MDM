@@ -26,7 +26,13 @@ mdm/
 │  ├─ indexer.py
 │  ├─ service/
 │  │  ├─ app_service.py
-│  │  └─ vectorstore_service.py
+│  │  ├─ analysis_service.py
+│  │  ├─ result_service.py
+│  │  ├─ vectorstore_service.py
+│  │  └─ intake/
+│  │     ├─ intake_service.py
+│  │     ├─ prompts.py
+│  │     └─ schema.py
 │  ├─ pipeline/
 │  │  ├─ retrieval.py
 │  │  ├─ retriever/
@@ -84,12 +90,28 @@ PDF 문서를 읽고 텍스트와 메타데이터를 정리한다.
 
 ### [rag/service/app_service.py](/home/nyong/mdm/rag/service/app_service.py)
 
-질문에 답변하는 애플리케이션 서비스다.
+사용자 흐름을 조율하는 애플리케이션 서비스다.
+
+- 입력 처리 흐름의 대표 진입점
+- 분석 서비스 호출
+- 기존 UI와 평가 스크립트가 사용하는 답변 API 유지
+
+### [rag/service/analysis_service.py](/home/nyong/mdm/rag/service/analysis_service.py)
+
+사고 질의를 분석하고 RAG 답변을 생성한다.
 
 - 검색 파이프라인 실행
 - 검색 컨텍스트 조립
 - 답변 프롬프트 생성
 - LLM 호출
+
+### [rag/service/result_service.py](/home/nyong/mdm/rag/service/result_service.py)
+
+분석 결과를 화면이나 평가에서 쓰기 좋은 형태로 정리한다.
+
+- 답변 표시 형식 정리
+- 검색 문서 조각 첨부
+- 이후 예상 사고유형, 과실비율, 주의사항 화면 모델 확장
 
 ### [rag/service/vectorstore_service.py](/home/nyong/mdm/rag/service/vectorstore_service.py)
 
@@ -98,6 +120,14 @@ PDF 문서를 읽고 텍스트와 메타데이터를 정리한다.
 - 기존 벡터스토어 로드
 - 필요 시 PDF 로드, 청킹, 색인 생성
 - 실행 중 캐시 정책
+
+### [rag/service/intake/](/home/nyong/mdm/rag/service/intake/)
+
+사고 입력 수집과 충분성 판단을 담당한다.
+
+- 입력 충분성 판단 결과 구조
+- 추가 질문 후보
+- 분석용 사고 설명 정규화
 
 ### [rag/pipeline/retrieval.py](/home/nyong/mdm/rag/pipeline/retrieval.py)
 

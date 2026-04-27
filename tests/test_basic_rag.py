@@ -17,6 +17,7 @@ from rag.pipeline.reranker import (
 )
 from rag.pipeline.retriever import EnsembleRetrieverConfig
 from rag.pipeline.retriever import RETRIEVAL_STRATEGIES, retrieve
+from rag.service.result_service import format_context_preview, truncate_context
 
 
 class BasicRagTest(unittest.TestCase):
@@ -224,6 +225,20 @@ class BasicRagTest(unittest.TestCase):
             vectorstore = build_vectorstore(documents, Path("vectorstore"), batch_size=2)
 
         self.assertEqual([len(batch) for batch in vectorstore.batches], [2, 2, 1])
+
+    def test_format_context_preview_returns_empty_without_contexts(self):
+        self.assertEqual(format_context_preview([]), "")
+
+    def test_format_context_preview_truncates_debug_contexts(self):
+        result = format_context_preview(
+            ["a" * 50, "b" * 50],
+            max_context_chars=20,
+        )
+
+        self.assertIn("...(중략)", result)
+        self.assertIn("[1]", result)
+        self.assertIn("[2]", result)
+        self.assertLessEqual(len(truncate_context("a" * 50, 20)), 20)
 
 
 if __name__ == "__main__":
