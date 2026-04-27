@@ -3,12 +3,14 @@
 from dotenv import load_dotenv
 import streamlit as st
 
+from config import DEFAULT_LOADER_STRATEGY
 from rag.service.app_service import answer_question_with_intake
 from rag.service.intake.schema import IntakeState
 from rag.service.result_service import format_context_preview
 
 
 SHOW_RETRIEVED_CONTEXTS = True
+LOADER_STRATEGY_OPTIONS = ("pdfplumber", "llamaparser")
 
 
 def init_state() -> None:
@@ -20,11 +22,13 @@ def init_state() -> None:
         st.session_state.intake_states = {
             name: IntakeState() for name in st.session_state.sessions
         }
+    if "loader_strategy" not in st.session_state:
+        st.session_state.loader_strategy = DEFAULT_LOADER_STRATEGY
     for name in st.session_state.sessions:
         st.session_state.intake_states.setdefault(name, IntakeState())
 
 
-def render_sidebar() -> None:
+def render_sidebar() -> str:
     st.sidebar.title("세션 목록")
     if st.sidebar.button("새 세션", use_container_width=True):
         name = f"세션 {len(st.session_state.sessions) + 1}"
@@ -38,8 +42,16 @@ def render_sidebar() -> None:
         if st.sidebar.button(name, key=f"session-{name}", use_container_width=True):
             st.session_state.active_session = name
 
+    st.sidebar.divider()
+    st.session_state.loader_strategy = st.sidebar.selectbox(
+        "문서 파서",
+        LOADER_STRATEGY_OPTIONS,
+        index=LOADER_STRATEGY_OPTIONS.index(st.session_state.loader_strategy),
+    )
+    return st.session_state.loader_strategy
 
-def render_chat() -> None:
+
+def render_chat(loader_strategy: str = DEFAULT_LOADER_STRATEGY) -> None:
     active_session = st.session_state.active_session
     messages = st.session_state.sessions[active_session]
 
@@ -66,6 +78,7 @@ def render_chat() -> None:
                 result = answer_question_with_intake(
                     question,
                     intake_state=st.session_state.intake_states.get(active_session, IntakeState()),
+                    loader_strategy=loader_strategy,
                 )
                 answer = result.answer
                 contexts = result.contexts
@@ -86,8 +99,8 @@ def main():
     load_dotenv()
     st.set_page_config(page_title="MDM Basic RAG")
     init_state()
-    render_sidebar()
-    render_chat()
+    loader_strategy = render_sidebar()
+    render_chat(loader_strategy)
 
 
 if __name__ == "__main__":
