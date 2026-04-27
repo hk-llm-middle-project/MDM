@@ -21,7 +21,10 @@ mdm/
 ├─ config.py
 ├─ rag/
 │  ├─ __init__.py
-│  ├─ loader.py
+│  ├─ loader/
+│  │  ├─ __init__.py
+│  │  ├─ loader.py
+│  │  └─ strategies/
 │  ├─ chunker.py
 │  ├─ indexer.py
 │  ├─ service/
@@ -59,18 +62,23 @@ Streamlit UI 실행 진입점이다.
 
 - PDF 경로
 - 벡터스토어 저장 경로
+- 로더 전략별 벡터스토어 저장 경로
+- LlamaParse markdown 저장 경로
+- 기본 문서 로더 전략
 - chunk size / overlap
 - top-k
 - 임베딩 모델명
 - LLM 모델명
 
-### [rag/loader.py](/home/nyong/mdm/rag/loader.py)
+### [rag/loader/](/home/nyong/mdm/rag/loader)
 
-PDF 문서를 읽고 텍스트와 메타데이터를 정리한다.
+PDF 문서를 읽고 텍스트와 메타데이터를 정리하는 로더 전략 패키지다.
 
-- 문서 로드
-- 페이지 단위 텍스트 추출
-- `source`, `page` 같은 메타데이터 부여
+- `pdfplumber` 기본 로더 전략
+- `llamaparser` / `llama-parse` LlamaParse 로더 전략
+- 페이지 단위 텍스트 또는 markdown 추출
+- `source`, `page`, `parser` 메타데이터 부여
+- LlamaParse 결과를 `data/llama_md/`에 페이지별 markdown으로 저장
 
 ### [rag/chunker.py](/home/nyong/mdm/rag/chunker.py)
 
@@ -78,6 +86,7 @@ PDF 문서를 읽고 텍스트와 메타데이터를 정리한다.
 
 - 문단 또는 고정 길이 청킹
 - overlap 적용
+- 로더에서 부여한 메타데이터 보존
 - 의미 단위가 최대한 유지되도록 분할
 
 ### [rag/indexer.py](/home/nyong/mdm/rag/indexer.py)
@@ -117,8 +126,9 @@ PDF 문서를 읽고 텍스트와 메타데이터를 정리한다.
 
 앱 프로세스에서 재사용할 벡터스토어와 검색 컴포넌트를 준비한다.
 
-- 기존 벡터스토어 로드
+- 선택한 로더 전략에 맞는 벡터스토어 로드
 - 필요 시 PDF 로드, 청킹, 색인 생성
+- `pdfplumber`와 `llamaparser` 색인 결과 분리
 - 실행 중 캐시 정책
 
 ### [rag/service/intake/](/home/nyong/mdm/rag/service/intake/)
@@ -171,6 +181,9 @@ PDF 문서를 읽고 텍스트와 메타데이터를 정리한다.
 
 - 원본 문서: [data/raw/230630_자동차사고 과실비율 인정기준_최종.pdf](/home/nyong/mdm/data/raw/230630_%EC%9E%90%EB%8F%99%EC%B0%A8%EC%82%AC%EA%B3%A0%20%EA%B3%BC%EC%8B%A4%EB%B9%84%EC%9C%A8%20%EC%9D%B8%EC%A0%95%EA%B8%B0%EC%A4%80_%EC%B5%9C%EC%A2%85.pdf)
 - 벡터스토어 저장 위치: `data/vectorstore/`
+- pdfplumber 벡터스토어: `data/vectorstore/pdfplumber/`
+- LlamaParse 벡터스토어: `data/vectorstore/llamaparser/`
+- LlamaParse markdown 저장 위치: `data/llama_md/`
 
 `data/vectorstore/`는 로컬 색인 결과물이 저장되는 위치이며 `.gitignore`에 포함되어 있다.
 
@@ -179,15 +192,16 @@ PDF 문서를 읽고 텍스트와 메타데이터를 정리한다.
 이 프로젝트는 아래 원칙으로 MVP를 만든다.
 
 - 처음엔 문서 1개로 시작한다.
+- 문서 로더는 전략으로 분리해 `pdfplumber`와 `LlamaParse`를 바꿔 쓸 수 있게 한다.
 - 검색은 복잡하게 가지 않고 벡터 검색 + `top-k`부터 시작한다.
-- 청크 메타데이터에 `source`, `page`를 남긴다.
+- 청크 메타데이터에 `source`, `page`, `parser`를 남긴다.
 - 답변은 문맥 기반으로만 하게 하고, 근거가 없으면 모른다고 하게 만든다.
 - 결과에는 출처를 같이 보여준다.
 - "잘 되는 느낌"이 아니라 샘플 질문셋으로 평가한다.
 
 ## 추천 구현 순서
 
-1. `loader.py`에서 PDF 텍스트 추출 구현
+1. `rag/loader/`에서 PDF 로더 전략 구현
 2. `chunker.py`에서 청킹 구현
 3. `indexer.py`에서 임베딩 및 저장 구현
 4. `retriever.py`에서 검색 구현
