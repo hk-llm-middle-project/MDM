@@ -10,8 +10,10 @@ from config import DEFAULT_LOADER_STRATEGY, PDF_PATH
 from rag.loader.strategies import (
     LlamaParserLoaderConfig,
     PdfPlumberLoaderConfig,
+    UpstageLoaderConfig,
     load_with_llamaparser,
     load_with_pdfplumber,
+    load_with_upstage,
 )
 
 
@@ -19,9 +21,10 @@ LOADER_STRATEGIES = {
     "pdfplumber": load_with_pdfplumber,
     "llamaparser": load_with_llamaparser,
     "llama-parse": load_with_llamaparser,
+    "upstage": load_with_upstage,
 }
 
-LoaderConfig = PdfPlumberLoaderConfig | LlamaParserLoaderConfig
+LoaderConfig = PdfPlumberLoaderConfig | LlamaParserLoaderConfig | UpstageLoaderConfig
 
 
 def load_pdf(

@@ -8,10 +8,16 @@ from rag.loader.strategies.pdfplumber_loader import (
     PdfPlumberLoaderConfig,
     load_with_pdfplumber,
 )
+from rag.loader.strategies.upstage_loader import (
+    UpstageLoaderConfig,
+    load_with_upstage,
+)
 
 __all__ = [
     "PdfPlumberLoaderConfig",
     "LlamaParserLoaderConfig",
+    "UpstageLoaderConfig",
     "load_with_pdfplumber",
     "load_with_llamaparser",
+    "load_with_upstage",
 ]
