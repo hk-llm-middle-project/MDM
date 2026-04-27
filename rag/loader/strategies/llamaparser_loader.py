@@ -36,6 +36,10 @@ class LlamaParserLoaderConfig:
     )
 
 
+def get_document_cache_dir(path: Path, output_dir: Path) -> Path:
+    return output_dir / "main_pdf"
+
+
 def select_page_content(page: object, result_type: str) -> str:
     markdown = getattr(page, "md", None) or ""
     text = getattr(page, "text", None) or ""
@@ -95,7 +99,8 @@ def load_with_llamaparser(
     strategy_config: LlamaParserLoaderConfig | None = None,
 ) -> list[Document]:
     config = strategy_config or LlamaParserLoaderConfig()
-    saved_documents = load_saved_markdown_documents(path, config.output_dir)
+    document_cache_dir = get_document_cache_dir(path, config.output_dir)
+    saved_documents = load_saved_markdown_documents(path, document_cache_dir)
     if saved_documents:
         return saved_documents
 
@@ -106,7 +111,7 @@ def load_with_llamaparser(
     for page in job_result.pages:
         page_content = select_page_content(page, config.result_type)
         if page_content.strip():
-            save_page_markdown(config.output_dir, page.page, page_content)
+            save_page_markdown(document_cache_dir, page.page, page_content)
             documents.append(
                 build_page_document(
                     path=path,

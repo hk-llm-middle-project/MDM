@@ -12,6 +12,7 @@ from rag.loader import (
     PdfPlumberLoaderConfig,
     load_pdf,
 )
+from rag.loader.strategies.llamaparser_loader import get_document_cache_dir
 
 
 class LoaderTest(unittest.TestCase):
@@ -91,7 +92,8 @@ class LoaderTest(unittest.TestCase):
                     strategy="llamaparser",
                     strategy_config=LlamaParserLoaderConfig(output_dir=output_dir),
                 )
-            saved_content = (output_dir / "003.md").read_text(encoding="utf-8")
+            document_cache_dir = get_document_cache_dir(pdf_path, output_dir)
+            saved_content = (document_cache_dir / "003.md").read_text(encoding="utf-8")
 
         self.assertEqual([document.page_content for document in documents], ["# content"])
         self.assertEqual(
@@ -123,9 +125,10 @@ class LoaderTest(unittest.TestCase):
             pdf_path = Path(temp_dir) / "source.pdf"
             pdf_path.touch()
             output_dir = Path(temp_dir) / "llama_md"
-            output_dir.mkdir()
-            (output_dir / "001.md").write_text("# page one\n", encoding="utf-8")
-            (output_dir / "003.md").write_text("# page three\n", encoding="utf-8")
+            document_cache_dir = get_document_cache_dir(pdf_path, output_dir)
+            document_cache_dir.mkdir(parents=True)
+            (document_cache_dir / "001.md").write_text("# page one\n", encoding="utf-8")
+            (document_cache_dir / "003.md").write_text("# page three\n", encoding="utf-8")
             parser_class = MagicMock()
 
             with patch("rag.loader.strategies.llamaparser_loader.LlamaParse", parser_class):
@@ -156,8 +159,22 @@ class LoaderTest(unittest.TestCase):
         )
         parser_class.assert_not_called()
 
-    def test_llamaparser_default_output_dir_is_data_llama_md(self):
+    def test_llamaparser_default_output_dir_is_data_llama_md_root(self):
         self.assertEqual(LlamaParserLoaderConfig().output_dir, LLAMA_MD_DIR)
+
+    def test_llamaparser_cache_dir_uses_main_pdf_directory(self):
+        with TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir) / "llama_md"
+            first_pdf = Path(temp_dir) / "source.pdf"
+            second_pdf = Path(temp_dir) / "source-copy.pdf"
+            first_pdf.write_bytes(b"first")
+            second_pdf.write_bytes(b"second")
+
+            first_cache_dir = get_document_cache_dir(first_pdf, root)
+            second_cache_dir = get_document_cache_dir(second_pdf, root)
+
+        self.assertEqual(first_cache_dir, root / "main_pdf")
+        self.assertEqual(second_cache_dir, root / "main_pdf")
 
 
 if __name__ == "__main__":
