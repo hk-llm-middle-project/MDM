@@ -118,6 +118,44 @@ class LoaderTest(unittest.TestCase):
         parser_instance.parse.assert_called_once_with(str(pdf_path))
         self.assertEqual(saved_content, "# content\n")
 
+    def test_llamaparser_strategy_reuses_saved_markdown_without_parsing(self):
+        with TemporaryDirectory() as temp_dir:
+            pdf_path = Path(temp_dir) / "source.pdf"
+            pdf_path.touch()
+            output_dir = Path(temp_dir) / "llama_md"
+            output_dir.mkdir()
+            (output_dir / "001.md").write_text("# page one\n", encoding="utf-8")
+            (output_dir / "003.md").write_text("# page three\n", encoding="utf-8")
+            parser_class = MagicMock()
+
+            with patch("rag.loader.strategies.llamaparser_loader.LlamaParse", parser_class):
+                documents = load_pdf(
+                    pdf_path,
+                    strategy="llamaparser",
+                    strategy_config=LlamaParserLoaderConfig(output_dir=output_dir),
+                )
+
+        self.assertEqual(
+            [document.page_content for document in documents],
+            ["# page one\n", "# page three\n"],
+        )
+        self.assertEqual(
+            [document.metadata for document in documents],
+            [
+                {
+                    "source": str(pdf_path),
+                    "page": 1,
+                    "parser": "llamaparser",
+                },
+                {
+                    "source": str(pdf_path),
+                    "page": 3,
+                    "parser": "llamaparser",
+                },
+            ],
+        )
+        parser_class.assert_not_called()
+
     def test_llamaparser_default_output_dir_is_data_llama_md(self):
         self.assertEqual(LlamaParserLoaderConfig().output_dir, LLAMA_MD_DIR)
 

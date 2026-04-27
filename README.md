@@ -79,6 +79,7 @@ PDF 문서를 읽고 텍스트와 메타데이터를 정리하는 로더 전략 
 - 페이지 단위 텍스트 또는 markdown 추출
 - `source`, `page`, `parser` 메타데이터 부여
 - LlamaParse 결과를 `data/llama_md/`에 페이지별 markdown으로 저장
+- LlamaParse 전략은 기존 markdown이 있으면 API를 다시 호출하지 않고 해당 파일로 문서를 재구성
 
 ### [rag/chunker.py](/home/nyong/mdm/rag/chunker.py)
 
@@ -186,6 +187,12 @@ PDF 문서를 읽고 텍스트와 메타데이터를 정리하는 로더 전략 
 - LlamaParse markdown 저장 위치: `data/llama_md/`
 
 `data/vectorstore/`는 로컬 색인 결과물이 저장되는 위치이며 `.gitignore`에 포함되어 있다.
+
+LlamaParse 전략의 색인 우선순위는 아래 순서다.
+
+1. `data/vectorstore/llamaparser/`에 기존 DB가 있으면 그대로 사용한다.
+2. DB가 없고 `data/llama_md/*.md`가 있으면 markdown 파일로 청킹과 임베딩을 진행한다.
+3. DB와 markdown 파일이 모두 없을 때만 PDF를 LlamaParse로 파싱하고, 페이지별 markdown을 저장한다.
 
 ## 구현 기준
 

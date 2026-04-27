@@ -60,6 +60,27 @@ def save_page_markdown(output_dir: Path, page_number: int, page_content: str) ->
     return output_path
 
 
+def load_saved_markdown_documents(path: Path, output_dir: Path) -> list[Document]:
+    documents: list[Document] = []
+    for markdown_path in sorted(output_dir.glob("*.md")):
+        try:
+            page_number = int(markdown_path.stem)
+        except ValueError:
+            continue
+
+        page_content = markdown_path.read_text(encoding="utf-8")
+        if page_content.strip():
+            documents.append(
+                build_page_document(
+                    path=path,
+                    page_content=page_content,
+                    page_number=page_number,
+                    parser_name="llamaparser",
+                )
+            )
+    return documents
+
+
 def create_llamaparse_parser(config: LlamaParserLoaderConfig) -> object:
     global LlamaParse
     if LlamaParse is None:
@@ -74,6 +95,10 @@ def load_with_llamaparser(
     strategy_config: LlamaParserLoaderConfig | None = None,
 ) -> list[Document]:
     config = strategy_config or LlamaParserLoaderConfig()
+    saved_documents = load_saved_markdown_documents(path, config.output_dir)
+    if saved_documents:
+        return saved_documents
+
     parser = create_llamaparse_parser(config)
     job_result = parser.parse(str(path))
 
