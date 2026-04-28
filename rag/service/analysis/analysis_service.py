@@ -33,9 +33,12 @@ def analyze_question(
         retrieval_kwargs["trace_context"] = trace_context
     documents = run_retrieval_pipeline(components, question, **retrieval_kwargs)
     contexts = [document.page_content for document in documents]
-    print(f"[retrieved] question={question}")
+    import logging
+
+    logger = logging.getLogger(__name__)
+    logger.info(f"[retrieved] question={question}")
     for index, context in enumerate(contexts, start=1):
-        print(f"[retrieved:{index}] {context}")
+        logger.info(f"[retrieved:{index}] {context}")
 
     prompt = build_prompt(question, "\n\n".join(contexts), chat_history=chat_history)
     llm = ChatOpenAI(model=LLM_MODEL, temperature=0)
