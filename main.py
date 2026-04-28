@@ -1,71 +1,117 @@
-"""Streamlit chat UI for the basic RAG app."""
+"""기본 RAG 앱의 Streamlit 채팅 UI입니다."""
 
 from dotenv import load_dotenv
 import streamlit as st
 
 from config import DEFAULT_EMBEDDING_PROVIDER, DEFAULT_LOADER_STRATEGY
 from rag.embeddings import EMBEDDING_STRATEGIES
-from rag.service.app_service import answer_question_with_intake
-from rag.service.intake.schema import IntakeState
-from rag.service.result_service import format_context_preview
+from rag.service.conversation.app_service import answer_question_with_intake
+from rag.service.presentation.result_service import format_context_preview
+from rag.service.session import ConversationStore, get_conversation_store
+from rag.service.tracing import TraceContext
 
 
 SHOW_RETRIEVED_CONTEXTS = True
 LOADER_STRATEGY_OPTIONS = ("pdfplumber", "llamaparser", "upstage")
 EMBEDDING_PROVIDER_OPTIONS = tuple(EMBEDDING_STRATEGIES)
+USER_ID = "local"
 
 
-def init_state() -> None:
-    if "sessions" not in st.session_state:
-        st.session_state.sessions = {"세션 1": []}
+def ensure_active_session(store: ConversationStore) -> str:
+    """활성 세션 id를 반환하고, 없으면 새로 생성합니다."""
+    sessions = store.list_sessions(USER_ID)
+    if not sessions:
+        session = store.create_session(USER_ID, title="세션 1")
+        store.set_active_session(USER_ID, session.session_id)
+        return session.session_id
+
+    active_session = store.get_active_session(USER_ID)
+    session_ids = {session.session_id for session in sessions}
+    if active_session in session_ids:
+        return active_session
+
+    fallback_session = sessions[0].session_id
+    store.set_active_session(USER_ID, fallback_session)
+    return fallback_session
+
+
+def init_state(store: ConversationStore) -> None:
     if "active_session" not in st.session_state:
-        st.session_state.active_session = "세션 1"
-    if "intake_states" not in st.session_state:
-        st.session_state.intake_states = {
-            name: IntakeState() for name in st.session_state.sessions
-        }
+        st.session_state.active_session = ensure_active_session(store)
     if "loader_strategy" not in st.session_state:
-        st.session_state.loader_strategy = DEFAULT_LOADER_STRATEGY
+        loader_strategy = store.get_loader_strategy(USER_ID) or DEFAULT_LOADER_STRATEGY
+        if loader_strategy not in LOADER_STRATEGY_OPTIONS:
+            loader_strategy = DEFAULT_LOADER_STRATEGY
+        st.session_state.loader_strategy = loader_strategy
     if "embedding_provider" not in st.session_state:
         st.session_state.embedding_provider = DEFAULT_EMBEDDING_PROVIDER
-    for name in st.session_state.sessions:
-        st.session_state.intake_states.setdefault(name, IntakeState())
+    st.session_state.active_session = ensure_active_session(store)
 
 
-def render_sidebar() -> tuple[str, str]:
+def render_sidebar(store: ConversationStore) -> tuple[str, str]:
     st.sidebar.title("세션 목록")
     if st.sidebar.button("새 세션", use_container_width=True):
-        name = f"세션 {len(st.session_state.sessions) + 1}"
-        st.session_state.sessions[name] = []
-        st.session_state.intake_states[name] = IntakeState()
-        st.session_state.active_session = name
+        session_count = len(store.list_sessions(USER_ID))
+        session = store.create_session(USER_ID, title=f"세션 {session_count + 1}")
+        store.set_active_session(USER_ID, session.session_id)
+        st.session_state.active_session = session.session_id
 
     st.sidebar.divider()
 
-    for name in st.session_state.sessions:
-        if st.sidebar.button(name, key=f"session-{name}", use_container_width=True):
-            st.session_state.active_session = name
+    for session in store.list_sessions(USER_ID):
+        if st.sidebar.button(
+            session.title,
+            key=f"session-{session.session_id}",
+            use_container_width=True,
+        ):
+            store.set_active_session(USER_ID, session.session_id)
+            st.session_state.active_session = session.session_id
 
     st.sidebar.divider()
-    st.session_state.loader_strategy = st.sidebar.selectbox(
+    current_loader_strategy = st.session_state.get("loader_strategy", DEFAULT_LOADER_STRATEGY)
+    if current_loader_strategy not in LOADER_STRATEGY_OPTIONS:
+        current_loader_strategy = DEFAULT_LOADER_STRATEGY
+    selected_loader_strategy = st.sidebar.selectbox(
         "문서 파서",
         LOADER_STRATEGY_OPTIONS,
-        index=LOADER_STRATEGY_OPTIONS.index(st.session_state.loader_strategy),
+        index=LOADER_STRATEGY_OPTIONS.index(current_loader_strategy),
     )
+    if selected_loader_strategy != current_loader_strategy:
+        store.set_loader_strategy(USER_ID, selected_loader_strategy)
+    st.session_state.loader_strategy = selected_loader_strategy
+
+    current_embedding_provider = st.session_state.get(
+        "embedding_provider",
+        DEFAULT_EMBEDDING_PROVIDER,
+    )
+    if current_embedding_provider not in EMBEDDING_PROVIDER_OPTIONS:
+        current_embedding_provider = DEFAULT_EMBEDDING_PROVIDER
     st.session_state.embedding_provider = st.sidebar.selectbox(
         "임베딩 모델",
         EMBEDDING_PROVIDER_OPTIONS,
-        index=EMBEDDING_PROVIDER_OPTIONS.index(st.session_state.embedding_provider),
+        index=EMBEDDING_PROVIDER_OPTIONS.index(current_embedding_provider),
     )
-    return st.session_state.loader_strategy, st.session_state.embedding_provider
+    return selected_loader_strategy, st.session_state.embedding_provider
+
 
 
 def render_chat(
+    store: ConversationStore,
     loader_strategy: str = DEFAULT_LOADER_STRATEGY,
     embedding_provider: str = DEFAULT_EMBEDDING_PROVIDER,
 ) -> None:
     active_session = st.session_state.active_session
-    messages = st.session_state.sessions[active_session]
+    messages = store.get_messages(USER_ID, active_session)
+    trace_context = TraceContext(
+        thread_id=active_session,
+        session_id=active_session,
+        user_id=USER_ID,
+        tags=("streamlit", "mdm", loader_strategy, embedding_provider),
+        metadata={
+            "loader_strategy": loader_strategy,
+            "embedding_provider": embedding_provider,
+        },
+    )
 
     st.title("MDM")
     st.markdown(
@@ -73,14 +119,14 @@ def render_chat(
         unsafe_allow_html=True,
     )
     for message in messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+        with st.chat_message(message.role):
+            st.markdown(message.content)
 
     question = st.chat_input("사고 내용을 입력하세요")
     if not question:
         return
 
-    messages.append({"role": "user", "content": question})
+    store.append_message(USER_ID, active_session, "user", question)
     with st.chat_message("user"):
         st.markdown(question)
 
@@ -89,13 +135,18 @@ def render_chat(
             try:
                 result = answer_question_with_intake(
                     question,
-                    intake_state=st.session_state.intake_states.get(active_session, IntakeState()),
+                    intake_state=store.get_intake_state(
+                        USER_ID,
+                        active_session,
+                    ),
                     loader_strategy=loader_strategy,
+                    chat_history=messages,
                     embedding_provider=embedding_provider,
+                    trace_context=trace_context,
                 )
                 answer = result.answer
                 contexts = result.contexts
-                st.session_state.intake_states[active_session] = result.intake_state
+                store.set_intake_state(USER_ID, active_session, result.intake_state)
                 st.markdown(answer)
                 context_preview = format_context_preview(contexts)
                 if SHOW_RETRIEVED_CONTEXTS and context_preview:
@@ -105,15 +156,16 @@ def render_chat(
                 answer = f"오류가 발생했습니다: {exc}"
                 st.markdown(answer)
 
-    messages.append({"role": "assistant", "content": answer})
+    store.append_message(USER_ID, active_session, "assistant", answer)
 
 
 def main():
     load_dotenv()
     st.set_page_config(page_title="MDM Basic RAG")
-    init_state()
-    loader_strategy, embedding_provider = render_sidebar()
-    render_chat(loader_strategy, embedding_provider)
+    store = get_conversation_store()
+    init_state(store)
+    loader_strategy, embedding_provider = render_sidebar(store)
+    render_chat(store, loader_strategy, embedding_provider)
 
 
 if __name__ == "__main__":

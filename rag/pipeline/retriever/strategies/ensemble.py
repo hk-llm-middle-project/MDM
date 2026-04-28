@@ -8,6 +8,7 @@ from langchain.retrievers import EnsembleRetriever
 from langchain_core.documents import Document
 
 from rag.pipeline.retriever.components import RetrievalComponents, get_or_create_bm25_retriever
+from rag.service.tracing import TraceContext
 
 
 @dataclass(frozen=True)
@@ -26,6 +27,7 @@ def retrieve_with_ensemble(
     k: int,
     filters: dict[str, object] | None = None,
     strategy_config: EnsembleRetrieverConfig | None = None,
+    trace_context: TraceContext | None = None,
 ) -> list[Document]:
     """Kiwi BM25와 dense 벡터 검색 결과를 결합합니다."""
     config = strategy_config or EnsembleRetrieverConfig()
@@ -49,4 +51,6 @@ def retrieve_with_ensemble(
         retrievers=[bm25_retriever, dense_retriever],
         weights=list(config.weights),
     )
-    return list(ensemble.invoke(query))[:k]
+    config_dict = trace_context.langchain_config("mdm.retrieve.ensemble") if trace_context else None
+    results = ensemble.invoke(query, config=config_dict) if config_dict else ensemble.invoke(query)
+    return list(results)[:k]

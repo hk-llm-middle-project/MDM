@@ -1,5 +1,6 @@
-"""Project configuration for the basic RAG app."""
+"""기본 RAG 앱의 프로젝트 설정입니다."""
 
+import os
 from pathlib import Path
 
 
@@ -34,6 +35,41 @@ DEFAULT_EMBEDDING_PROVIDER = "bge"
 OPENAI_EMBEDDING_MODEL = "text-embedding-3-small"
 GOOGLE_EMBEDDING_MODEL = "models/gemini-embedding-001"
 LLM_MODEL = "gpt-4o-mini"
+
+
+def _optional_env(name: str, default: str | None = None) -> str | None:
+    value = os.getenv(name, default)
+    if value is None or value.strip().lower() in {"", "null", "none"}:
+        return None
+    return value.strip()
+
+
+def get_redis_url() -> str | None:
+    """세션 저장에 사용할 Redis URL을 반환합니다."""
+    return _optional_env("REDIS_URL")
+
+
+def get_session_store_backend() -> str:
+    """사용할 세션 저장소 백엔드를 반환합니다."""
+    return (_optional_env("SESSION_STORE_BACKEND", "memory") or "memory").lower()
+
+
+def get_session_store_strict() -> bool:
+    """Redis 연결 실패 시 앱을 실패 처리할지 반환합니다."""
+    value = _optional_env("SESSION_STORE_STRICT", "false")
+    return value is not None and value.lower() in {"1", "true", "yes", "on"}
+
+
+def get_session_ttl_seconds() -> int | None:
+    """세션 데이터에 적용할 Redis TTL 초 값을 반환합니다."""
+    value = _optional_env("SESSION_TTL_SECONDS")
+    if value is None:
+        return None
+    try:
+        ttl = int(value)
+    except ValueError:
+        return None
+    return ttl if ttl > 0 else None
 
 
 def get_vectorstore_dir(

@@ -12,7 +12,8 @@ from langchain_core.documents import Document
 from langchain_openai import ChatOpenAI
 
 from config import LLM_MODEL
-from rag.service.intake.intake_service import clamp_confidence, extract_json_object
+from rag.service.common.json_utils import extract_json_object
+from rag.service.intake.intake_service import clamp_confidence
 from rag.service.intake.values import LOCATIONS, PARTY_TYPES
 
 

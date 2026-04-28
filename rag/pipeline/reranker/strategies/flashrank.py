@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from langchain_core.documents import Document
+from rag.service.tracing import TraceContext
 
 
 @dataclass(frozen=True)
@@ -20,6 +21,7 @@ def rerank_with_flashrank(
     documents: list[Document],
     k: int,
     strategy_config: FlashrankRerankerConfig | None = None,
+    trace_context: TraceContext | None = None,
 ) -> list[Document]:
     """FlashRank로 문서를 재정렬한 뒤 상위 k개를 반환합니다."""
     if not documents:
@@ -32,6 +34,7 @@ def rerank_with_flashrank(
             "flashrank 리랭커를 사용하려면 `flashrank` 패키지가 설치되어 있어야 합니다."
         ) from error
 
+    del trace_context
     config = strategy_config or FlashrankRerankerConfig()
     ranker_kwargs: dict[str, str] = {"model_name": config.model_name}
     if config.cache_dir:

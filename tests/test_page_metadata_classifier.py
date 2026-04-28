@@ -34,7 +34,7 @@ class PageMetadataClassifierTest(unittest.TestCase):
         result = normalize_page_metadata_response(
             {
                 "party_type": "트럭",
-                "location": "교차로 사고",
+                "location": "신호등 없는 교차로",
                 "confidence": {
                     "party_type": 0.95,
                     "location": 0.2,
@@ -63,7 +63,7 @@ class PageMetadataClassifierTest(unittest.TestCase):
             def invoke(self, prompt):
                 self.prompt = prompt
                 return (
-                    '{"party_type": "자동차", "location": "교차로 사고", '
+                    '{"party_type": "자동차", "location": "신호등 없는 교차로", '
                     '"confidence": {"party_type": 0.9, "location": 0.8}}'
                 )
 
@@ -81,7 +81,7 @@ class PageMetadataClassifierTest(unittest.TestCase):
         self.assertEqual(enriched[0].page_content, documents[0].page_content)
         self.assertEqual(enriched[0].metadata["source"], "source.pdf")
         self.assertEqual(enriched[0].metadata["party_type"], "자동차")
-        self.assertEqual(enriched[0].metadata["location"], "교차로 사고")
+        self.assertEqual(enriched[0].metadata["location"], "신호등 없는 교차로")
         self.assertEqual(enriched[0].metadata["metadata_source"], "llm")
         self.assertEqual(enriched[0].metadata["metadata_confidence_party_type"], 0.9)
         self.assertEqual(enriched[0].metadata["metadata_confidence_location"], 0.8)
@@ -135,7 +135,7 @@ class PageMetadataClassifierTest(unittest.TestCase):
             def invoke(self, prompt):
                 self.invoke_count += 1
                 return (
-                    '{"party_type": "자동차", "location": "교차로 사고", '
+                    '{"party_type": "자동차", "location": "신호등 없는 교차로", '
                     '"confidence": {"party_type": 0.9, "location": 0.9}}'
                 )
 
@@ -167,7 +167,7 @@ class PageMetadataClassifierTest(unittest.TestCase):
                 with self.lock:
                     self.active_count -= 1
                 return (
-                    '{"party_type": "자동차", "location": "교차로 사고", '
+                    '{"party_type": "자동차", "location": "신호등 없는 교차로", '
                     '"confidence": {"party_type": 0.9, "location": 0.9}}'
                 )
 
@@ -190,7 +190,7 @@ class PageMetadataClassifierTest(unittest.TestCase):
                 if "실패 페이지" in prompt:
                     raise ValueError("invalid json")
                 return (
-                    '{"party_type": "자동차", "location": "교차로 사고", '
+                    '{"party_type": "자동차", "location": "신호등 없는 교차로", '
                     '"confidence": {"party_type": 0.9, "location": 0.9}}'
                 )
 
@@ -208,7 +208,7 @@ class PageMetadataClassifierTest(unittest.TestCase):
         self.assertEqual(enriched[0].metadata["metadata_confidence_party_type"], 0.0)
         self.assertEqual(enriched[0].metadata["metadata_confidence_location"], 0.0)
         self.assertEqual(enriched[1].metadata["party_type"], "자동차")
-        self.assertEqual(enriched[1].metadata["location"], "교차로 사고")
+        self.assertEqual(enriched[1].metadata["location"], "신호등 없는 교차로")
 
     def test_enrich_documents_uses_cached_page_metadata_without_llm_call(self):
         from rag.metadata.classifier import enrich_documents_with_llm_metadata
@@ -224,7 +224,7 @@ class PageMetadataClassifierTest(unittest.TestCase):
                     {
                         "3": {
                             "party_type": "자동차",
-                            "location": "교차로 사고",
+                            "location": "신호등 없는 교차로",
                             "confidence": {
                                 "party_type": 0.88,
                                 "location": 0.79,
@@ -244,7 +244,7 @@ class PageMetadataClassifierTest(unittest.TestCase):
             )
 
         self.assertEqual(enriched[0].metadata["party_type"], "자동차")
-        self.assertEqual(enriched[0].metadata["location"], "교차로 사고")
+        self.assertEqual(enriched[0].metadata["location"], "신호등 없는 교차로")
         self.assertEqual(enriched[0].metadata["metadata_source"], "llm_cache")
         self.assertEqual(enriched[0].metadata["metadata_confidence_party_type"], 0.88)
         self.assertEqual(enriched[0].metadata["metadata_confidence_location"], 0.79)
