@@ -35,10 +35,16 @@ class LoaderTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             load_pdf(Path("source.pdf"), strategy="missing")
 
-    def test_get_vectorstore_dir_separates_loader_strategies(self):
-        self.assertEqual(get_vectorstore_dir("pdfplumber"), VECTORSTORE_DIR / "pdfplumber")
-        self.assertEqual(get_vectorstore_dir("llamaparser"), VECTORSTORE_DIR / "llamaparser")
-        self.assertEqual(get_vectorstore_dir("llama-parse"), VECTORSTORE_DIR / "llamaparser")
+    def test_get_vectorstore_dir_separates_loader_and_embedding_strategies(self):
+        self.assertEqual(get_vectorstore_dir("pdfplumber"), VECTORSTORE_DIR / "pdfplumber" / "bge")
+        self.assertEqual(
+            get_vectorstore_dir("llamaparser", "google"),
+            VECTORSTORE_DIR / "llamaparser" / "google",
+        )
+        self.assertEqual(
+            get_vectorstore_dir("llama-parse", "openai"),
+            VECTORSTORE_DIR / "llamaparser" / "openai",
+        )
 
     def test_get_vectorstore_dir_raises_for_unknown_strategy(self):
         with self.assertRaises(ValueError):

@@ -6,7 +6,7 @@ from pathlib import Path
 from langchain_chroma import Chroma
 from langchain_core.documents import Document
 
-from config import INDEX_BATCH_SIZE, VECTORSTORE_DIR
+from config import DEFAULT_EMBEDDING_PROVIDER, INDEX_BATCH_SIZE, VECTORSTORE_DIR
 from rag.embeddings import create_embeddings
 
 
@@ -14,6 +14,7 @@ def build_vectorstore(
     documents: list[Document],
     persist_directory: Path = VECTORSTORE_DIR,
     batch_size: int = INDEX_BATCH_SIZE,
+    embedding_provider: str = DEFAULT_EMBEDDING_PROVIDER,
 ) -> Chroma:
     """Embed documents and save them in a local Chroma vector store."""
     if batch_size <= 0:
@@ -22,7 +23,7 @@ def build_vectorstore(
     persist_directory.mkdir(parents=True, exist_ok=True)
     vectorstore = Chroma(
         persist_directory=str(persist_directory),
-        embedding_function=create_embeddings(),
+        embedding_function=create_embeddings(embedding_provider),
     )
     for start in range(0, len(documents), batch_size):
         vectorstore.add_documents(documents[start : start + batch_size])
@@ -30,11 +31,14 @@ def build_vectorstore(
     return vectorstore
 
 
-def load_vectorstore(persist_directory: Path = VECTORSTORE_DIR) -> Chroma:
+def load_vectorstore(
+    persist_directory: Path = VECTORSTORE_DIR,
+    embedding_provider: str = DEFAULT_EMBEDDING_PROVIDER,
+) -> Chroma:
     """Load the local Chroma vector store."""
     return Chroma(
         persist_directory=str(persist_directory),
-        embedding_function=create_embeddings(),
+        embedding_function=create_embeddings(embedding_provider),
     )
 
 

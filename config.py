@@ -26,11 +26,16 @@ GOOGLE_EMBEDDING_MODEL = "models/gemini-embedding-001"
 LLM_MODEL = "gpt-4o-mini"
 
 
-def get_vectorstore_dir(loader_strategy: str = DEFAULT_LOADER_STRATEGY) -> Path:
+def get_vectorstore_dir(
+    loader_strategy: str = DEFAULT_LOADER_STRATEGY,
+    embedding_provider: str = DEFAULT_EMBEDDING_PROVIDER,
+) -> Path:
     try:
-        return LOADER_VECTORSTORE_DIRS[loader_strategy]
+        loader_vectorstore_dir = LOADER_VECTORSTORE_DIRS[loader_strategy]
     except KeyError as error:
         available = ", ".join(sorted(LOADER_VECTORSTORE_DIRS))
         raise ValueError(
             f"Unknown loader strategy: {loader_strategy}. Available strategies: {available}"
         ) from error
+
+    return loader_vectorstore_dir / embedding_provider
