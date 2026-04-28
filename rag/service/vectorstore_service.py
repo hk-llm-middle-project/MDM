@@ -40,7 +40,7 @@ def get_vectorstore(
     )
 
 
-@lru_cache(maxsize=None)
+@lru_cache(maxsize=32)
 def get_retrieval_components(
     loader_strategy: str = DEFAULT_LOADER_STRATEGY,
     embedding_provider: str = DEFAULT_EMBEDDING_PROVIDER,
