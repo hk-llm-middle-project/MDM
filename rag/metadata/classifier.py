@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -17,6 +18,7 @@ from rag.service.intake.values import LOCATIONS, PARTY_TYPES
 
 CONFIDENCE_THRESHOLD = 0.75
 MAX_PROMPT_CHARS = 6000
+MAX_CLASSIFICATION_WORKERS = 8
 
 
 @dataclass(frozen=True)
@@ -179,7 +181,8 @@ def enrich_documents_with_llm_metadata(
     """Classify and enrich each page document before chunking, reusing a cache if provided."""
     cache = load_page_metadata_cache(cache_path) if cache_path is not None else {}
     cache_changed = False
-    enriched_documents: list[Document] = []
+    enriched_documents: list[Document | None] = [None] * len(documents)
+    cache_misses: list[tuple[int, str, Document]] = []
     classifier_llm = llm
 
     for index, document in enumerate(documents, start=1):
@@ -187,31 +190,41 @@ def enrich_documents_with_llm_metadata(
         cached_entry = cache.get(cache_key)
         if cached_entry is not None:
             classification = normalize_page_metadata_response(cached_entry)
-            enriched_documents.append(
-                _merge_classification_metadata(
-                    document,
-                    classification,
-                    metadata_source="llm_cache",
-                )
+            enriched_documents[index - 1] = _merge_classification_metadata(
+                document,
+                classification,
+                metadata_source="llm_cache",
             )
             continue
 
-        if classifier_llm is None:
-            classifier_llm = ChatOpenAI(model=LLM_MODEL, temperature=0)
+        cache_misses.append((index - 1, cache_key, document))
 
-        classification = classify_page_metadata(document.page_content, llm=classifier_llm)
-        if cache_path is not None:
-            cache[cache_key] = _classification_to_cache_entry(classification)
-            cache_changed = True
-        enriched_documents.append(
-            _merge_classification_metadata(
-                document,
-                classification,
-                metadata_source="llm",
+    if classifier_llm is None and any(document.page_content.strip() for _, _, document in cache_misses):
+        classifier_llm = ChatOpenAI(model=LLM_MODEL, temperature=0)
+
+    worker_count = min(MAX_CLASSIFICATION_WORKERS, len(cache_misses))
+    if worker_count:
+        with ThreadPoolExecutor(max_workers=worker_count) as executor:
+            classifications = executor.map(
+                lambda item: classify_page_metadata(item[2].page_content, llm=classifier_llm),
+                cache_misses,
             )
-        )
+
+            for (document_index, cache_key, document), classification in zip(
+                cache_misses,
+                classifications,
+                strict=True,
+            ):
+                if cache_path is not None:
+                    cache[cache_key] = _classification_to_cache_entry(classification)
+                    cache_changed = True
+                enriched_documents[document_index] = _merge_classification_metadata(
+                    document,
+                    classification,
+                    metadata_source="llm",
+                )
 
     if cache_path is not None and cache_changed:
         save_page_metadata_cache(cache_path, cache)
 
-    return enriched_documents
+    return [document for document in enriched_documents if document is not None]

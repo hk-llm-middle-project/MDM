@@ -1,5 +1,7 @@
 import json
 import tempfile
+import threading
+import time
 import unittest
 from pathlib import Path
 
@@ -147,6 +149,38 @@ class PageMetadataClassifierTest(unittest.TestCase):
 
         self.assertEqual(len(FakeChatOpenAI.instances), 1)
         self.assertEqual(FakeChatOpenAI.instances[0].invoke_count, 2)
+
+    def test_enrich_documents_classifies_cache_misses_concurrently(self):
+        from rag.metadata.classifier import enrich_documents_with_llm_metadata
+
+        class SlowFakeLLM:
+            def __init__(self):
+                self.active_count = 0
+                self.max_active_count = 0
+                self.lock = threading.Lock()
+
+            def invoke(self, prompt):
+                with self.lock:
+                    self.active_count += 1
+                    self.max_active_count = max(self.max_active_count, self.active_count)
+                time.sleep(0.05)
+                with self.lock:
+                    self.active_count -= 1
+                return (
+                    '{"party_type": "자동차", "location": "교차로 사고", '
+                    '"confidence": {"party_type": 0.9, "location": 0.9}}'
+                )
+
+        llm = SlowFakeLLM()
+        documents = [
+            Document(page_content=f"교차로 자동차 사고 {index}", metadata={"page": index})
+            for index in range(1, 5)
+        ]
+
+        enriched = enrich_documents_with_llm_metadata(documents, llm=llm)
+
+        self.assertEqual([document.metadata["page"] for document in enriched], [1, 2, 3, 4])
+        self.assertGreater(llm.max_active_count, 1)
 
     def test_enrich_documents_uses_cached_page_metadata_without_llm_call(self):
         from rag.metadata.classifier import enrich_documents_with_llm_metadata
