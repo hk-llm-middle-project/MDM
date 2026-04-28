@@ -12,6 +12,7 @@ LOADER_VECTORSTORE_DIRS = {
     "pdfplumber": VECTORSTORE_DIR / "pdfplumber",
     "llamaparser": VECTORSTORE_DIR / "llamaparser",
     "llama-parse": VECTORSTORE_DIR / "llamaparser",
+    "upstage": VECTORSTORE_DIR / "upstage",
 }
 
 CHUNK_SIZE = 500

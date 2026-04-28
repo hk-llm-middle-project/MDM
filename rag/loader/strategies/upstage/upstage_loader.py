@@ -7,12 +7,13 @@ import tempfile
 from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from dotenv import load_dotenv
 from langchain_core.documents import Document
-from langchain_upstage import UpstageDocumentParseLoader
-from pypdf import PdfReader, PdfWriter
+
+if TYPE_CHECKING:
+    from langchain_upstage import UpstageDocumentParseLoader
 
 
 IMAGE_CATEGORIES = {"figure", "chart", "table"}
@@ -37,6 +38,8 @@ class UpstageLoaderConfig:
 
 
 def split_pdf_for_upstage(path: Path, page_size: int) -> list[dict[str, int | Path]]:
+    from pypdf import PdfReader, PdfWriter
+
     reader = PdfReader(str(path))
     split_files: list[dict[str, int | Path]] = []
 
@@ -68,7 +71,9 @@ def restore_page_metadata(docs: list[Document], source_path: Path, page_offset: 
         doc.metadata["parser"] = "upstage"
 
 
-def create_upstage_loader(path: Path, config: UpstageLoaderConfig) -> UpstageDocumentParseLoader:
+def create_upstage_loader(path: Path, config: UpstageLoaderConfig) -> "UpstageDocumentParseLoader":
+    from langchain_upstage import UpstageDocumentParseLoader
+
     return UpstageDocumentParseLoader(file_path=str(path), **config.upstage_options)
 
 

@@ -10,10 +10,7 @@ from dotenv import load_dotenv
 from langchain_core.documents import Document
 from openai import OpenAI
 
-try:
-    from parsing.storage import load_documents_json, save_documents_json
-except ModuleNotFoundError:
-    from storage import load_documents_json, save_documents_json
+from .storage import load_documents_json, save_documents_json
 
 
 IMAGE_CATEGORIES = {"figure", "table"}
