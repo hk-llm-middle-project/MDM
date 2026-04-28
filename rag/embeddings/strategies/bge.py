@@ -23,7 +23,7 @@ class BGEM3Embeddings(Embeddings):
         results = []
         for start in range(0, len(texts), BGE_EMBEDDING_BATCH_SIZE):
             batch = texts[start : start + BGE_EMBEDDING_BATCH_SIZE]
-            response = requests.post(
+            response = self.session.post(
                 f"{self.url}/v1/embeddings/m3",
                 headers={"Authorization": f"Bearer {self.key}"},
                 json={"input": batch, "return_dense": True},
