@@ -45,6 +45,8 @@ def run_retrieval_pipeline(
     if trace_context is not None:
         retrieve_kwargs["trace_context"] = trace_context
     candidate_documents = retrieve(**retrieve_kwargs)
+    if filters is not None and not candidate_documents:
+        candidate_documents = retrieve(**{**retrieve_kwargs, "filters": None})
 
     rerank_kwargs = {
         "query": query,

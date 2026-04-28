@@ -194,6 +194,36 @@ class BasicRagTest(unittest.TestCase):
             strategy_config=pipeline_config.reranker_config,
         )
 
+    def test_run_retrieval_pipeline_falls_back_without_filters_when_filtered_results_empty(self):
+        pipeline_config = RetrievalPipelineConfig(candidate_k=5, final_k=2)
+        fallback_documents = [Document(page_content="fallback")]
+        final_documents = [Document(page_content="final")]
+        components = build_retrieval_components(MagicMock())
+
+        with (
+            patch("rag.pipeline.retrieval.retrieve", side_effect=[[], fallback_documents]) as retrieve_mock,
+            patch("rag.pipeline.retrieval.rerank", return_value=final_documents) as rerank_mock,
+        ):
+            results = run_retrieval_pipeline(
+                components,
+                "query",
+                filters={"party_type": "자동차"},
+                pipeline_config=pipeline_config,
+            )
+
+        self.assertEqual(results, final_documents)
+        self.assertEqual(retrieve_mock.call_count, 2)
+        first_call, second_call = retrieve_mock.call_args_list
+        self.assertEqual(first_call.kwargs["filters"], {"party_type": "자동차"})
+        self.assertIsNone(second_call.kwargs["filters"])
+        rerank_mock.assert_called_once_with(
+            query="query",
+            documents=fallback_documents,
+            k=2,
+            strategy="none",
+            strategy_config=None,
+        )
+
     def test_selfquery_strategy_placeholder_raises(self):
         with self.assertRaises(NotImplementedError):
             retrieve(build_retrieval_components(MagicMock()), "query", strategy="selfquery")
