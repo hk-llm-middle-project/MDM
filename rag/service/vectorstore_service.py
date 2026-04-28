@@ -17,7 +17,7 @@ from rag.pipeline.retriever import RetrievalComponents, build_retrieval_componen
 PRE_CHUNKED_LOADER_STRATEGIES = {"upstage"}
 
 
-@lru_cache(maxsize=None)
+@lru_cache(maxsize=32)
 def get_vectorstore(
     loader_strategy: str = DEFAULT_LOADER_STRATEGY,
     embedding_provider: str = DEFAULT_EMBEDDING_PROVIDER,
