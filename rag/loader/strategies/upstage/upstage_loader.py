@@ -128,7 +128,7 @@ def load_with_upstage(
 
     config = strategy_config or UpstageLoaderConfig()
 
-    if config.final_documents_path.exists():
+    if config.final_documents_path.is_file():
         documents = load_documents_json(config.final_documents_path)
         normalize_cached_document_metadata(documents, path)
         return documents
