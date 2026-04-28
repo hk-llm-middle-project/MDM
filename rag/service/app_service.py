@@ -10,6 +10,7 @@ from rag.service.intake.intake_service import (
     evaluate_input_sufficiency,
 )
 from rag.service.intake.schema import IntakeState, UserSearchMetadata
+from rag.service.session.schema import ChatMessage
 
 
 MAX_FOLLOW_UP_ATTEMPTS = 2
@@ -65,6 +66,7 @@ def answer_question_with_intake(
     pipeline_config: RetrievalPipelineConfig | None = None,
     intake_state: IntakeState | None = None,
     loader_strategy: str = DEFAULT_LOADER_STRATEGY,
+    chat_history: list[ChatMessage] | None = None,
 ) -> AnswerResult:
     """intake 결과에 따라 추가 질문 또는 RAG 답변을 반환합니다."""
     current_state = intake_state or IntakeState()
@@ -95,11 +97,16 @@ def answer_question_with_intake(
             )
 
         # 질문 한도를 넘기면 지금까지 누적된 metadata만 사용해 가능한 범위에서 검색합니다.
+        analysis_kwargs = {
+            "search_metadata": merged_metadata,
+            "pipeline_config": pipeline_config,
+            "loader_strategy": loader_strategy,
+        }
+        if chat_history is not None:
+            analysis_kwargs["chat_history"] = chat_history
         answer, contexts = analyze_question(
             intake_decision.normalized_description or question,
-            search_metadata=merged_metadata,
-            pipeline_config=pipeline_config,
-            loader_strategy=loader_strategy,
+            **analysis_kwargs,
         )
         return AnswerResult(
             answer=build_fallback_notice(answer),
@@ -108,11 +115,16 @@ def answer_question_with_intake(
             intake_state=IntakeState(),
         )
 
+    analysis_kwargs = {
+        "search_metadata": merged_metadata,
+        "pipeline_config": pipeline_config,
+        "loader_strategy": loader_strategy,
+    }
+    if chat_history is not None:
+        analysis_kwargs["chat_history"] = chat_history
     answer, contexts = analyze_question(
         intake_decision.normalized_description,
-        search_metadata=merged_metadata,
-        pipeline_config=pipeline_config,
-        loader_strategy=loader_strategy,
+        **analysis_kwargs,
     )
     return AnswerResult(
         answer=answer,
@@ -126,12 +138,14 @@ def answer_question(
     question: str,
     pipeline_config: RetrievalPipelineConfig | None = None,
     loader_strategy: str = DEFAULT_LOADER_STRATEGY,
+    chat_history: list[ChatMessage] | None = None,
 ) -> tuple[str, list[str]]:
     """사용자 질문에 대한 RAG 답변을 반환합니다."""
     result = answer_question_with_intake(
         question,
         pipeline_config=pipeline_config,
         loader_strategy=loader_strategy,
+        chat_history=chat_history,
     )
     return result.answer, result.contexts
 
@@ -139,10 +153,13 @@ def answer_question(
 def answer_question_without_intake(
     question: str,
     pipeline_config: RetrievalPipelineConfig | None = None,
+    chat_history: list[ChatMessage] | None = None,
 ) -> tuple[str, list[str]]:
     """intake 없이 바로 RAG 답변을 반환합니다."""
-    return analyze_question(
-        question,
-        search_metadata=None,
-        pipeline_config=pipeline_config,
-    )
+    analysis_kwargs = {
+        "search_metadata": None,
+        "pipeline_config": pipeline_config,
+    }
+    if chat_history is not None:
+        analysis_kwargs["chat_history"] = chat_history
+    return analyze_question(question, **analysis_kwargs)

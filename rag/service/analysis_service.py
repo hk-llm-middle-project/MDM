@@ -8,6 +8,7 @@ from rag.service.answer_schema import parse_structured_answer
 from rag.service.intake.filter_service import build_metadata_filters
 from rag.service.intake.schema import UserSearchMetadata
 from rag.service.prompt import build_prompt
+from rag.service.session.schema import ChatMessage
 from rag.service.vectorstore_service import get_retrieval_components
 
 
@@ -16,6 +17,7 @@ def analyze_question(
     search_metadata: UserSearchMetadata | None = None,
     pipeline_config: RetrievalPipelineConfig | None = None,
     loader_strategy: str = DEFAULT_LOADER_STRATEGY,
+    chat_history: list[ChatMessage] | None = None,
 ) -> tuple[str, list[str]]:
     """질문을 검색하고 LLM 답변과 검색 컨텍스트를 반환합니다."""
     components = get_retrieval_components(loader_strategy)
@@ -31,7 +33,7 @@ def analyze_question(
     for index, context in enumerate(contexts, start=1):
         print(f"[retrieved:{index}] {context}")
 
-    prompt = build_prompt(question, "\n\n".join(contexts))
+    prompt = build_prompt(question, "\n\n".join(contexts), chat_history=chat_history)
     llm = ChatOpenAI(model=LLM_MODEL, temperature=0)
     content = llm.invoke(prompt).content
     structured_answer = parse_structured_answer(str(content))
