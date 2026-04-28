@@ -182,6 +182,34 @@ class PageMetadataClassifierTest(unittest.TestCase):
         self.assertEqual([document.metadata["page"] for document in enriched], [1, 2, 3, 4])
         self.assertGreater(llm.max_active_count, 1)
 
+    def test_enrich_documents_uses_default_metadata_when_page_classification_fails(self):
+        from rag.metadata.classifier import enrich_documents_with_llm_metadata
+
+        class PartiallyFailingLLM:
+            def invoke(self, prompt):
+                if "실패 페이지" in prompt:
+                    raise ValueError("invalid json")
+                return (
+                    '{"party_type": "자동차", "location": "교차로 사고", '
+                    '"confidence": {"party_type": 0.9, "location": 0.9}}'
+                )
+
+        documents = [
+            Document(page_content="실패 페이지", metadata={"page": 1}),
+            Document(page_content="교차로 자동차 사고", metadata={"page": 2}),
+        ]
+
+        enriched = enrich_documents_with_llm_metadata(documents, llm=PartiallyFailingLLM())
+
+        self.assertEqual(len(enriched), 2)
+        self.assertEqual(enriched[0].metadata["metadata_source"], "llm_error")
+        self.assertNotIn("party_type", enriched[0].metadata)
+        self.assertNotIn("location", enriched[0].metadata)
+        self.assertEqual(enriched[0].metadata["metadata_confidence_party_type"], 0.0)
+        self.assertEqual(enriched[0].metadata["metadata_confidence_location"], 0.0)
+        self.assertEqual(enriched[1].metadata["party_type"], "자동차")
+        self.assertEqual(enriched[1].metadata["location"], "교차로 사고")
+
     def test_enrich_documents_uses_cached_page_metadata_without_llm_call(self):
         from rag.metadata.classifier import enrich_documents_with_llm_metadata
 

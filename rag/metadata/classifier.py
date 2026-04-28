@@ -100,6 +100,27 @@ def classify_page_metadata(page_content: str, llm: Any | None = None) -> PageMet
     return normalize_page_metadata_response(extract_json_object(str(content)))
 
 
+def default_page_metadata_classification() -> PageMetadataClassification:
+    """Return empty metadata for pages that cannot be classified."""
+    return PageMetadataClassification(confidence={"party_type": 0.0, "location": 0.0})
+
+
+def classify_page_metadata_safely(
+    document: Document,
+    llm: Any | None = None,
+) -> tuple[PageMetadataClassification, bool]:
+    """Classify one page, falling back to empty metadata if classification fails."""
+    try:
+        return classify_page_metadata(document.page_content, llm=llm), False
+    except Exception as exc:
+        page = document.metadata.get("page", "unknown")
+        print(
+            "[WARN] page metadata classification failed "
+            f"- page={page}, error_type={type(exc).__name__}, error={exc}"
+        )
+        return default_page_metadata_classification(), True
+
+
 def load_page_metadata_cache(cache_path: Path) -> dict[str, dict[str, Any]]:
     """Load page metadata classifications keyed by page number."""
     if not cache_path.exists():
@@ -205,14 +226,14 @@ def enrich_documents_with_llm_metadata(
     worker_count = min(MAX_CLASSIFICATION_WORKERS, len(cache_misses))
     if worker_count:
         with ThreadPoolExecutor(max_workers=worker_count) as executor:
-            classifications = executor.map(
-                lambda item: classify_page_metadata(item[2].page_content, llm=classifier_llm),
+            classification_results = executor.map(
+                lambda item: classify_page_metadata_safely(item[2], llm=classifier_llm),
                 cache_misses,
             )
 
-            for (document_index, cache_key, document), classification in zip(
+            for (document_index, cache_key, document), (classification, had_error) in zip(
                 cache_misses,
-                classifications,
+                classification_results,
                 strict=True,
             ):
                 if cache_path is not None:
@@ -221,7 +242,7 @@ def enrich_documents_with_llm_metadata(
                 enriched_documents[document_index] = _merge_classification_metadata(
                     document,
                     classification,
-                    metadata_source="llm",
+                    metadata_source="llm_error" if had_error else "llm",
                 )
 
     if cache_path is not None and cache_changed:
