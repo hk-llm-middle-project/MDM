@@ -6,6 +6,8 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 PDF_PATH = BASE_DIR / "data" / "raw" / "230630_자동차사고 과실비율 인정기준_최종.pdf"
 VECTORSTORE_DIR = BASE_DIR / "data" / "vectorstore"
+PAGE_METADATA_DIR = BASE_DIR / "data" / "metadata"
+PAGE_METADATA_PATH = PAGE_METADATA_DIR / "main_pdf_page_metadata.json"
 LLAMA_MD_DIR = BASE_DIR / "data" / "llama_md"
 UPSTAGE_OUTPUT_DIR = BASE_DIR / "data" / "upstage_output"
 UPSTAGE_MAIN_PDF_OUTPUT_DIR = UPSTAGE_OUTPUT_DIR / "main_pdf"
