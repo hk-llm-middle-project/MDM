@@ -13,8 +13,11 @@ class BGEM3Embeddings(Embeddings):
     """LangChain embeddings adapter for the BGE-M3 embedding API."""
 
     def __init__(self):
-        self.url = os.environ["BGE_BASE_URL"]
-        self.key = os.environ["BGE_API_KEY"]
+        self.url = os.environ.get("BGE_BASE_URL")
+        self.key = os.environ.get("BGE_API_KEY")
+        if not self.url or not self.key:
+            raise ValueError("BGE_BASE_URL and BGE_API_KEY environment variables must be set.")
+        self.session = requests.Session()
 
     def _embed(self, texts: list[str]) -> list[list[float]]:
         results = []
