@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import json
 import tempfile
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -13,7 +14,6 @@ from dotenv import load_dotenv
 from langchain_core.documents import Document
 
 from config import UPSTAGE_FINAL_DOCUMENTS_PATH, UPSTAGE_RAW_DOCUMENTS_PATH
-from rag.loader.strategies.upstage.storage import load_documents_json, save_documents_json
 
 if TYPE_CHECKING:
     from langchain_upstage import UpstageDocumentParseLoader
@@ -28,6 +28,35 @@ DEFAULT_UPSTAGE_OPTIONS = {
     "base64_encoding": ["figure", "chart", "table"],
     "ocr": "auto",
 }
+
+
+def load_documents_json(json_path: str | Path) -> list[Document]:
+    path = Path(json_path)
+    with path.open("r", encoding="utf-8") as fp:
+        payload = json.load(fp)
+
+    return [
+        Document(
+            page_content=item.get("page_content", ""),
+            metadata=item.get("metadata", {}),
+        )
+        for item in payload
+    ]
+
+
+def save_documents_json(docs: list[Document], output_path: str | Path) -> Path:
+    path = Path(output_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = [
+        {
+            "page_content": doc.page_content,
+            "metadata": doc.metadata,
+        }
+        for doc in docs
+    ]
+    with path.open("w", encoding="utf-8") as fp:
+        json.dump(payload, fp, ensure_ascii=False, indent=2)
+    return path
 
 
 @dataclass(frozen=True)

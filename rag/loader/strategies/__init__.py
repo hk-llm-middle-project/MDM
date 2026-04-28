@@ -13,7 +13,7 @@ from rag.loader.strategies.pdfplumber_loader import (
     PdfPlumberLoaderConfig,
     load_with_pdfplumber,
 )
-from rag.loader.strategies.upstage.upstage_loader import UpstageLoaderConfig
+from rag.loader.strategies.upstage_loader import UpstageLoaderConfig
 
 
 def load_with_upstage(
@@ -21,7 +21,7 @@ def load_with_upstage(
     strategy_config: UpstageLoaderConfig | None = None,
 ) -> list[Document]:
     """Load with Upstage only when the strategy is actually selected."""
-    from rag.loader.strategies.upstage.upstage_loader import (
+    from rag.loader.strategies.upstage_loader import (
         load_with_upstage as _load_with_upstage,
     )
 
