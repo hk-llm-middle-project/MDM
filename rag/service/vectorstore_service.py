@@ -14,6 +14,9 @@ from rag.loader import load_pdf
 from rag.pipeline.retriever import RetrievalComponents, build_retrieval_components
 
 
+PRE_CHUNKED_LOADER_STRATEGIES = {"upstage"}
+
+
 @lru_cache(maxsize=None)
 def get_vectorstore(
     loader_strategy: str = DEFAULT_LOADER_STRATEGY,
@@ -25,7 +28,11 @@ def get_vectorstore(
         return load_vectorstore(vectorstore_dir, embedding_provider=embedding_provider)
 
     documents = load_pdf(PDF_PATH, strategy=loader_strategy)
-    chunks = split_documents(documents)
+    chunks = (
+        documents
+        if loader_strategy in PRE_CHUNKED_LOADER_STRATEGIES
+        else split_documents(documents)
+    )
     return build_vectorstore(
         chunks,
         vectorstore_dir,

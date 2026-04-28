@@ -11,7 +11,7 @@ from rag.service.result_service import format_context_preview
 
 
 SHOW_RETRIEVED_CONTEXTS = True
-LOADER_STRATEGY_OPTIONS = ("pdfplumber", "llamaparser")
+LOADER_STRATEGY_OPTIONS = ("pdfplumber", "llamaparser", "upstage")
 EMBEDDING_PROVIDER_OPTIONS = tuple(EMBEDDING_STRATEGIES)
 
 

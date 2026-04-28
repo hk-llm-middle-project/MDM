@@ -352,6 +352,28 @@ class BasicRagTest(unittest.TestCase):
 
         vectorstore_service.get_vectorstore.cache_clear()
 
+    def test_vectorstore_service_does_not_split_upstage_final_chunks(self):
+        from rag.service import vectorstore_service
+
+        vectorstore_service.get_vectorstore.cache_clear()
+        upstage_documents = [Document(page_content="already chunked")]
+
+        with (
+            patch("rag.service.vectorstore_service.get_vectorstore_dir", return_value=Path("vectorstore/upstage/bge")),
+            patch("rag.service.vectorstore_service.vectorstore_exists", return_value=False),
+            patch("rag.service.vectorstore_service.load_pdf", return_value=upstage_documents),
+            patch("rag.service.vectorstore_service.split_documents") as split_mock,
+            patch("rag.service.vectorstore_service.build_vectorstore", return_value="vectorstore") as build_mock,
+        ):
+            result = vectorstore_service.get_vectorstore("upstage", "bge")
+
+        self.assertEqual(result, "vectorstore")
+        split_mock.assert_not_called()
+        build_mock.assert_called_once()
+        self.assertEqual(build_mock.call_args.args[0], upstage_documents)
+
+        vectorstore_service.get_vectorstore.cache_clear()
+
     def test_format_context_preview_returns_empty_without_contexts(self):
         self.assertEqual(format_context_preview([]), "")
 

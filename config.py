@@ -7,6 +7,14 @@ BASE_DIR = Path(__file__).resolve().parent
 PDF_PATH = BASE_DIR / "data" / "raw" / "230630_자동차사고 과실비율 인정기준_최종.pdf"
 VECTORSTORE_DIR = BASE_DIR / "data" / "vectorstore"
 LLAMA_MD_DIR = BASE_DIR / "data" / "llama_md"
+UPSTAGE_OUTPUT_DIR = BASE_DIR / "data" / "upstage_output"
+UPSTAGE_MAIN_PDF_OUTPUT_DIR = UPSTAGE_OUTPUT_DIR / "main_pdf"
+UPSTAGE_FINAL_DOCUMENTS_PATH = (
+    UPSTAGE_MAIN_PDF_OUTPUT_DIR / "final" / "chunked_documents_final.json"
+)
+UPSTAGE_RAW_DOCUMENTS_PATH = (
+    UPSTAGE_MAIN_PDF_OUTPUT_DIR / "raw" / "parsed_documents_raw.json"
+)
 DEFAULT_LOADER_STRATEGY = "pdfplumber"
 LOADER_VECTORSTORE_DIRS = {
     "pdfplumber": VECTORSTORE_DIR / "pdfplumber",
