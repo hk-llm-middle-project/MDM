@@ -11,6 +11,7 @@ from langchain_openai import ChatOpenAI
 
 from config import LLM_MODEL
 from rag.pipeline.retriever.components import RetrievalComponents
+from rag.service.tracing import TraceContext
 
 
 @dataclass(frozen=True)
@@ -30,6 +31,7 @@ def retrieve_with_multiquery(
     k: int,
     filters: dict[str, object] | None = None,
     strategy_config: MultiQueryRetrieverConfig | None = None,
+    trace_context: TraceContext | None = None,
 ) -> list[Document]:
     """사용자 질문을 여러 의미적 변형 질의로 확장해 검색합니다."""
     config = strategy_config or MultiQueryRetrieverConfig()
@@ -47,4 +49,6 @@ def retrieve_with_multiquery(
         llm=llm,
         include_original=config.include_original,
     )
-    return list(retriever.invoke(query))[:k]
+    config_dict = trace_context.langchain_config("mdm.retrieve.multiquery") if trace_context else None
+    results = retriever.invoke(query, config=config_dict) if config_dict else retriever.invoke(query)
+    return list(results)[:k]

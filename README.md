@@ -27,15 +27,24 @@ mdm/
 │  │  └─ strategies/
 │  ├─ chunker.py
 │  ├─ indexer.py
-│  ├─ service/
-│  │  ├─ app_service.py
-│  │  ├─ analysis_service.py
-│  │  ├─ result_service.py
-│  │  ├─ vectorstore_service.py
-│  │  └─ intake/
-│  │     ├─ intake_service.py
-│  │     ├─ prompts.py
-│  │     └─ schema.py
+?? ?쒋? service/
+?? ?? ?붴? conversation/
+?? ?? ?? ?쒋? app_service.py
+?? ?? ?? ?쒋? orchestrator.py
+?? ?? ?? ?쒋? router.py
+?? ?? ?? ?붴? pipelines/
+?? ?? ?붴? analysis/
+?? ?? ?? ?쒋? analysis_service.py
+?? ?? ?? ?쒋? prompt.py
+?? ?? ?? ?붴? answer_schema.py
+?? ?? ?붴? presentation/
+?? ?? ?? ?붴? result_service.py
+?? ?? ?붴? vectorstore/
+?? ?? ?? ?붴? service.py
+?? ?? ?붴? intake/
+?? ??    ?쒋? intake_service.py
+?? ??    ?쒋? prompts.py
+?? ??    ?붴? schema.py
 │  ├─ pipeline/
 │  │  ├─ retrieval.py
 │  │  ├─ retriever/
@@ -98,7 +107,7 @@ PDF 문서를 읽고 텍스트와 메타데이터를 정리하는 로더 전략 
 - Chroma 또는 FAISS 저장
 - 재색인 처리
 
-### [rag/service/app_service.py](rag/service/app_service.py)
+### [rag/service/conversation/app_service.py](rag/service/conversation/app_service.py)
 
 사용자 흐름을 조율하는 애플리케이션 서비스다.
 
@@ -106,7 +115,7 @@ PDF 문서를 읽고 텍스트와 메타데이터를 정리하는 로더 전략 
 - 분석 서비스 호출
 - 기존 UI와 평가 스크립트가 사용하는 답변 API 유지
 
-### [rag/service/analysis_service.py](rag/service/analysis_service.py)
+### [rag/service/analysis/analysis_service.py](rag/service/analysis/analysis_service.py)
 
 사고 질의를 분석하고 RAG 답변을 생성한다.
 
@@ -115,7 +124,7 @@ PDF 문서를 읽고 텍스트와 메타데이터를 정리하는 로더 전략 
 - 답변 프롬프트 생성
 - LLM 호출
 
-### [rag/service/result_service.py](rag/service/result_service.py)
+### [rag/service/presentation/result_service.py](rag/service/presentation/result_service.py)
 
 분석 결과를 화면이나 평가에서 쓰기 좋은 형태로 정리한다.
 
@@ -123,7 +132,7 @@ PDF 문서를 읽고 텍스트와 메타데이터를 정리하는 로더 전략 
 - 검색 문서 조각 첨부
 - 이후 예상 사고유형, 과실비율, 주의사항 화면 모델 확장
 
-### [rag/service/vectorstore_service.py](rag/service/vectorstore_service.py)
+### [rag/service/vectorstore/service.py](rag/service/vectorstore/service.py)
 
 앱 프로세스에서 재사용할 벡터스토어와 검색 컴포넌트를 준비한다.
 

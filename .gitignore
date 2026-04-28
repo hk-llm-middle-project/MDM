@@ -12,6 +12,10 @@ wheels/
 # Local vector store artifacts
 data/vectorstore/
 
+# Local test scratch artifacts
+.tmp_tests/
+.tmp_unittest/
+
 # Parser experiment image artifacts
 experiments/parser/llamaparser/**/images/
 
@@ -19,3 +23,7 @@ experiments/parser/llamaparser/**/images/
 .codex
 .claude
 .omx
+
+# Local Docker overrides
+docker-compose.override.yml
+docker-compose.local.yml

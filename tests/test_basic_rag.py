@@ -20,14 +20,16 @@ from rag.pipeline.reranker import (
 )
 from rag.pipeline.retriever import EnsembleRetrieverConfig
 from rag.pipeline.retriever import RETRIEVAL_STRATEGIES, retrieve
-from rag.service.app_service import answer_question, answer_question_with_intake
+from rag.service.conversation.app_service import answer_question, answer_question_with_intake
+from rag.service.conversation.app_service import answer_question_without_intake
 from rag.service.intake.filter_service import build_metadata_filters
 from rag.service.intake.intake_service import (
     evaluate_input_sufficiency,
     normalize_metadata_response,
 )
 from rag.service.intake.schema import IntakeDecision, IntakeState, UserSearchMetadata
-from rag.service.result_service import format_context_preview, truncate_context
+from rag.service.presentation.result_service import format_context_preview, truncate_context
+from rag.service.tracing import TraceContext
 
 
 class BasicRagTest(unittest.TestCase):
@@ -65,8 +67,8 @@ class BasicRagTest(unittest.TestCase):
         called = {}
         config = EnsembleRetrieverConfig(weights=(0.7, 0.3))
 
-        def fake_strategy(vectorstore, query, k, filters, strategy_config):
-            called["args"] = (vectorstore, query, k, filters, strategy_config)
+        def fake_strategy(vectorstore, query, k, filters, strategy_config, trace_context=None):
+            called["args"] = (vectorstore, query, k, filters, strategy_config, trace_context)
             return [Document(page_content="routed")]
 
         with patch.dict(RETRIEVAL_STRATEGIES, {"ensemble": fake_strategy}, clear=False):
@@ -82,7 +84,7 @@ class BasicRagTest(unittest.TestCase):
         self.assertEqual(results[0].page_content, "routed")
         self.assertEqual(
             called["args"],
-            (components, "query", 3, {"page": 3}, config),
+            (components, "query", 3, {"page": 3}, config, None),
         )
 
     def test_retrieve_raises_for_unknown_strategy(self):
@@ -104,8 +106,8 @@ class BasicRagTest(unittest.TestCase):
         called = {}
         config = FlashrankRerankerConfig(model_name="test-model")
 
-        def fake_strategy(query, documents, k, strategy_config):
-            called["args"] = (query, documents, k, strategy_config)
+        def fake_strategy(query, documents, k, strategy_config, trace_context=None):
+            called["args"] = (query, documents, k, strategy_config, trace_context)
             return [Document(page_content="reranked")]
 
         with patch.dict(RERANKER_STRATEGIES, {"flashrank": fake_strategy}, clear=False):
@@ -119,7 +121,7 @@ class BasicRagTest(unittest.TestCase):
             )
 
         self.assertEqual(results[0].page_content, "reranked")
-        self.assertEqual(called["args"], ("query", documents, 1, config))
+        self.assertEqual(called["args"], ("query", documents, 1, config, None))
 
     def test_reranker_registry_includes_new_strategies(self):
         self.assertIn("cohere", RERANKER_STRATEGIES)
@@ -192,6 +194,36 @@ class BasicRagTest(unittest.TestCase):
             strategy_config=pipeline_config.reranker_config,
         )
 
+    def test_run_retrieval_pipeline_falls_back_without_filters_when_filtered_results_empty(self):
+        pipeline_config = RetrievalPipelineConfig(candidate_k=5, final_k=2)
+        fallback_documents = [Document(page_content="fallback")]
+        final_documents = [Document(page_content="final")]
+        components = build_retrieval_components(MagicMock())
+
+        with (
+            patch("rag.pipeline.retrieval.retrieve", side_effect=[[], fallback_documents]) as retrieve_mock,
+            patch("rag.pipeline.retrieval.rerank", return_value=final_documents) as rerank_mock,
+        ):
+            results = run_retrieval_pipeline(
+                components,
+                "query",
+                filters={"party_type": "자동차"},
+                pipeline_config=pipeline_config,
+            )
+
+        self.assertEqual(results, final_documents)
+        self.assertEqual(retrieve_mock.call_count, 2)
+        first_call, second_call = retrieve_mock.call_args_list
+        self.assertEqual(first_call.kwargs["filters"], {"party_type": "자동차"})
+        self.assertIsNone(second_call.kwargs["filters"])
+        rerank_mock.assert_called_once_with(
+            query="query",
+            documents=fallback_documents,
+            k=2,
+            strategy="none",
+            strategy_config=None,
+        )
+
     def test_selfquery_strategy_placeholder_raises(self):
         with self.assertRaises(NotImplementedError):
             retrieve(build_retrieval_components(MagicMock()), "query", strategy="selfquery")
@@ -258,8 +290,10 @@ class BasicRagTest(unittest.TestCase):
 
         with (
             patch.dict("os.environ", {"BGE_BASE_URL": "https://bge.example", "BGE_API_KEY": "secret"}),
-            patch("rag.embeddings.strategies.bge.requests.post", return_value=response) as post_mock,
+            patch("rag.embeddings.strategies.bge.requests.Session") as session_mock,
         ):
+            post_mock = session_mock.return_value.post
+            post_mock.return_value = response
             embeddings = BGEM3Embeddings()
             result = embeddings.embed_documents(["one", "two"])
 
@@ -283,11 +317,10 @@ class BasicRagTest(unittest.TestCase):
 
         with (
             patch.dict("os.environ", {"BGE_BASE_URL": "https://bge.example", "BGE_API_KEY": "secret"}),
-            patch(
-                "rag.embeddings.strategies.bge.requests.post",
-                side_effect=[first_response, second_response],
-            ) as post_mock,
+            patch("rag.embeddings.strategies.bge.requests.Session") as session_mock,
         ):
+            post_mock = session_mock.return_value.post
+            post_mock.side_effect = [first_response, second_response]
             embeddings = BGEM3Embeddings()
             result = embeddings.embed_documents(texts)
 
@@ -309,16 +342,28 @@ class BasicRagTest(unittest.TestCase):
         google_mock.return_value.embed_query.assert_called_once_with("query")
 
     def test_vectorstore_service_uses_loader_specific_directory(self):
-        from rag.service import vectorstore_service
+        from config import BASE_DIR
+        from rag.service.vectorstore import vectorstore_service as vectorstore_service
 
         vectorstore_service.get_vectorstore.cache_clear()
+        loaded_documents = [Document(page_content="doc", metadata={"page": 1})]
+        enriched_documents = [
+            Document(
+                page_content="doc",
+                metadata={"page": 1, "party_type": "pedestrian", "location": "crosswalk"},
+            )
+        ]
 
         with (
-            patch("rag.service.vectorstore_service.get_vectorstore_dir", return_value=Path("vectorstore/llamaparser/google")) as dir_mock,
-            patch("rag.service.vectorstore_service.vectorstore_exists", return_value=False),
-            patch("rag.service.vectorstore_service.load_pdf", return_value=[Document(page_content="doc")]) as load_mock,
-            patch("rag.service.vectorstore_service.split_documents", return_value=[Document(page_content="chunk")]),
-            patch("rag.service.vectorstore_service.build_vectorstore", return_value="vectorstore") as build_mock,
+            patch("rag.service.vectorstore.vectorstore_service.get_vectorstore_dir", return_value=Path("vectorstore/llamaparser/google")) as dir_mock,
+            patch("rag.service.vectorstore.vectorstore_service.vectorstore_exists", return_value=False),
+            patch("rag.service.vectorstore.vectorstore_service.load_pdf", return_value=loaded_documents) as load_mock,
+            patch(
+                "rag.service.vectorstore.vectorstore_service.enrich_documents_with_llm_metadata",
+                return_value=enriched_documents,
+            ) as enrich_mock,
+            patch("rag.service.vectorstore.vectorstore_service.split_documents", return_value=[Document(page_content="chunk")]),
+            patch("rag.service.vectorstore.vectorstore_service.build_vectorstore", return_value="vectorstore") as build_mock,
         ):
             result = vectorstore_service.get_vectorstore("llamaparser", "google")
 
@@ -326,6 +371,10 @@ class BasicRagTest(unittest.TestCase):
         dir_mock.assert_called_once_with("llamaparser", "google")
         load_mock.assert_called_once()
         self.assertEqual(load_mock.call_args.kwargs["strategy"], "llamaparser")
+        enrich_mock.assert_called_once_with(
+            loaded_documents,
+            cache_path=BASE_DIR / "data" / "metadata" / "main_pdf_page_metadata.json",
+        )
         build_mock.assert_called_once()
         self.assertEqual(build_mock.call_args.args[1], Path("vectorstore/llamaparser/google"))
         self.assertEqual(build_mock.call_args.kwargs["embedding_provider"], "google")
@@ -333,14 +382,14 @@ class BasicRagTest(unittest.TestCase):
         vectorstore_service.get_vectorstore.cache_clear()
 
     def test_vectorstore_service_loads_embedding_specific_directory(self):
-        from rag.service import vectorstore_service
+        from rag.service.vectorstore import vectorstore_service
 
         vectorstore_service.get_vectorstore.cache_clear()
 
         with (
-            patch("rag.service.vectorstore_service.get_vectorstore_dir", return_value=Path("vectorstore/pdfplumber/openai")),
-            patch("rag.service.vectorstore_service.vectorstore_exists", return_value=True),
-            patch("rag.service.vectorstore_service.load_vectorstore", return_value="vectorstore") as load_mock,
+            patch("rag.service.vectorstore.vectorstore_service.get_vectorstore_dir", return_value=Path("vectorstore/pdfplumber/openai")),
+            patch("rag.service.vectorstore.vectorstore_service.vectorstore_exists", return_value=True),
+            patch("rag.service.vectorstore.vectorstore_service.load_vectorstore", return_value="vectorstore") as load_mock,
         ):
             result = vectorstore_service.get_vectorstore("pdfplumber", "openai")
 
@@ -353,21 +402,23 @@ class BasicRagTest(unittest.TestCase):
         vectorstore_service.get_vectorstore.cache_clear()
 
     def test_vectorstore_service_does_not_split_upstage_final_chunks(self):
-        from rag.service import vectorstore_service
+        from rag.service.vectorstore import vectorstore_service
 
         vectorstore_service.get_vectorstore.cache_clear()
         upstage_documents = [Document(page_content="already chunked")]
 
         with (
-            patch("rag.service.vectorstore_service.get_vectorstore_dir", return_value=Path("vectorstore/upstage/bge")),
-            patch("rag.service.vectorstore_service.vectorstore_exists", return_value=False),
-            patch("rag.service.vectorstore_service.load_pdf", return_value=upstage_documents),
-            patch("rag.service.vectorstore_service.split_documents") as split_mock,
-            patch("rag.service.vectorstore_service.build_vectorstore", return_value="vectorstore") as build_mock,
+            patch("rag.service.vectorstore.vectorstore_service.get_vectorstore_dir", return_value=Path("vectorstore/upstage/bge")),
+            patch("rag.service.vectorstore.vectorstore_service.vectorstore_exists", return_value=False),
+            patch("rag.service.vectorstore.vectorstore_service.load_pdf", return_value=upstage_documents),
+            patch("rag.service.vectorstore.vectorstore_service.enrich_documents_with_llm_metadata") as enrich_mock,
+            patch("rag.service.vectorstore.vectorstore_service.split_documents") as split_mock,
+            patch("rag.service.vectorstore.vectorstore_service.build_vectorstore", return_value="vectorstore") as build_mock,
         ):
             result = vectorstore_service.get_vectorstore("upstage", "bge")
 
         self.assertEqual(result, "vectorstore")
+        enrich_mock.assert_not_called()
         split_mock.assert_not_called()
         build_mock.assert_called_once()
         self.assertEqual(build_mock.call_args.args[0], upstage_documents)
@@ -392,7 +443,7 @@ class BasicRagTest(unittest.TestCase):
         decision = normalize_metadata_response(
             {
                 "party_type": "자동차",
-                "location": "교차로 사고",
+                "location": "신호등 없는 교차로",
                 "confidence": {"party_type": 0.95, "location": 0.9},
                 "missing_fields": [],
                 "follow_up_questions": [],
@@ -401,7 +452,7 @@ class BasicRagTest(unittest.TestCase):
 
         self.assertTrue(decision.is_sufficient)
         self.assertEqual(decision.search_metadata.party_type, "자동차")
-        self.assertEqual(decision.search_metadata.location, "교차로 사고")
+        self.assertEqual(decision.search_metadata.location, "신호등 없는 교차로")
         self.assertEqual(decision.missing_fields, [])
 
     def test_normalize_metadata_response_rejects_invalid_or_low_confidence_values(self):
@@ -468,33 +519,52 @@ class BasicRagTest(unittest.TestCase):
     def test_answer_question_returns_follow_up_without_analysis_when_intake_is_insufficient(self):
         with (
             patch(
-                "rag.service.app_service.evaluate_input_sufficiency",
+                "rag.service.conversation.app_service.evaluate_input_sufficiency",
                 return_value=IntakeDecision(
                     is_sufficient=False,
                     normalized_description="사고났어요",
                     follow_up_questions=["사고 상대는 무엇인가요?"],
                 ),
             ) as intake_mock,
-            patch("rag.service.app_service.analyze_question") as analyze_mock,
+            patch("rag.service.conversation.app_service.analyze_question") as analyze_mock,
         ):
             answer, contexts = answer_question("사고났어요")
 
-        self.assertIn("사고 상대는 보행자, 자동차, 자전거 중 무엇인가요?", answer)
+        self.assertIn("사고 상대는 무엇인가요?", answer)
         self.assertEqual(contexts, [])
         intake_mock.assert_called_once_with("사고났어요")
+        analyze_mock.assert_not_called()
+
+    def test_answer_question_uses_llm_follow_up_questions_first(self):
+        with (
+            patch(
+                "rag.service.conversation.app_service.evaluate_input_sufficiency",
+                return_value=IntakeDecision(
+                    is_sufficient=False,
+                    normalized_description="사고났어요",
+                    follow_up_questions=["LLM이 만든 추가 질문입니다."],
+                ),
+            ),
+            patch("rag.service.conversation.app_service.analyze_question") as analyze_mock,
+        ):
+            answer, contexts = answer_question("사고났어요")
+
+        self.assertIn("LLM이 만든 추가 질문입니다.", answer)
+        self.assertNotIn("사고 상대는 보행자", answer)
+        self.assertEqual(contexts, [])
         analyze_mock.assert_not_called()
 
     def test_answer_question_with_intake_allows_two_follow_up_attempts(self):
         with (
             patch(
-                "rag.service.app_service.evaluate_input_sufficiency",
+                "rag.service.conversation.app_service.evaluate_input_sufficiency",
                 return_value=IntakeDecision(
                     is_sufficient=False,
                     normalized_description="애매한 입력",
                     follow_up_questions=["사고 상대는 무엇인가요?"],
                 ),
             ),
-            patch("rag.service.app_service.analyze_question") as analyze_mock,
+            patch("rag.service.conversation.app_service.analyze_question") as analyze_mock,
         ):
             result = answer_question_with_intake(
                 "애매한 입력",
@@ -502,7 +572,7 @@ class BasicRagTest(unittest.TestCase):
             )
 
         self.assertTrue(result.needs_more_input)
-        self.assertIn("사고 상대는 보행자, 자동차, 자전거 중 무엇인가요?", result.answer)
+        self.assertIn("사고 상대는 무엇인가요?", result.answer)
         self.assertEqual(result.contexts, [])
         self.assertEqual(result.intake_state.attempt_count, 2)
         analyze_mock.assert_not_called()
@@ -511,7 +581,7 @@ class BasicRagTest(unittest.TestCase):
         metadata = UserSearchMetadata()
         with (
             patch(
-                "rag.service.app_service.evaluate_input_sufficiency",
+                "rag.service.conversation.app_service.evaluate_input_sufficiency",
                 return_value=IntakeDecision(
                     is_sufficient=False,
                     normalized_description="계속 애매한 입력",
@@ -519,7 +589,7 @@ class BasicRagTest(unittest.TestCase):
                     follow_up_questions=["사고 상대는 무엇인가요?"],
                 ),
             ),
-            patch("rag.service.app_service.analyze_question", return_value=("fallback answer", ["context"])) as analyze_mock,
+            patch("rag.service.conversation.app_service.analyze_question", return_value=("fallback answer", ["context"])) as analyze_mock,
         ):
             result = answer_question_with_intake(
                 "계속 애매한 입력",
@@ -548,14 +618,14 @@ class BasicRagTest(unittest.TestCase):
         )
         with (
             patch(
-                "rag.service.app_service.evaluate_input_sufficiency",
+                "rag.service.conversation.app_service.evaluate_input_sufficiency",
                 return_value=IntakeDecision(
                     is_sufficient=False,
                     normalized_description="교차로였어요",
                     search_metadata=UserSearchMetadata(location="교차로 사고"),
                 ),
             ),
-            patch("rag.service.app_service.analyze_question", return_value=("answer", ["context"])) as analyze_mock,
+            patch("rag.service.conversation.app_service.analyze_question", return_value=("answer", ["context"])) as analyze_mock,
         ):
             result = answer_question_with_intake(
                 "교차로였어요",
@@ -577,14 +647,14 @@ class BasicRagTest(unittest.TestCase):
         metadata = UserSearchMetadata(party_type="자동차", location="교차로 사고")
         with (
             patch(
-                "rag.service.app_service.evaluate_input_sufficiency",
+                "rag.service.conversation.app_service.evaluate_input_sufficiency",
                 return_value=IntakeDecision(
                     is_sufficient=True,
                     normalized_description="정규화된 설명",
                     search_metadata=metadata,
                 ),
             ),
-            patch("rag.service.app_service.analyze_question", return_value=("answer", ["context"])) as analyze_mock,
+            patch("rag.service.conversation.app_service.analyze_question", return_value=("answer", ["context"])) as analyze_mock,
         ):
             answer, contexts = answer_question("원문 입력")
 
@@ -602,14 +672,14 @@ class BasicRagTest(unittest.TestCase):
         metadata = UserSearchMetadata(party_type="자동차", location="교차로 사고")
         with (
             patch(
-                "rag.service.app_service.evaluate_input_sufficiency",
+                "rag.service.conversation.app_service.evaluate_input_sufficiency",
                 return_value=IntakeDecision(
                     is_sufficient=True,
                     normalized_description="정규화된 설명",
                     search_metadata=metadata,
                 ),
             ),
-            patch("rag.service.app_service.analyze_question", return_value=("answer", ["context"])) as analyze_mock,
+            patch("rag.service.conversation.app_service.analyze_question", return_value=("answer", ["context"])) as analyze_mock,
         ):
             answer, contexts = answer_question(
                 "원문 입력",
@@ -627,18 +697,38 @@ class BasicRagTest(unittest.TestCase):
             embedding_provider="google",
         )
 
+    def test_answer_question_without_intake_bypasses_intake(self):
+        with (
+            patch("rag.service.conversation.app_service.evaluate_input_sufficiency") as intake_mock,
+            patch("rag.service.conversation.app_service.analyze_question", return_value=("answer", ["context"])) as analyze_mock,
+        ):
+            answer, contexts = answer_question_without_intake("평가용 질문")
+
+        self.assertEqual(answer, "answer")
+        self.assertEqual(contexts, ["context"])
+        intake_mock.assert_not_called()
+        analyze_mock.assert_called_once_with(
+            "평가용 질문",
+            search_metadata=None,
+            pipeline_config=None,
+            chat_history=None,
+            trace_context=None,
+        )
+
     def test_analyze_question_passes_metadata_filters_to_retrieval_pipeline(self):
-        from rag.service.analysis_service import analyze_question
+        from rag.service.analysis.analysis_service import analyze_question
 
         metadata = UserSearchMetadata(party_type="자동차", location="교차로 사고")
         fake_document = Document(page_content="context")
         fake_llm = MagicMock()
-        fake_llm.invoke.return_value = MagicMock(content="answer")
+        fake_llm.invoke.return_value = MagicMock(
+            content='{"fault_ratio_a":70,"fault_ratio_b":30,"response":"answer"}'
+        )
 
         with (
-            patch("rag.service.analysis_service.get_retrieval_components", return_value="components"),
-            patch("rag.service.analysis_service.run_retrieval_pipeline", return_value=[fake_document]) as pipeline_mock,
-            patch("rag.service.analysis_service.ChatOpenAI", return_value=fake_llm),
+            patch("rag.service.analysis.analysis_service.get_retrieval_components", return_value="components"),
+            patch("rag.service.analysis.analysis_service.run_retrieval_pipeline", return_value=[fake_document]) as pipeline_mock,
+            patch("rag.service.analysis.analysis_service.ChatOpenAI", return_value=fake_llm),
         ):
             answer, contexts = analyze_question("query", search_metadata=metadata)
 
@@ -652,16 +742,18 @@ class BasicRagTest(unittest.TestCase):
         )
 
     def test_analyze_question_uses_loader_and_embedding_strategy_for_retrieval_components(self):
-        from rag.service.analysis_service import analyze_question
+        from rag.service.analysis.analysis_service import analyze_question
 
         fake_document = Document(page_content="context")
         fake_llm = MagicMock()
-        fake_llm.invoke.return_value = MagicMock(content="answer")
+        fake_llm.invoke.return_value = MagicMock(
+            content='{"fault_ratio_a":70,"fault_ratio_b":30,"response":"answer"}'
+        )
 
         with (
-            patch("rag.service.analysis_service.get_retrieval_components", return_value="components") as components_mock,
-            patch("rag.service.analysis_service.run_retrieval_pipeline", return_value=[fake_document]),
-            patch("rag.service.analysis_service.ChatOpenAI", return_value=fake_llm),
+            patch("rag.service.analysis.analysis_service.get_retrieval_components", return_value="components") as components_mock,
+            patch("rag.service.analysis.analysis_service.run_retrieval_pipeline", return_value=[fake_document]),
+            patch("rag.service.analysis.analysis_service.ChatOpenAI", return_value=fake_llm),
         ):
             answer, contexts = analyze_question(
                 "query",
@@ -672,6 +764,39 @@ class BasicRagTest(unittest.TestCase):
         self.assertEqual(answer, "answer")
         self.assertEqual(contexts, ["context"])
         components_mock.assert_called_once_with("llamaparser", "google")
+
+    def test_analyze_question_passes_trace_context_to_langchain_runs(self):
+        from rag.service.analysis.analysis_service import analyze_question
+
+        fake_document = Document(page_content="context")
+        fake_llm = MagicMock()
+        fake_llm.invoke.return_value = MagicMock(
+            content='{"fault_ratio_a":70,"fault_ratio_b":30,"response":"answer"}'
+        )
+        trace_context = TraceContext(
+            thread_id="session-1",
+            session_id="session-1",
+            user_id="local",
+            tags=("mdm", "pdfplumber", "bge"),
+            metadata={"loader_strategy": "pdfplumber", "embedding_provider": "bge"},
+        )
+
+        with (
+            patch("rag.service.analysis.analysis_service.get_retrieval_components", return_value="components"),
+            patch("rag.service.analysis.analysis_service.run_retrieval_pipeline", return_value=[fake_document]) as pipeline_mock,
+            patch("rag.service.analysis.analysis_service.ChatOpenAI", return_value=fake_llm),
+        ):
+            answer, contexts = analyze_question("query", trace_context=trace_context)
+
+        self.assertEqual(answer, "answer")
+        self.assertEqual(contexts, ["context"])
+        self.assertIs(pipeline_mock.call_args.kwargs["trace_context"], trace_context)
+        langchain_config = fake_llm.invoke.call_args.kwargs["config"]
+        self.assertEqual(langchain_config["run_name"], "mdm.answer")
+        self.assertEqual(langchain_config["metadata"]["thread_id"], "session-1")
+        self.assertEqual(langchain_config["metadata"]["session_id"], "session-1")
+        self.assertEqual(langchain_config["metadata"]["user_id"], "local")
+        self.assertEqual(langchain_config["tags"], ["mdm", "pdfplumber", "bge"])
 
 
 if __name__ == "__main__":

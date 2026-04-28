@@ -8,6 +8,7 @@ from typing import Any
 from langchain_core.documents import Document
 
 from rag.pipeline.reranker.strategies.common import build_scored_document
+from rag.service.tracing import TraceContext
 
 
 @dataclass(frozen=True)
@@ -25,6 +26,7 @@ def rerank_with_cohere(
     documents: list[Document],
     k: int,
     strategy_config: CohereRerankerConfig | None = None,
+    trace_context: TraceContext | None = None,
 ) -> list[Document]:
     """Cohere Rerank로 문서를 재정렬한 뒤 상위 k개를 반환합니다."""
     if not documents:
@@ -37,6 +39,7 @@ def rerank_with_cohere(
             "cohere 리랭커를 사용하려면 `langchain-cohere` 패키지가 설치되어 있어야 합니다."
         ) from error
 
+    del trace_context
     config = strategy_config or CohereRerankerConfig()
     reranker_kwargs: dict[str, Any] = {
         "model": config.model,

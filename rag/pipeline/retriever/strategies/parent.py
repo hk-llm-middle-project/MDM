@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from langchain_core.documents import Document
 
 from rag.pipeline.retriever.components import RetrievalComponents, get_or_create_parent_retriever
+from rag.service.tracing import TraceContext
 
 
 @dataclass(frozen=True)
@@ -26,6 +27,7 @@ def retrieve_with_parent_documents(
     k: int,
     filters: dict[str, object] | None = None,
     strategy_config: ParentDocumentRetrieverConfig | None = None,
+    trace_context: TraceContext | None = None,
 ) -> list[Document]:
     """메모리 기반 자식 인덱스를 이용해 부모 문맥까지 확장하여 검색합니다."""
     config = strategy_config or ParentDocumentRetrieverConfig()
@@ -35,7 +37,8 @@ def retrieve_with_parent_documents(
 
     retriever = get_or_create_parent_retriever(components, config, k)
     retriever.search_kwargs = {"k": k}
-    results = list(retriever.invoke(query))
+    config_dict = trace_context.langchain_config("mdm.retrieve.parent") if trace_context else None
+    results = list(retriever.invoke(query, config=config_dict) if config_dict else retriever.invoke(query))
     if not filters:
         return results[:k]
 
