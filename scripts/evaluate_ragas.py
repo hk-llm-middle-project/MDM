@@ -32,7 +32,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from config import BASE_DIR, EMBEDDING_MODEL, LLM_MODEL
-from rag.service.app_service import answer_question_without_intake
+from rag.service.conversation.app_service import answer_question_without_intake
 
 
 DEFAULT_TESTSET_PATH = BASE_DIR / "data" / "testsets" / "accident_ragas_eval_dataset_ver_2.jsonl"

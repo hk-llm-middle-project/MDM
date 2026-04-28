@@ -2,7 +2,7 @@ import unittest
 
 from langchain_core.messages import AIMessage, HumanMessage
 
-from rag.service.prompt import CHAT_HISTORY_LIMIT, build_prompt, to_langchain_messages
+from rag.service.analysis.prompt import CHAT_HISTORY_LIMIT, build_prompt, to_langchain_messages
 from rag.service.session.schema import ChatMessage
 
 

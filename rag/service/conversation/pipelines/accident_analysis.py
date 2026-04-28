@@ -1,36 +1,26 @@
-"""RAG 앱의 서비스 흐름을 조율합니다."""
+"""사고 분석 파이프라인: intake, follow-up, RAG 답변을 처리합니다."""
 
-from dataclasses import dataclass, field
+from collections.abc import Callable, Sequence
 
 from config import DEFAULT_LOADER_STRATEGY
 from rag.pipeline.retrieval import RetrievalPipelineConfig
-from rag.service.analysis_service import analyze_question
-from rag.service.intake.intake_service import (
-    build_default_follow_up_questions,
-    evaluate_input_sufficiency,
-)
-from rag.service.intake.schema import IntakeState, UserSearchMetadata
+from rag.service.conversation.schema import TurnResultType
+from rag.service.intake.intake_service import build_default_follow_up_questions
+from rag.service.intake.schema import IntakeDecision, IntakeState, UserSearchMetadata
 from rag.service.session.schema import ChatMessage
 
 
 MAX_FOLLOW_UP_ATTEMPTS = 2
 
-
-@dataclass(frozen=True)
-class AnswerResult:
-    """사용자 입력 처리 결과와 갱신된 intake 상태입니다."""
-
-    answer: str
-    contexts: list[str] = field(default_factory=list)
-    needs_more_input: bool = False
-    intake_state: IntakeState = field(default_factory=IntakeState)
+IntakeEvaluator = Callable[..., IntakeDecision]
+Analyzer = Callable[..., tuple[str, list[str]]]
 
 
 def merge_search_metadata(
     previous: UserSearchMetadata,
     current: UserSearchMetadata,
 ) -> UserSearchMetadata:
-    """이전 intake metadata에 이번 입력에서 새로 추출한 값을 병합합니다."""
+    """이전 intake metadata와 이번 입력에서 새로 추출한 값을 병합합니다."""
     return UserSearchMetadata(
         party_type=current.party_type or previous.party_type,
         location=current.location or previous.location,
@@ -50,27 +40,52 @@ def get_missing_metadata_fields(metadata: UserSearchMetadata) -> list[str]:
 def build_follow_up_answer(follow_up_questions: list[str]) -> str:
     """검색에 필요한 정보가 부족할 때 사용자에게 보여줄 답변을 만듭니다."""
     if not follow_up_questions:
-        return "검색에 필요한 사고 정보가 부족합니다. 사고 상대와 사고 상황을 조금 더 알려주세요."
+        return "검색에 필요한 사고 정보가 부족합니다. 사고 대상과 사고 상황을 조금 더 알려주세요."
 
     questions = "\n".join(f"- {question}" for question in follow_up_questions)
     return f"검색에 필요한 사고 정보가 조금 더 필요합니다.\n\n{questions}"
 
 
 def build_fallback_notice(answer: str) -> str:
-    """추가 질문 한도를 넘긴 뒤 best-effort 검색 결과임을 알립니다."""
+    """추가 질문 시도를 넘긴 뒤 best-effort 검색 결과임을 알립니다."""
     return f"입력 정보가 충분하지 않아 정확도가 낮을 수 있습니다. 현재 설명만으로 가능한 범위에서 찾아봤습니다.\n\n{answer}"
 
 
-def answer_question_with_intake(
+def reset_intake_progress(search_metadata: UserSearchMetadata) -> IntakeState:
+    """완료된 사고 metadata는 남기고 진행 중인 follow-up 상태만 초기화합니다."""
+    return IntakeState(search_metadata=search_metadata)
+
+
+def evaluate_with_optional_context(
+    evaluator: IntakeEvaluator,
     question: str,
+    chat_history: Sequence[ChatMessage] | None,
+    previous_state: IntakeState,
+) -> IntakeDecision:
+    """기존 테스트 호환을 위해 문맥이 없으면 예전 호출 형태를 유지합니다."""
+    if chat_history is None and previous_state == IntakeState():
+        return evaluator(question)
+    return evaluator(question, chat_history=chat_history, previous_state=previous_state)
+
+
+def answer_accident_analysis(
+    question: str,
+    *,
     pipeline_config: RetrievalPipelineConfig | None = None,
     intake_state: IntakeState | None = None,
     loader_strategy: str = DEFAULT_LOADER_STRATEGY,
     chat_history: list[ChatMessage] | None = None,
-) -> AnswerResult:
-    """intake 결과에 따라 추가 질문 또는 RAG 답변을 반환합니다."""
+    intake_evaluator: IntakeEvaluator,
+    analyzer: Analyzer,
+) -> tuple[str, list[str], bool, IntakeState, TurnResultType]:
+    """사고 분석 흐름을 처리하고 답변, context, 상태, 결과 타입을 반환합니다."""
     current_state = intake_state or IntakeState()
-    intake_decision = evaluate_input_sufficiency(question)
+    intake_decision = evaluate_with_optional_context(
+        intake_evaluator,
+        question,
+        chat_history,
+        current_state,
+    )
     merged_metadata = merge_search_metadata(
         current_state.search_metadata,
         intake_decision.search_metadata,
@@ -89,14 +104,14 @@ def answer_question_with_intake(
                 last_missing_fields=missing_field_names,
                 last_follow_up_questions=follow_up_questions,
             )
-            return AnswerResult(
-                answer=build_follow_up_answer(follow_up_questions),
-                contexts=[],
-                needs_more_input=True,
-                intake_state=next_state,
+            return (
+                build_follow_up_answer(follow_up_questions),
+                [],
+                True,
+                next_state,
+                TurnResultType.ACCIDENT_FOLLOW_UP,
             )
 
-        # 질문 한도를 넘기면 지금까지 누적된 metadata만 사용해 가능한 범위에서 검색합니다.
         analysis_kwargs = {
             "search_metadata": merged_metadata,
             "pipeline_config": pipeline_config,
@@ -104,15 +119,21 @@ def answer_question_with_intake(
         }
         if chat_history is not None:
             analysis_kwargs["chat_history"] = chat_history
-        answer, contexts = analyze_question(
+        answer, contexts = analyzer(
             intake_decision.normalized_description or question,
             **analysis_kwargs,
         )
-        return AnswerResult(
-            answer=build_fallback_notice(answer),
-            contexts=contexts,
-            needs_more_input=False,
-            intake_state=IntakeState(),
+        next_state = (
+            reset_intake_progress(merged_metadata)
+            if chat_history is not None
+            else IntakeState()
+        )
+        return (
+            build_fallback_notice(answer),
+            contexts,
+            False,
+            next_state,
+            TurnResultType.ACCIDENT_RAG,
         )
 
     analysis_kwargs = {
@@ -122,44 +143,13 @@ def answer_question_with_intake(
     }
     if chat_history is not None:
         analysis_kwargs["chat_history"] = chat_history
-    answer, contexts = analyze_question(
+    answer, contexts = analyzer(
         intake_decision.normalized_description,
         **analysis_kwargs,
     )
-    return AnswerResult(
-        answer=answer,
-        contexts=contexts,
-        needs_more_input=False,
-        intake_state=IntakeState(),
+    next_state = (
+        reset_intake_progress(merged_metadata)
+        if chat_history is not None
+        else IntakeState()
     )
-
-
-def answer_question(
-    question: str,
-    pipeline_config: RetrievalPipelineConfig | None = None,
-    loader_strategy: str = DEFAULT_LOADER_STRATEGY,
-    chat_history: list[ChatMessage] | None = None,
-) -> tuple[str, list[str]]:
-    """사용자 질문에 대한 RAG 답변을 반환합니다."""
-    result = answer_question_with_intake(
-        question,
-        pipeline_config=pipeline_config,
-        loader_strategy=loader_strategy,
-        chat_history=chat_history,
-    )
-    return result.answer, result.contexts
-
-
-def answer_question_without_intake(
-    question: str,
-    pipeline_config: RetrievalPipelineConfig | None = None,
-    chat_history: list[ChatMessage] | None = None,
-) -> tuple[str, list[str]]:
-    """intake 없이 바로 RAG 답변을 반환합니다."""
-    analysis_kwargs = {
-        "search_metadata": None,
-        "pipeline_config": pipeline_config,
-    }
-    if chat_history is not None:
-        analysis_kwargs["chat_history"] = chat_history
-    return analyze_question(question, **analysis_kwargs)
+    return answer, contexts, False, next_state, TurnResultType.ACCIDENT_RAG

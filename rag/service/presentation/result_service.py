@@ -1,4 +1,4 @@
-"""분석 결과를 화면이나 평가에서 쓰기 좋은 형태로 정리합니다."""
+"""분석 결과를 화면이나 평가에서 읽기 좋은 형태로 정리합니다."""
 
 
 DEFAULT_CONTEXT_CHAR_LIMIT = 700
@@ -24,7 +24,7 @@ def format_context_preview(
     *,
     max_context_chars: int = DEFAULT_CONTEXT_CHAR_LIMIT,
 ) -> str:
-    """테스트와 디버깅 화면에서 보여줄 검색 문서 조각 미리보기를 만듭니다."""
+    """테스트와 디버그 화면에서 보여줄 검색 문서 조각 미리보기를 만듭니다."""
     if not contexts:
         return ""
 

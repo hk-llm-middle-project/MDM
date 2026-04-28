@@ -1,15 +1,15 @@
-"""사고 질의 분석과 RAG 답변 생성을 담당합니다."""
+"""사고 질의를 분석하고 RAG 답변을 생성합니다."""
 
 from langchain_openai import ChatOpenAI
 
 from config import DEFAULT_LOADER_STRATEGY, LLM_MODEL
 from rag.pipeline.retrieval import RetrievalPipelineConfig, run_retrieval_pipeline
-from rag.service.answer_schema import parse_structured_answer
+from rag.service.analysis.answer_schema import parse_structured_answer
+from rag.service.analysis.prompt import build_prompt
 from rag.service.intake.filter_service import build_metadata_filters
 from rag.service.intake.schema import UserSearchMetadata
-from rag.service.prompt import build_prompt
 from rag.service.session.schema import ChatMessage
-from rag.service.vectorstore_service import get_retrieval_components
+from rag.service.vectorstore.vectorstore_service import get_retrieval_components
 
 
 def analyze_question(

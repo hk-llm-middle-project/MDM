@@ -4,8 +4,8 @@ from dotenv import load_dotenv
 import streamlit as st
 
 from config import DEFAULT_LOADER_STRATEGY
-from rag.service.app_service import answer_question_with_intake
-from rag.service.result_service import format_context_preview
+from rag.service.conversation.app_service import answer_question_with_intake
+from rag.service.presentation.result_service import format_context_preview
 from rag.service.session import ConversationStore, get_conversation_store
 
 

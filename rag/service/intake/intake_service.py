@@ -4,14 +4,16 @@ from __future__ import annotations
 
 import json
 import re
+from collections.abc import Sequence
 from typing import Any
 
 from langchain_openai import ChatOpenAI
 
 from config import LLM_MODEL
 from rag.service.intake.prompts import build_intake_prompt
-from rag.service.intake.schema import IntakeDecision, MissingField, UserSearchMetadata
+from rag.service.intake.schema import IntakeDecision, IntakeState, MissingField, UserSearchMetadata
 from rag.service.intake.values import LOCATIONS, PARTY_TYPES
+from rag.service.session.schema import ChatMessage
 
 
 CONFIDENCE_THRESHOLD = 0.75
@@ -106,7 +108,12 @@ def normalize_metadata_response(data: dict[str, Any]) -> IntakeDecision:
     )
 
 
-def evaluate_input_sufficiency(user_input: str, llm: Any | None = None) -> IntakeDecision:
+def evaluate_input_sufficiency(
+    user_input: str,
+    llm: Any | None = None,
+    chat_history: Sequence[ChatMessage] | None = None,
+    previous_state: IntakeState | None = None,
+) -> IntakeDecision:
     """LLM으로 party_type과 location을 추출해 검색 가능 여부를 판단합니다."""
     normalized_description = user_input.strip()
     if not normalized_description:
@@ -123,7 +130,13 @@ def evaluate_input_sufficiency(user_input: str, llm: Any | None = None) -> Intak
         )
 
     intake_llm = llm or ChatOpenAI(model=LLM_MODEL, temperature=0)
-    response = intake_llm.invoke(build_intake_prompt(normalized_description))
+    response = intake_llm.invoke(
+        build_intake_prompt(
+            normalized_description,
+            chat_history=chat_history,
+            previous_state=previous_state,
+        )
+    )
     content = getattr(response, "content", response)
     decision = normalize_metadata_response(extract_json_object(str(content)))
     return IntakeDecision(

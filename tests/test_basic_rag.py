@@ -17,15 +17,15 @@ from rag.pipeline.reranker import (
 )
 from rag.pipeline.retriever import EnsembleRetrieverConfig
 from rag.pipeline.retriever import RETRIEVAL_STRATEGIES, retrieve
-from rag.service.app_service import answer_question, answer_question_with_intake
-from rag.service.app_service import answer_question_without_intake
+from rag.service.conversation.app_service import answer_question, answer_question_with_intake
+from rag.service.conversation.app_service import answer_question_without_intake
 from rag.service.intake.filter_service import build_metadata_filters
 from rag.service.intake.intake_service import (
     evaluate_input_sufficiency,
     normalize_metadata_response,
 )
 from rag.service.intake.schema import IntakeDecision, IntakeState, UserSearchMetadata
-from rag.service.result_service import format_context_preview, truncate_context
+from rag.service.presentation.result_service import format_context_preview, truncate_context
 
 
 class BasicRagTest(unittest.TestCase):
@@ -236,16 +236,16 @@ class BasicRagTest(unittest.TestCase):
         self.assertEqual([len(batch) for batch in vectorstore.batches], [2, 2, 1])
 
     def test_vectorstore_service_uses_loader_specific_directory(self):
-        from rag.service import vectorstore_service
+        from rag.service.vectorstore import vectorstore_service as vectorstore_service
 
         vectorstore_service.get_vectorstore.cache_clear()
 
         with (
-            patch("rag.service.vectorstore_service.get_vectorstore_dir", return_value=Path("vectorstore/llamaparser")) as dir_mock,
-            patch("rag.service.vectorstore_service.vectorstore_exists", return_value=False),
-            patch("rag.service.vectorstore_service.load_pdf", return_value=[Document(page_content="doc")]) as load_mock,
-            patch("rag.service.vectorstore_service.split_documents", return_value=[Document(page_content="chunk")]),
-            patch("rag.service.vectorstore_service.build_vectorstore", return_value="vectorstore") as build_mock,
+            patch("rag.service.vectorstore.service.get_vectorstore_dir", return_value=Path("vectorstore/llamaparser")) as dir_mock,
+            patch("rag.service.vectorstore.service.vectorstore_exists", return_value=False),
+            patch("rag.service.vectorstore.service.load_pdf", return_value=[Document(page_content="doc")]) as load_mock,
+            patch("rag.service.vectorstore.service.split_documents", return_value=[Document(page_content="chunk")]),
+            patch("rag.service.vectorstore.service.build_vectorstore", return_value="vectorstore") as build_mock,
         ):
             result = vectorstore_service.get_vectorstore("llamaparser")
 
@@ -352,14 +352,14 @@ class BasicRagTest(unittest.TestCase):
     def test_answer_question_returns_follow_up_without_analysis_when_intake_is_insufficient(self):
         with (
             patch(
-                "rag.service.app_service.evaluate_input_sufficiency",
+                "rag.service.conversation.app_service.evaluate_input_sufficiency",
                 return_value=IntakeDecision(
                     is_sufficient=False,
                     normalized_description="사고났어요",
                     follow_up_questions=["사고 상대는 무엇인가요?"],
                 ),
             ) as intake_mock,
-            patch("rag.service.app_service.analyze_question") as analyze_mock,
+            patch("rag.service.conversation.app_service.analyze_question") as analyze_mock,
         ):
             answer, contexts = answer_question("사고났어요")
 
@@ -371,14 +371,14 @@ class BasicRagTest(unittest.TestCase):
     def test_answer_question_uses_llm_follow_up_questions_first(self):
         with (
             patch(
-                "rag.service.app_service.evaluate_input_sufficiency",
+                "rag.service.conversation.app_service.evaluate_input_sufficiency",
                 return_value=IntakeDecision(
                     is_sufficient=False,
                     normalized_description="사고났어요",
                     follow_up_questions=["LLM이 만든 추가 질문입니다."],
                 ),
             ),
-            patch("rag.service.app_service.analyze_question") as analyze_mock,
+            patch("rag.service.conversation.app_service.analyze_question") as analyze_mock,
         ):
             answer, contexts = answer_question("사고났어요")
 
@@ -390,14 +390,14 @@ class BasicRagTest(unittest.TestCase):
     def test_answer_question_with_intake_allows_two_follow_up_attempts(self):
         with (
             patch(
-                "rag.service.app_service.evaluate_input_sufficiency",
+                "rag.service.conversation.app_service.evaluate_input_sufficiency",
                 return_value=IntakeDecision(
                     is_sufficient=False,
                     normalized_description="애매한 입력",
                     follow_up_questions=["사고 상대는 무엇인가요?"],
                 ),
             ),
-            patch("rag.service.app_service.analyze_question") as analyze_mock,
+            patch("rag.service.conversation.app_service.analyze_question") as analyze_mock,
         ):
             result = answer_question_with_intake(
                 "애매한 입력",
@@ -414,7 +414,7 @@ class BasicRagTest(unittest.TestCase):
         metadata = UserSearchMetadata()
         with (
             patch(
-                "rag.service.app_service.evaluate_input_sufficiency",
+                "rag.service.conversation.app_service.evaluate_input_sufficiency",
                 return_value=IntakeDecision(
                     is_sufficient=False,
                     normalized_description="계속 애매한 입력",
@@ -422,7 +422,7 @@ class BasicRagTest(unittest.TestCase):
                     follow_up_questions=["사고 상대는 무엇인가요?"],
                 ),
             ),
-            patch("rag.service.app_service.analyze_question", return_value=("fallback answer", ["context"])) as analyze_mock,
+            patch("rag.service.conversation.app_service.analyze_question", return_value=("fallback answer", ["context"])) as analyze_mock,
         ):
             result = answer_question_with_intake(
                 "계속 애매한 입력",
@@ -450,14 +450,14 @@ class BasicRagTest(unittest.TestCase):
         )
         with (
             patch(
-                "rag.service.app_service.evaluate_input_sufficiency",
+                "rag.service.conversation.app_service.evaluate_input_sufficiency",
                 return_value=IntakeDecision(
                     is_sufficient=False,
                     normalized_description="교차로였어요",
                     search_metadata=UserSearchMetadata(location="교차로 사고"),
                 ),
             ),
-            patch("rag.service.app_service.analyze_question", return_value=("answer", ["context"])) as analyze_mock,
+            patch("rag.service.conversation.app_service.analyze_question", return_value=("answer", ["context"])) as analyze_mock,
         ):
             result = answer_question_with_intake(
                 "교차로였어요",
@@ -478,14 +478,14 @@ class BasicRagTest(unittest.TestCase):
         metadata = UserSearchMetadata(party_type="자동차", location="교차로 사고")
         with (
             patch(
-                "rag.service.app_service.evaluate_input_sufficiency",
+                "rag.service.conversation.app_service.evaluate_input_sufficiency",
                 return_value=IntakeDecision(
                     is_sufficient=True,
                     normalized_description="정규화된 설명",
                     search_metadata=metadata,
                 ),
             ),
-            patch("rag.service.app_service.analyze_question", return_value=("answer", ["context"])) as analyze_mock,
+            patch("rag.service.conversation.app_service.analyze_question", return_value=("answer", ["context"])) as analyze_mock,
         ):
             answer, contexts = answer_question("원문 입력")
 
@@ -502,14 +502,14 @@ class BasicRagTest(unittest.TestCase):
         metadata = UserSearchMetadata(party_type="자동차", location="교차로 사고")
         with (
             patch(
-                "rag.service.app_service.evaluate_input_sufficiency",
+                "rag.service.conversation.app_service.evaluate_input_sufficiency",
                 return_value=IntakeDecision(
                     is_sufficient=True,
                     normalized_description="정규화된 설명",
                     search_metadata=metadata,
                 ),
             ),
-            patch("rag.service.app_service.analyze_question", return_value=("answer", ["context"])) as analyze_mock,
+            patch("rag.service.conversation.app_service.analyze_question", return_value=("answer", ["context"])) as analyze_mock,
         ):
             answer, contexts = answer_question("원문 입력", loader_strategy="llamaparser")
 
@@ -524,8 +524,8 @@ class BasicRagTest(unittest.TestCase):
 
     def test_answer_question_without_intake_bypasses_intake(self):
         with (
-            patch("rag.service.app_service.evaluate_input_sufficiency") as intake_mock,
-            patch("rag.service.app_service.analyze_question", return_value=("answer", ["context"])) as analyze_mock,
+            patch("rag.service.conversation.app_service.evaluate_input_sufficiency") as intake_mock,
+            patch("rag.service.conversation.app_service.analyze_question", return_value=("answer", ["context"])) as analyze_mock,
         ):
             answer, contexts = answer_question_without_intake("평가용 질문")
 
@@ -539,7 +539,7 @@ class BasicRagTest(unittest.TestCase):
         )
 
     def test_analyze_question_passes_metadata_filters_to_retrieval_pipeline(self):
-        from rag.service.analysis_service import analyze_question
+        from rag.service.analysis.analysis_service import analyze_question
 
         metadata = UserSearchMetadata(party_type="자동차", location="교차로 사고")
         fake_document = Document(page_content="context")
@@ -549,9 +549,9 @@ class BasicRagTest(unittest.TestCase):
         )
 
         with (
-            patch("rag.service.analysis_service.get_retrieval_components", return_value="components"),
-            patch("rag.service.analysis_service.run_retrieval_pipeline", return_value=[fake_document]) as pipeline_mock,
-            patch("rag.service.analysis_service.ChatOpenAI", return_value=fake_llm),
+            patch("rag.service.analysis.analysis_service.get_retrieval_components", return_value="components"),
+            patch("rag.service.analysis.analysis_service.run_retrieval_pipeline", return_value=[fake_document]) as pipeline_mock,
+            patch("rag.service.analysis.analysis_service.ChatOpenAI", return_value=fake_llm),
         ):
             answer, contexts = analyze_question("query", search_metadata=metadata)
 
@@ -565,16 +565,16 @@ class BasicRagTest(unittest.TestCase):
         )
 
     def test_analyze_question_uses_loader_strategy_for_retrieval_components(self):
-        from rag.service.analysis_service import analyze_question
+        from rag.service.analysis.analysis_service import analyze_question
 
         fake_document = Document(page_content="context")
         fake_llm = MagicMock()
         fake_llm.invoke.return_value = MagicMock(content="answer")
 
         with (
-            patch("rag.service.analysis_service.get_retrieval_components", return_value="components") as components_mock,
-            patch("rag.service.analysis_service.run_retrieval_pipeline", return_value=[fake_document]),
-            patch("rag.service.analysis_service.ChatOpenAI", return_value=fake_llm),
+            patch("rag.service.analysis.analysis_service.get_retrieval_components", return_value="components") as components_mock,
+            patch("rag.service.analysis.analysis_service.run_retrieval_pipeline", return_value=[fake_document]),
+            patch("rag.service.analysis.analysis_service.ChatOpenAI", return_value=fake_llm),
         ):
             answer, contexts = analyze_question("query", loader_strategy="llamaparser")
 
