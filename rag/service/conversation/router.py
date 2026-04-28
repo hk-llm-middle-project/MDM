@@ -14,6 +14,7 @@ from rag.service.conversation.prompts import build_route_prompt
 from rag.service.conversation.schema import RouteDecision, RouteType
 from rag.service.intake.schema import IntakeState
 from rag.service.session.schema import ChatMessage
+from rag.service.tracing import TraceContext
 
 
 ROUTER_CONFIDENCE_THRESHOLD = 0.6
@@ -74,11 +75,14 @@ def route_conversation_turn(
     chat_history: Sequence[ChatMessage] | None,
     intake_state: IntakeState | None = None,
     llm: Any | None = None,
+    trace_context: TraceContext | None = None,
 ) -> RouteDecision:
     """현재 입력을 일반 대화 또는 사고 분석 흐름으로 분류합니다."""
     router_llm = llm or ChatOpenAI(model=LLM_MODEL, temperature=0)
     try:
-        response = router_llm.invoke(build_route_prompt(question, chat_history, intake_state))
+        prompt = build_route_prompt(question, chat_history, intake_state)
+        config = trace_context.langchain_config("mdm.route") if trace_context else None
+        response = router_llm.invoke(prompt, config=config) if config else router_llm.invoke(prompt)
         content = getattr(response, "content", response)
         return parse_route_decision(extract_json_object(str(content)))
     except Exception as error:

@@ -16,6 +16,7 @@ from rag.pipeline.retriever.strategies import (
     retrieve_with_self_query,
     retrieve_with_vectorstore,
 )
+from rag.service.tracing import TraceContext
 
 
 RETRIEVAL_STRATEGIES = {
@@ -43,6 +44,7 @@ def retrieve(
     strategy: str = "vectorstore",
     filters: dict[str, object] | None = None,
     strategy_config: StrategyConfig | None = None,
+    trace_context: TraceContext | None = None,
 ) -> list[Document]:
     """선택한 검색 전략으로 문서 청크를 조회합니다."""
     try:
@@ -51,4 +53,6 @@ def retrieve(
         available = ", ".join(sorted(RETRIEVAL_STRATEGIES))
         raise ValueError(f"알 수 없는 검색 전략입니다: {strategy}. 사용 가능 전략: {available}") from error
 
-    return retrieval_strategy(components, query, k, filters, strategy_config)
+    if trace_context is None:
+        return retrieval_strategy(components, query, k, filters, strategy_config)
+    return retrieval_strategy(components, query, k, filters, strategy_config, trace_context)

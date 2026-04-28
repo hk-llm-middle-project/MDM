@@ -11,6 +11,7 @@ from langchain_openai import ChatOpenAI
 from config import LLM_MODEL
 from rag.pipeline.reranker.prompts import build_llm_score_reranker_prompt
 from rag.pipeline.reranker.strategies.common import build_scored_document, parse_json_response
+from rag.service.tracing import TraceContext
 
 
 @dataclass(frozen=True)
@@ -27,6 +28,7 @@ def rerank_with_llm_score(
     documents: list[Document],
     k: int,
     strategy_config: LLMScoreRerankerConfig | None = None,
+    trace_context: TraceContext | None = None,
 ) -> list[Document]:
     """LLM 점수화를 통해 문서를 재정렬한 뒤 상위 k개를 반환합니다."""
     if not documents:
@@ -35,7 +37,8 @@ def rerank_with_llm_score(
     config = strategy_config or LLMScoreRerankerConfig()
     llm = config.llm or ChatOpenAI(model=config.model, temperature=config.temperature)
     prompt = build_llm_score_reranker_prompt(query, documents)
-    response = llm.invoke(prompt)
+    config_dict = trace_context.langchain_config("mdm.rerank.llm_score") if trace_context else None
+    response = llm.invoke(prompt, config=config_dict) if config_dict else llm.invoke(prompt)
     content = getattr(response, "content", response)
     parsed = parse_json_response(str(content))
 

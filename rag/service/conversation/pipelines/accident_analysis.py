@@ -8,6 +8,7 @@ from rag.service.conversation.schema import TurnResultType
 from rag.service.intake.intake_service import build_default_follow_up_questions
 from rag.service.intake.schema import IntakeDecision, IntakeState, UserSearchMetadata
 from rag.service.session.schema import ChatMessage
+from rag.service.tracing import TraceContext
 
 
 MAX_FOLLOW_UP_ATTEMPTS = 2
@@ -61,11 +62,19 @@ def evaluate_with_optional_context(
     question: str,
     chat_history: Sequence[ChatMessage] | None,
     previous_state: IntakeState,
+    trace_context: TraceContext | None = None,
 ) -> IntakeDecision:
     """기존 테스트 호환을 위해 문맥이 없으면 예전 호출 형태를 유지합니다."""
     if chat_history is None and previous_state == IntakeState():
+        if trace_context is not None:
+            return evaluator(question, trace_context=trace_context)
         return evaluator(question)
-    return evaluator(question, chat_history=chat_history, previous_state=previous_state)
+    return evaluator(
+        question,
+        chat_history=chat_history,
+        previous_state=previous_state,
+        trace_context=trace_context,
+    )
 
 
 def answer_accident_analysis(
@@ -76,6 +85,7 @@ def answer_accident_analysis(
     loader_strategy: str = DEFAULT_LOADER_STRATEGY,
     embedding_provider: str = DEFAULT_EMBEDDING_PROVIDER,
     chat_history: list[ChatMessage] | None = None,
+    trace_context: TraceContext | None = None,
     intake_evaluator: IntakeEvaluator,
     analyzer: Analyzer,
 ) -> tuple[str, list[str], bool, IntakeState, TurnResultType]:
@@ -86,6 +96,7 @@ def answer_accident_analysis(
         question,
         chat_history,
         current_state,
+        trace_context,
     )
     merged_metadata = merge_search_metadata(
         current_state.search_metadata,
@@ -121,6 +132,8 @@ def answer_accident_analysis(
         }
         if chat_history is not None:
             analysis_kwargs["chat_history"] = chat_history
+        if trace_context is not None:
+            analysis_kwargs["trace_context"] = trace_context
         answer, contexts = analyzer(
             intake_decision.normalized_description or question,
             **analysis_kwargs,
@@ -146,6 +159,8 @@ def answer_accident_analysis(
     }
     if chat_history is not None:
         analysis_kwargs["chat_history"] = chat_history
+    if trace_context is not None:
+        analysis_kwargs["trace_context"] = trace_context
     answer, contexts = analyzer(
         intake_decision.normalized_description,
         **analysis_kwargs,

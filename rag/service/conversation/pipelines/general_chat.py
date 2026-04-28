@@ -8,6 +8,7 @@ from langchain_openai import ChatOpenAI
 from config import LLM_MODEL
 from rag.service.analysis.prompt import to_langchain_messages
 from rag.service.session.schema import ChatMessage
+from rag.service.tracing import TraceContext
 
 
 def build_general_chat_prompt(
@@ -46,8 +47,11 @@ def answer_general_chat(
     question: str,
     chat_history: Sequence[ChatMessage] | None,
     llm=None,
+    trace_context: TraceContext | None = None,
 ) -> str:
     """일반 대화 파이프의 답변을 생성합니다."""
     general_llm = llm or ChatOpenAI(model=LLM_MODEL, temperature=0)
-    response = general_llm.invoke(build_general_chat_prompt(question, chat_history))
+    prompt = build_general_chat_prompt(question, chat_history)
+    config = trace_context.langchain_config("mdm.general_chat") if trace_context else None
+    response = general_llm.invoke(prompt, config=config) if config else general_llm.invoke(prompt)
     return str(getattr(response, "content", response)).strip()

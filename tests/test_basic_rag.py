@@ -29,6 +29,7 @@ from rag.service.intake.intake_service import (
 )
 from rag.service.intake.schema import IntakeDecision, IntakeState, UserSearchMetadata
 from rag.service.presentation.result_service import format_context_preview, truncate_context
+from rag.service.tracing import TraceContext
 
 
 class BasicRagTest(unittest.TestCase):
@@ -713,6 +714,39 @@ class BasicRagTest(unittest.TestCase):
         self.assertEqual(answer, "answer")
         self.assertEqual(contexts, ["context"])
         components_mock.assert_called_once_with("llamaparser", "google")
+
+    def test_analyze_question_passes_trace_context_to_langchain_runs(self):
+        from rag.service.analysis.analysis_service import analyze_question
+
+        fake_document = Document(page_content="context")
+        fake_llm = MagicMock()
+        fake_llm.invoke.return_value = MagicMock(
+            content='{"fault_ratio_a":70,"fault_ratio_b":30,"response":"answer"}'
+        )
+        trace_context = TraceContext(
+            thread_id="session-1",
+            session_id="session-1",
+            user_id="local",
+            tags=("mdm", "pdfplumber", "bge"),
+            metadata={"loader_strategy": "pdfplumber", "embedding_provider": "bge"},
+        )
+
+        with (
+            patch("rag.service.analysis.analysis_service.get_retrieval_components", return_value="components"),
+            patch("rag.service.analysis.analysis_service.run_retrieval_pipeline", return_value=[fake_document]) as pipeline_mock,
+            patch("rag.service.analysis.analysis_service.ChatOpenAI", return_value=fake_llm),
+        ):
+            answer, contexts = analyze_question("query", trace_context=trace_context)
+
+        self.assertEqual(answer, "answer")
+        self.assertEqual(contexts, ["context"])
+        self.assertIs(pipeline_mock.call_args.kwargs["trace_context"], trace_context)
+        langchain_config = fake_llm.invoke.call_args.kwargs["config"]
+        self.assertEqual(langchain_config["run_name"], "mdm.answer")
+        self.assertEqual(langchain_config["metadata"]["thread_id"], "session-1")
+        self.assertEqual(langchain_config["metadata"]["session_id"], "session-1")
+        self.assertEqual(langchain_config["metadata"]["user_id"], "local")
+        self.assertEqual(langchain_config["tags"], ["mdm", "pdfplumber", "bge"])
 
 
 if __name__ == "__main__":

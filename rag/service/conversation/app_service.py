@@ -15,6 +15,7 @@ from rag.service.conversation.pipelines.accident_analysis import (
 from rag.service.intake.intake_service import evaluate_input_sufficiency
 from rag.service.intake.schema import IntakeState
 from rag.service.session.schema import ChatMessage
+from rag.service.tracing import TraceContext
 
 
 def answer_question_with_intake(
@@ -24,6 +25,7 @@ def answer_question_with_intake(
     loader_strategy: str = DEFAULT_LOADER_STRATEGY,
     embedding_provider: str = DEFAULT_EMBEDDING_PROVIDER,
     chat_history: list[ChatMessage] | None = None,
+    trace_context: TraceContext | None = None,
 ) -> AnswerResult:
     """intake, 일반 대화, RAG 분석을 조율해 답변을 반환합니다."""
     if chat_history is None:
@@ -34,6 +36,7 @@ def answer_question_with_intake(
             loader_strategy=loader_strategy,
             embedding_provider=embedding_provider,
             chat_history=chat_history,
+            trace_context=trace_context,
             intake_evaluator=evaluate_input_sufficiency,
             analyzer=analyze_question,
         )
@@ -52,6 +55,7 @@ def answer_question_with_intake(
         loader_strategy=loader_strategy,
         embedding_provider=embedding_provider,
         chat_history=chat_history,
+        trace_context=trace_context,
         intake_evaluator=evaluate_input_sufficiency,
         analyzer=analyze_question,
     )
@@ -63,6 +67,7 @@ def answer_question(
     loader_strategy: str = DEFAULT_LOADER_STRATEGY,
     embedding_provider: str = DEFAULT_EMBEDDING_PROVIDER,
     chat_history: list[ChatMessage] | None = None,
+    trace_context: TraceContext | None = None,
 ) -> tuple[str, list[str]]:
     """사용자 질문에 대한 답변과 검색 컨텍스트를 반환합니다."""
     result = answer_question_with_intake(
@@ -71,6 +76,7 @@ def answer_question(
         loader_strategy=loader_strategy,
         embedding_provider=embedding_provider,
         chat_history=chat_history,
+        trace_context=trace_context,
     )
     return result.answer, result.contexts
 
@@ -79,6 +85,7 @@ def answer_question_without_intake(
     question: str,
     pipeline_config: RetrievalPipelineConfig | None = None,
     chat_history: list[ChatMessage] | None = None,
+    trace_context: TraceContext | None = None,
 ) -> tuple[str, list[str]]:
     """intake 없이 바로 RAG 답변을 반환합니다."""
     analysis_kwargs = {
@@ -87,4 +94,6 @@ def answer_question_without_intake(
     }
     if chat_history is not None:
         analysis_kwargs["chat_history"] = chat_history
+    if trace_context is not None:
+        analysis_kwargs["trace_context"] = trace_context
     return analyze_question(question, **analysis_kwargs)

@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from langchain_core.documents import Document
 
 from rag.pipeline.retriever.components import RetrievalComponents
+from rag.service.tracing import TraceContext
 
 
 @dataclass(frozen=True)
@@ -22,6 +23,7 @@ def retrieve_with_vectorstore(
     k: int,
     filters: dict[str, object] | None = None,
     strategy_config: VectorStoreRetrieverConfig | None = None,
+    trace_context: TraceContext | None = None,
 ) -> list[Document]:
     """벡터스토어 retriever 인터페이스로 문서를 조회합니다."""
     config = strategy_config or VectorStoreRetrieverConfig()
@@ -33,4 +35,5 @@ def retrieve_with_vectorstore(
         search_type=config.search_type,
         search_kwargs=search_kwargs,
     )
-    return list(retriever.invoke(query))
+    config_dict = trace_context.langchain_config("mdm.retrieve.vectorstore") if trace_context else None
+    return list(retriever.invoke(query, config=config_dict) if config_dict else retriever.invoke(query))

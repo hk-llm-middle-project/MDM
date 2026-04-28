@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from langchain_core.documents import Document
+from rag.service.tracing import TraceContext
 
 
 @dataclass(frozen=True)
@@ -17,7 +18,8 @@ def rerank_with_none(
     documents: list[Document],
     k: int,
     strategy_config: NoOpRerankerConfig | None = None,
+    trace_context: TraceContext | None = None,
 ) -> list[Document]:
     """입력 순서를 유지한 채 상위 k개만 반환합니다."""
-    del query, strategy_config
+    del query, strategy_config, trace_context
     return list(documents[:k])

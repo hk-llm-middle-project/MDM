@@ -11,6 +11,7 @@ from rag.service.conversation.router import route_conversation_turn
 from rag.service.conversation.schema import RouteType, TurnResultType
 from rag.service.intake.schema import IntakeState
 from rag.service.session.schema import ChatMessage
+from rag.service.tracing import TraceContext
 
 
 @dataclass(frozen=True)
@@ -32,6 +33,7 @@ def answer_conversation_turn(
     loader_strategy: str = DEFAULT_LOADER_STRATEGY,
     embedding_provider: str = DEFAULT_EMBEDDING_PROVIDER,
     chat_history: list[ChatMessage] | None = None,
+    trace_context: TraceContext | None = None,
     intake_evaluator,
     analyzer,
     router_llm: Any | None = None,
@@ -44,11 +46,17 @@ def answer_conversation_turn(
         chat_history,
         current_state,
         llm=router_llm,
+        trace_context=trace_context,
     )
 
     if route.route_type == RouteType.GENERAL_CHAT:
         return AnswerResult(
-            answer=answer_general_chat(question, chat_history, llm=general_chat_llm),
+            answer=answer_general_chat(
+                question,
+                chat_history,
+                llm=general_chat_llm,
+                trace_context=trace_context,
+            ),
             contexts=[],
             needs_more_input=False,
             intake_state=current_state,
@@ -62,6 +70,7 @@ def answer_conversation_turn(
         loader_strategy=loader_strategy,
         embedding_provider=embedding_provider,
         chat_history=chat_history,
+        trace_context=trace_context,
         intake_evaluator=intake_evaluator,
         analyzer=analyzer,
     )

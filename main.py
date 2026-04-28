@@ -8,6 +8,7 @@ from rag.embeddings import EMBEDDING_STRATEGIES
 from rag.service.conversation.app_service import answer_question_with_intake
 from rag.service.presentation.result_service import format_context_preview
 from rag.service.session import ConversationStore, get_conversation_store
+from rag.service.tracing import TraceContext
 
 
 SHOW_RETRIEVED_CONTEXTS = True
@@ -101,6 +102,16 @@ def render_chat(
 ) -> None:
     active_session = st.session_state.active_session
     messages = store.get_messages(USER_ID, active_session)
+    trace_context = TraceContext(
+        thread_id=active_session,
+        session_id=active_session,
+        user_id=USER_ID,
+        tags=("streamlit", "mdm", loader_strategy, embedding_provider),
+        metadata={
+            "loader_strategy": loader_strategy,
+            "embedding_provider": embedding_provider,
+        },
+    )
 
     st.title("MDM")
     st.markdown(
@@ -131,6 +142,7 @@ def render_chat(
                     loader_strategy=loader_strategy,
                     chat_history=messages,
                     embedding_provider=embedding_provider,
+                    trace_context=trace_context,
                 )
                 answer = result.answer
                 contexts = result.contexts

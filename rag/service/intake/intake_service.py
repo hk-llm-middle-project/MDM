@@ -14,6 +14,7 @@ from rag.service.intake.prompts import build_intake_prompt
 from rag.service.intake.schema import IntakeDecision, IntakeState, MissingField, UserSearchMetadata
 from rag.service.intake.values import LOCATIONS, PARTY_TYPES
 from rag.service.session.schema import ChatMessage
+from rag.service.tracing import TraceContext
 
 
 CONFIDENCE_THRESHOLD = 0.75
@@ -113,6 +114,7 @@ def evaluate_input_sufficiency(
     llm: Any | None = None,
     chat_history: Sequence[ChatMessage] | None = None,
     previous_state: IntakeState | None = None,
+    trace_context: TraceContext | None = None,
 ) -> IntakeDecision:
     """LLM으로 party_type과 location을 추출해 검색 가능 여부를 판단합니다."""
     normalized_description = user_input.strip()
@@ -130,13 +132,13 @@ def evaluate_input_sufficiency(
         )
 
     intake_llm = llm or ChatOpenAI(model=LLM_MODEL, temperature=0)
-    response = intake_llm.invoke(
-        build_intake_prompt(
-            normalized_description,
-            chat_history=chat_history,
-            previous_state=previous_state,
-        )
+    prompt = build_intake_prompt(
+        normalized_description,
+        chat_history=chat_history,
+        previous_state=previous_state,
     )
+    config = trace_context.langchain_config("mdm.intake") if trace_context else None
+    response = intake_llm.invoke(prompt, config=config) if config else intake_llm.invoke(prompt)
     content = getattr(response, "content", response)
     decision = normalize_metadata_response(extract_json_object(str(content)))
     return IntakeDecision(
