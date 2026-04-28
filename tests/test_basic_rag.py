@@ -312,14 +312,26 @@ class BasicRagTest(unittest.TestCase):
         google_mock.return_value.embed_query.assert_called_once_with("query")
 
     def test_vectorstore_service_uses_loader_specific_directory(self):
+        from config import BASE_DIR
         from rag.service.vectorstore import vectorstore_service as vectorstore_service
 
         vectorstore_service.get_vectorstore.cache_clear()
+        loaded_documents = [Document(page_content="doc", metadata={"page": 1})]
+        enriched_documents = [
+            Document(
+                page_content="doc",
+                metadata={"page": 1, "party_type": "pedestrian", "location": "crosswalk"},
+            )
+        ]
 
         with (
             patch("rag.service.vectorstore.vectorstore_service.get_vectorstore_dir", return_value=Path("vectorstore/llamaparser/google")) as dir_mock,
             patch("rag.service.vectorstore.vectorstore_service.vectorstore_exists", return_value=False),
-            patch("rag.service.vectorstore.vectorstore_service.load_pdf", return_value=[Document(page_content="doc")]) as load_mock,
+            patch("rag.service.vectorstore.vectorstore_service.load_pdf", return_value=loaded_documents) as load_mock,
+            patch(
+                "rag.service.vectorstore.vectorstore_service.enrich_documents_with_llm_metadata",
+                return_value=enriched_documents,
+            ) as enrich_mock,
             patch("rag.service.vectorstore.vectorstore_service.split_documents", return_value=[Document(page_content="chunk")]),
             patch("rag.service.vectorstore.vectorstore_service.build_vectorstore", return_value="vectorstore") as build_mock,
         ):
@@ -329,6 +341,10 @@ class BasicRagTest(unittest.TestCase):
         dir_mock.assert_called_once_with("llamaparser", "google")
         load_mock.assert_called_once()
         self.assertEqual(load_mock.call_args.kwargs["strategy"], "llamaparser")
+        enrich_mock.assert_called_once_with(
+            loaded_documents,
+            cache_path=BASE_DIR / "data" / "metadata" / "main_pdf_page_metadata.json",
+        )
         build_mock.assert_called_once()
         self.assertEqual(build_mock.call_args.args[1], Path("vectorstore/llamaparser/google"))
         self.assertEqual(build_mock.call_args.kwargs["embedding_provider"], "google")
@@ -365,12 +381,14 @@ class BasicRagTest(unittest.TestCase):
             patch("rag.service.vectorstore.vectorstore_service.get_vectorstore_dir", return_value=Path("vectorstore/upstage/bge")),
             patch("rag.service.vectorstore.vectorstore_service.vectorstore_exists", return_value=False),
             patch("rag.service.vectorstore.vectorstore_service.load_pdf", return_value=upstage_documents),
+            patch("rag.service.vectorstore.vectorstore_service.enrich_documents_with_llm_metadata") as enrich_mock,
             patch("rag.service.vectorstore.vectorstore_service.split_documents") as split_mock,
             patch("rag.service.vectorstore.vectorstore_service.build_vectorstore", return_value="vectorstore") as build_mock,
         ):
             result = vectorstore_service.get_vectorstore("upstage", "bge")
 
         self.assertEqual(result, "vectorstore")
+        enrich_mock.assert_not_called()
         split_mock.assert_not_called()
         build_mock.assert_called_once()
         self.assertEqual(build_mock.call_args.args[0], upstage_documents)
