@@ -67,8 +67,8 @@ class BasicRagTest(unittest.TestCase):
         called = {}
         config = EnsembleRetrieverConfig(weights=(0.7, 0.3))
 
-        def fake_strategy(vectorstore, query, k, filters, strategy_config):
-            called["args"] = (vectorstore, query, k, filters, strategy_config)
+        def fake_strategy(vectorstore, query, k, filters, strategy_config, trace_context=None):
+            called["args"] = (vectorstore, query, k, filters, strategy_config, trace_context)
             return [Document(page_content="routed")]
 
         with patch.dict(RETRIEVAL_STRATEGIES, {"ensemble": fake_strategy}, clear=False):
@@ -84,7 +84,7 @@ class BasicRagTest(unittest.TestCase):
         self.assertEqual(results[0].page_content, "routed")
         self.assertEqual(
             called["args"],
-            (components, "query", 3, {"page": 3}, config),
+            (components, "query", 3, {"page": 3}, config, None),
         )
 
     def test_retrieve_raises_for_unknown_strategy(self):
@@ -106,8 +106,8 @@ class BasicRagTest(unittest.TestCase):
         called = {}
         config = FlashrankRerankerConfig(model_name="test-model")
 
-        def fake_strategy(query, documents, k, strategy_config):
-            called["args"] = (query, documents, k, strategy_config)
+        def fake_strategy(query, documents, k, strategy_config, trace_context=None):
+            called["args"] = (query, documents, k, strategy_config, trace_context)
             return [Document(page_content="reranked")]
 
         with patch.dict(RERANKER_STRATEGIES, {"flashrank": fake_strategy}, clear=False):
@@ -121,7 +121,7 @@ class BasicRagTest(unittest.TestCase):
             )
 
         self.assertEqual(results[0].page_content, "reranked")
-        self.assertEqual(called["args"], ("query", documents, 1, config))
+        self.assertEqual(called["args"], ("query", documents, 1, config, None))
 
     def test_reranker_registry_includes_new_strategies(self):
         self.assertIn("cohere", RERANKER_STRATEGIES)
@@ -711,6 +711,8 @@ class BasicRagTest(unittest.TestCase):
             "평가용 질문",
             search_metadata=None,
             pipeline_config=None,
+            chat_history=None,
+            trace_context=None,
         )
 
     def test_analyze_question_passes_metadata_filters_to_retrieval_pipeline(self):

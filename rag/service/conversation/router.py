@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
-import json
-import re
 from collections.abc import Sequence
 from typing import Any
 
 from langchain_openai import ChatOpenAI
 
 from config import LLM_MODEL
+from rag.service.common.json_utils import extract_json_object
 from rag.service.conversation.prompts import build_route_prompt
 from rag.service.conversation.schema import RouteDecision, RouteType
 from rag.service.intake.schema import IntakeState
@@ -18,18 +17,6 @@ from rag.service.tracing import TraceContext
 
 
 ROUTER_CONFIDENCE_THRESHOLD = 0.6
-
-
-def extract_json_object(content: str) -> dict[str, Any]:
-    """LLM 응답에서 JSON object를 추출합니다."""
-    stripped = content.strip()
-    if stripped.startswith("```"):
-        stripped = re.sub(r"^```(?:json)?\s*", "", stripped)
-        stripped = re.sub(r"\s*```$", "", stripped)
-    match = re.search(r"\{.*\}", stripped, re.DOTALL)
-    if not match:
-        raise ValueError(f"라우터 응답에서 JSON을 찾을 수 없습니다: {content}")
-    return json.loads(match.group())
 
 
 def clamp_confidence(value: object) -> float:

@@ -47,6 +47,4 @@ def rerank(
         available = ", ".join(sorted(RERANKER_STRATEGIES))
         raise ValueError(f"알 수 없는 리랭커 전략입니다: {strategy}. 사용 가능 전략: {available}") from error
 
-    if trace_context is None:
-        return reranker_strategy(query, documents, k, strategy_config)
     return reranker_strategy(query, documents, k, strategy_config, trace_context)

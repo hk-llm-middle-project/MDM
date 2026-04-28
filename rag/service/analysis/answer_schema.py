@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-import json
-import re
 from dataclasses import dataclass
-from typing import Any
+
+from rag.service.common.json_utils import extract_json_object
 
 
 @dataclass(frozen=True)
@@ -15,15 +14,6 @@ class StructuredAnswer:
     fault_ratio_a: int | None
     fault_ratio_b: int | None
     response: str
-
-
-def extract_json_object(content: str) -> dict[str, Any]:
-    """LLM 응답 문자열에서 JSON 객체를 파싱합니다."""
-    stripped = content.strip()
-    if stripped.startswith("```"):
-        stripped = re.sub(r"^```(?:json)?\s*", "", stripped)
-        stripped = re.sub(r"\s*```$", "", stripped)
-    return json.loads(stripped)
 
 
 def parse_fault_ratio(value: object) -> int | None:

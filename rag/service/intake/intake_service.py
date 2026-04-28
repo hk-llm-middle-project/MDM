@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
-import json
-import re
 from collections.abc import Sequence
 from typing import Any
 
 from langchain_openai import ChatOpenAI
 
 from config import LLM_MODEL
+from rag.service.common.json_utils import extract_json_object
 from rag.service.intake.prompts import build_intake_prompt
 from rag.service.intake.schema import IntakeDecision, IntakeState, MissingField, UserSearchMetadata
 from rag.service.intake.values import LOCATIONS, PARTY_TYPES
@@ -18,15 +17,6 @@ from rag.service.tracing import TraceContext
 
 
 CONFIDENCE_THRESHOLD = 0.75
-
-
-def extract_json_object(content: str) -> dict[str, Any]:
-    """LLM 응답에서 JSON 객체를 추출합니다."""
-    # JSON 블록({ ... })을 찾아 추출합니다. 마크다운 코드 블록이나 앞뒤 설명 텍스트가 있어도 대응 가능합니다.
-    match = re.search(r"\{.*\}", content, re.DOTALL)
-    if not match:
-        raise ValueError(f"응답에서 JSON 객체를 찾을 수 없습니다: {content}")
-    return json.loads(match.group())
 
 
 def clamp_confidence(value: object) -> float:

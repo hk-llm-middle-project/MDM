@@ -53,6 +53,4 @@ def retrieve(
         available = ", ".join(sorted(RETRIEVAL_STRATEGIES))
         raise ValueError(f"알 수 없는 검색 전략입니다: {strategy}. 사용 가능 전략: {available}") from error
 
-    if trace_context is None:
-        return retrieval_strategy(components, query, k, filters, strategy_config)
     return retrieval_strategy(components, query, k, filters, strategy_config, trace_context)

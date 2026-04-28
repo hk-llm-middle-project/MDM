@@ -88,12 +88,10 @@ def answer_question_without_intake(
     trace_context: TraceContext | None = None,
 ) -> tuple[str, list[str]]:
     """intake 없이 바로 RAG 답변을 반환합니다."""
-    analysis_kwargs = {
-        "search_metadata": None,
-        "pipeline_config": pipeline_config,
-    }
-    if chat_history is not None:
-        analysis_kwargs["chat_history"] = chat_history
-    if trace_context is not None:
-        analysis_kwargs["trace_context"] = trace_context
-    return analyze_question(question, **analysis_kwargs)
+    return analyze_question(
+        question,
+        search_metadata=None,
+        pipeline_config=pipeline_config,
+        chat_history=chat_history,
+        trace_context=trace_context,
+    )
