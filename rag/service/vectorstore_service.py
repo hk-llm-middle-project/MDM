@@ -5,16 +5,24 @@ from functools import lru_cache
 from config import (
     DEFAULT_EMBEDDING_PROVIDER,
     DEFAULT_LOADER_STRATEGY,
+    PAGE_METADATA_PATH,
     PDF_PATH,
     get_vectorstore_dir,
 )
 from rag.chunker import split_documents
 from rag.indexer import build_vectorstore, load_vectorstore, vectorstore_exists
 from rag.loader import load_pdf
+from rag.metadata import enrich_documents_with_llm_metadata
 from rag.pipeline.retriever import RetrievalComponents, build_retrieval_components
 
 
 PRE_CHUNKED_LOADER_STRATEGIES = {"upstage"}
+
+
+def get_page_metadata_cache_path(loader_strategy: str):
+    """Return the cache path for page-level LLM metadata labels."""
+    del loader_strategy
+    return PAGE_METADATA_PATH
 
 
 @lru_cache(maxsize=32)
@@ -31,7 +39,12 @@ def get_vectorstore(
     chunks = (
         documents
         if loader_strategy in PRE_CHUNKED_LOADER_STRATEGIES
-        else split_documents(documents)
+        else split_documents(
+            enrich_documents_with_llm_metadata(
+                documents,
+                cache_path=get_page_metadata_cache_path(loader_strategy),
+            )
+        )
     )
     return build_vectorstore(
         chunks,
