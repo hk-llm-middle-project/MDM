@@ -180,6 +180,7 @@ def enrich_documents_with_llm_metadata(
     cache = load_page_metadata_cache(cache_path) if cache_path is not None else {}
     cache_changed = False
     enriched_documents: list[Document] = []
+    classifier_llm = llm
 
     for index, document in enumerate(documents, start=1):
         cache_key = _page_cache_key(document, index)
@@ -195,7 +196,10 @@ def enrich_documents_with_llm_metadata(
             )
             continue
 
-        classification = classify_page_metadata(document.page_content, llm=llm)
+        if classifier_llm is None:
+            classifier_llm = ChatOpenAI(model=LLM_MODEL, temperature=0)
+
+        classification = classify_page_metadata(document.page_content, llm=classifier_llm)
         if cache_path is not None:
             cache[cache_key] = _classification_to_cache_entry(classification)
             cache_changed = True
