@@ -18746,7 +18746,7 @@
       "description": "| 차41-1 | 양 차량 주행 중 후방 추돌(앞차량 정지 직후 포함) | 양 차량 주행 중 후방 추돌(앞차량 정지 직후 포함) | 양 차량 주행 중 후방 추돌(앞차량 정지 직후 포함) | 양 차량 주행 중 후방 추돌(앞차량 정지 직후 포함) | 양 차량 주행 중 후방 추돌(앞차량 정지 직후 포함) | 양 차량 주행 중 후방 추돌(앞차량 정지 직후 포함) | 양 차량 주행 중 후방 추돌(앞차량 정지 직후 포함) |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| 차41-1 | (A) 뒤차(후행) 추돌 (B) 앞차(선행) 직진 | (A) 뒤차(후행) 추돌 (B) 앞차(선행) 직진 | (A) 뒤차(후행) 추돌 (B) 앞차(선행) 직진 | (A) 뒤차(후행) 추돌 (B) 앞차(선행) 직진 | (A) 뒤차(후행) 추돌 (B) 앞차(선행) 직진 | (A) 뒤차(후행) 추돌 (B) 앞차(선행) 직진 | (A) 뒤차(후행) 추돌 (B) 앞차(선행) 직진 |\n|  |  | A | 기본 과실비율 | 기본 과실비율 | 기본 과실비율 | A100 | BO |\n| 과실비율 조정예시 | A | A | 주택가·상점가등 | +10 |  |  |  |\n| 과실비율 조정예시 |  | A | A현저한 과실 | +10 |  |  |  |\n| 과실비율 조정예시 |  | A | A중대한 과실 | +20 |  |  |  |\n| 과실비율 조정예시 |  | A | B 저속주행 또는 편도3차로 이상 도로 에서 이유 없는 정지 |  | +10 |  |  |\n| 과실비율 조정예시 | ② | A | B 제동등화의 고장 |  | +20 |  |  |\n| 과실비율 조정예시 | ③ | A | B이유 없는 급정지 |  | +30 |  |  |\n",
       "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_352_table_1.png",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -18758,7 +18758,7 @@
       "subsection": "안전거리미확보로 인한 추돌사고",
       "page": 352,
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -18772,7 +18772,7 @@
       "page": 352,
       "heading": "- ※사고발생, 손해확대와의 인과관계를 감안하여 기본 과실비율을 가(+), 감(-) 조정 가능합니다.",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -18786,7 +18786,7 @@
       "page": 352,
       "heading": "사고 상황",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -18800,7 +18800,7 @@
       "page": 352,
       "heading": "기본 과실비율 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -18814,7 +18814,7 @@
       "page": 352,
       "heading": "수정요소(인과관계를 감안한 과실비율 조정) 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -18828,7 +18828,7 @@
       "page": 352,
       "heading": "활용시 참고 사항",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -18842,7 +18842,7 @@
       "page": 352,
       "heading": "⊙ 도로교통법 제17조(자동차등과 노면전차의 속도)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -18856,7 +18856,7 @@
       "page": 352,
       "heading": "도로교통법 제19조(안전거리확보 등)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -18870,7 +18870,7 @@
       "page": 352,
       "heading": "⊙ 대법원 1997. 11. 25. 선고 97다41639 판결",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -18884,7 +18884,7 @@
       "page": 352,
       "heading": "울산지방법원 2013.8.30. 선고 2011가단34087, 41405 판결",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -18898,7 +18898,7 @@
       "page": 352,
       "heading": "서울동부지방법원 2007. 1. 26. 선고 2005가단49363 판결",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -18912,7 +18912,7 @@
       "page": 352,
       "heading": "서울중앙지방법원 2018. 9. 5. 선고 2018나16484 판결",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -18926,7 +18926,7 @@
       "page": 352,
       "heading": "서울남부지방법원 2021. 6. 25. 선고 2020나71619판결",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -18940,7 +18940,7 @@
       "page": 352,
       "heading": "(2) 주정차 차량 추돌사고 [차42]",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -18954,7 +18954,7 @@
       "description": "| 차42-1 | 차로 주·정차 중 재추돌(2차) 사고(고속도로등 포함) | 차로 주·정차 중 재추돌(2차) 사고(고속도로등 포함) | 차로 주·정차 중 재추돌(2차) 사고(고속도로등 포함) | 차로 주·정차 중 재추돌(2차) 사고(고속도로등 포함) | 차로 주·정차 중 재추돌(2차) 사고(고속도로등 포함) | 차로 주·정차 중 재추돌(2차) 사고(고속도로등 포함) |\n| --- | --- | --- | --- | --- | --- | --- |\n| 차42-1 | (A) 뒤차(추돌차) (B) 앞차(사고로 주정차중) | (A) 뒤차(추돌차) (B) 앞차(사고로 주정차중) | (A) 뒤차(추돌차) (B) 앞차(사고로 주정차중) | (A) 뒤차(추돌차) (B) 앞차(사고로 주정차중) | (A) 뒤차(추돌차) (B) 앞차(사고로 주정차중) | (A) 뒤차(추돌차) (B) 앞차(사고로 주정차중) |\n| ![image](/image/placeholder)\n기사고\n차량\nA\n기사고\n차량 | ![image](/image/placeholder)\n기사고\n차량\nA\n기사고\n차량 | 기본 과실비율 | 기본 과실비율 | 기본 과실비율 | A80 | B20 |\n| ![image](/image/placeholder)\n기사고\n차량\nA\n기사고\n차량 | ![image](/image/placeholder)\n기사고\n차량\nA\n기사고\n차량 | 과실비율 |  | A 현저한 과실 | +10 |  |\n| ![image](/image/placeholder)\n기사고\n차량\nA\n기사고\n차량 | ![image](/image/placeholder)\n기사고\n차량\nA\n기사고\n차량 | 과실비율 |  | A 중대한 과실 | +20 |  |\n| ![image](/image/placeholder)\n기사고\n차량\nA\n기사고\n차량 | ![image](/image/placeholder)\n기사고\n차량\nA\n기사고\n차량 | 과실비율 | ⑤ | A 대피불가능 상황 | -10 |  |\n| ![image](/image/placeholder)\n기사고\n차량\nA\n기사고\n차량 | ![image](/image/placeholder)\n기사고\n차량\nA\n기사고\n차량 | 과실비율 | ⑤ | B 고속도로 (자동차전용도로 포함) |  | +20 |\n| ![image](/image/placeholder)\n기사고\n차량\nA\n기사고\n차량 | ![image](/image/placeholder)\n기사고\n차량\nA\n기사고\n차량 | 과실비율 |  | B 주정차에 과실 없음 |  | -20 |\n| ![image](/image/placeholder)\n기사고\n차량\nA\n기사고\n차량 | ![image](/image/placeholder)\n기사고\n차량\nA\n기사고\n차량 | 과실비율 | 조정예시 | B 추월차로 |  | +10 |\n| ![image](/image/placeholder)\n기사고\n차량\nA\n기사고\n차량 | ![image](/image/placeholder)\n기사고\n차량\nA\n기사고\n차량 | 과실비율 | 조정예시 | B야간·악천후등시야확보곤란 |  | +10 |\n| ![image](/image/placeholder)\n기사고\n차량\nA\n기사고\n차량 | ![image](/image/placeholder)\n기사고\n차량\nA\n기사고\n차량 | 과실비율 | 조정예시 | B 전용차로 위반 |  | +10 |\n| ![image](/image/placeholder)\n기사고\n차량\nA\n기사고\n차량 | ![image](/image/placeholder)\n기사고\n차량\nA\n기사고\n차량 | 과실비율 | 조정예시 | B 현저한 과실 |  | +10 |\n| ![image](/image/placeholder)\n기사고\n차량\nA\n기사고\n차량 | ![image](/image/placeholder)\n기사고\n차량\nA\n기사고\n차량 | 과실비율 | 조정예시 | B 중대한 과실 |  | +20 |\n| ![image](/image/placeholder)\n기사고\n차량\nA\n기사고\n차량 | ![image](/image/placeholder)\n기사고\n차량\nA\n기사고\n차량 | 과실비율 |  | B 안전표지판 등 설치 |  | -20 |\n| ![image](/image/placeholder)\n기사고\n차량\nA\n기사고\n차량 | ![image](/image/placeholder)\n기사고\n차량\nA\n기사고\n차량 | 과실비율 | B 비상점멸표시등 점등 |  | -10 |  |\n| ![image](/image/placeholder)\n기사고\n차량\nA\n기사고\n차량 | ![image](/image/placeholder)\n기사고\n차량\nA\n기사고\n차량 | 과실비율 | B 대피불가능 상황 |  | -10 |  |\n",
       "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_356_table_1.png",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -18966,7 +18966,7 @@
       "subsection": "주정차 차량 추돌사고",
       "page": 356,
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -18980,7 +18980,7 @@
       "page": 356,
       "heading": "- ※사고발생, 손해확대와의 인과관계를 감안하여 기본 과실비율을 가(+), 감(-) 조정 가능합니다.",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -18994,7 +18994,7 @@
       "page": 356,
       "heading": "사고 상황",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19008,7 +19008,7 @@
       "page": 356,
       "heading": "기본 과실비율 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19022,7 +19022,7 @@
       "page": 356,
       "heading": "활용시 참고 사항",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19036,7 +19036,7 @@
       "page": 356,
       "heading": "⊙ 도로교통법 제19조(안전거리 확보 등)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19050,7 +19050,7 @@
       "page": 356,
       "heading": "도로교통법 제48조(안전운전 및 친환경 경제운전의 의무)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19064,7 +19064,7 @@
       "page": 356,
       "heading": "도로교통법 제57조(통칙)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19078,7 +19078,7 @@
       "page": 356,
       "heading": "도로교통법 제64조 (고속도로등에서의 정차 및 주차의 금지)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19092,7 +19092,7 @@
       "page": 356,
       "heading": "도로교통법 제66조(고장 등의 조치)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19106,7 +19106,7 @@
       "page": 356,
       "heading": "도로교통법 시행규칙 제40조(고장자동차의 표지)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19120,7 +19120,7 @@
       "page": 356,
       "heading": "⊙ 대법원 2014. 3. 27. 선고 2013다215904 판결",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19134,7 +19134,7 @@
       "description": "| 차42-2 | 일반 도로 가장자리(갓길포함) 주·정차 | 일반 도로 가장자리(갓길포함) 주·정차 | 일반 도로 가장자리(갓길포함) 주·정차 | 일반 도로 가장자리(갓길포함) 주·정차 | 일반 도로 가장자리(갓길포함) 주·정차 | 일반 도로 가장자리(갓길포함) 주·정차 |\n| --- | --- | --- | --- | --- | --- | --- |\n| 차42-2 | 주·정차 (A) (B) 추돌차 | 주·정차 (A) (B) 추돌차 | 주·정차 (A) (B) 추돌차 | 주·정차 (A) (B) 추돌차 | 주·정차 (A) (B) 추돌차 | 주·정차 (A) (B) 추돌차 |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 기본 과실비율 | 기본 과실비율 | 기본 과실비율 | A0 | B100 |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | A시야불량 | +10 |  |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 | ② | A 주정차 금지장소 | +10 |  |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 | ③ | A 주정차 방법 위반 | +10 |  |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | A 비상등화등 안전조치 불이행 |  | +10 |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | A 현저한 과실 | +10 |  |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | A 중대한 과실 | +20 |  |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 | ⑤ | A 회피불능 | -10 |  |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | B 현저한 과실 |  | +10 |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | B 중대한 과실 |  | +20 |\n",
       "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_361_table_1.png",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19146,7 +19146,7 @@
       "subsection": "주정차 차량 추돌사고",
       "page": 361,
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19160,7 +19160,7 @@
       "page": 361,
       "heading": "- ※사고발생, 손해확대와의 인과관계를 감안하여 기본 과실비율을 가(+), 감(-) 조정 가능합니다.",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19174,7 +19174,7 @@
       "page": 361,
       "heading": "사고 상황",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19188,7 +19188,7 @@
       "page": 361,
       "heading": "기본 과실비율 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19202,7 +19202,7 @@
       "page": 361,
       "heading": "수정요소(인과관계를 감안한 과실비율 조정) 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19216,7 +19216,7 @@
       "page": 361,
       "heading": "활용시 참고 사항",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19230,7 +19230,7 @@
       "page": 361,
       "heading": "도로교통법 제32조(정차 또는 주차의 금지)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19244,7 +19244,7 @@
       "page": 361,
       "heading": "1. 안전표지 또는 다음 각 목의 어느 하나에 해당하는 사람의 지시에 따르는 경우",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19258,7 +19258,7 @@
       "page": 361,
       "heading": "2. 고장으로 인하여 부득이하게 주차하는 경우",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19272,7 +19272,7 @@
       "page": 361,
       "heading": "⊙ 대법원 1996. 2. 9. 선고 95다39359판결",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19286,7 +19286,7 @@
       "page": 361,
       "heading": "서울중앙지방법원 2019.04.17.선고 2018나62265 판결",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19300,7 +19300,7 @@
       "page": 361,
       "heading": "서울중앙지방법원 2019. 08. 21.선고 2019나23090 판결",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19314,7 +19314,7 @@
       "page": 361,
       "heading": "춘천지방법원 원주지원 2023. 1. 31. 선고 2022가단58638 판결",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19328,7 +19328,7 @@
       "description": "| 차42-3 | 고속도로(자동차전용도로 포함) 갓길 주·정차 중 추돌 | 고속도로(자동차전용도로 포함) 갓길 주·정차 중 추돌 | 고속도로(자동차전용도로 포함) 갓길 주·정차 중 추돌 | 고속도로(자동차전용도로 포함) 갓길 주·정차 중 추돌 | 고속도로(자동차전용도로 포함) 갓길 주·정차 중 추돌 | 고속도로(자동차전용도로 포함) 갓길 주·정차 중 추돌 |\n| --- | --- | --- | --- | --- | --- | --- |\n| 차42-3 | (A) 추돌 (B) 피추돌(갓길 주정차중) | (A) 추돌 (B) 피추돌(갓길 주정차중) | (A) 추돌 (B) 피추돌(갓길 주정차중) | (A) 추돌 (B) 피추돌(갓길 주정차중) | (A) 추돌 (B) 피추돌(갓길 주정차중) | (A) 추돌 (B) 피추돌(갓길 주정차중) |\n| ![image](/image/placeholder)\n갓 길\nA\n갓 길 | ![image](/image/placeholder)\n갓 길\nA\n갓 길 | 기본 과실비율 | 기본 과실비율 | 기본 과실비율 | A100 | BO |\n| ![image](/image/placeholder)\n갓 길\nA\n갓 길 | ![image](/image/placeholder)\n갓 길\nA\n갓 길 | 과실비율 조정예시 |  | A 현저한 과실 | +10 |  |\n| ![image](/image/placeholder)\n갓 길\nA\n갓 길 | ![image](/image/placeholder)\n갓 길\nA\n갓 길 | 과실비율 조정예시 |  | A중대한 과실 | +20 |  |\n| ![image](/image/placeholder)\n갓 길\nA\n갓 길 | ![image](/image/placeholder)\n갓 길\nA\n갓 길 | 과실비율 조정예시 |  | B 야간, 악천후 등 시야확보 곤란 |  | +10 |\n| ![image](/image/placeholder)\n갓 길\nA\n갓 길 | ![image](/image/placeholder)\n갓 길\nA\n갓 길 | 과실비율 조정예시 | ① | B 차로 일부 점용 |  | +20 |\n| ![image](/image/placeholder)\n갓 길\nA\n갓 길 | ![image](/image/placeholder)\n갓 길\nA\n갓 길 | 과실비율 조정예시 | 없는 | B부득이한 사정이 주정차 |  | +10 |\n| ![image](/image/placeholder)\n갓 길\nA\n갓 길 | ![image](/image/placeholder)\n갓 길\nA\n갓 길 | 과실비율 조정예시 | B | 현저한 과실 |  | +10 |\n| ![image](/image/placeholder)\n갓 길\nA\n갓 길 | ![image](/image/placeholder)\n갓 길\nA\n갓 길 | 과실비율 조정예시 |  | B 중대한 과실 |  | +20 |\n| ![image](/image/placeholder)\n갓 길\nA\n갓 길 | ![image](/image/placeholder)\n갓 길\nA\n갓 길 | 과실비율 조정예시 | B | 안전표지 미설치 |  | +10 |\n",
       "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_366_table_1.png",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19340,7 +19340,7 @@
       "subsection": "주정차 차량 추돌사고",
       "page": 366,
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19354,7 +19354,7 @@
       "page": 366,
       "heading": "- ※사고발생, 손해확대와의 인과관계를 감안하여 기본 과실비율을 가(+), 감(-) 조정 가능합니다.",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19368,7 +19368,7 @@
       "page": 366,
       "heading": "사고 상황",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19382,7 +19382,7 @@
       "page": 366,
       "heading": "기본 과실비율 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19396,7 +19396,7 @@
       "page": 366,
       "heading": "활용시 참고 사항",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19410,7 +19410,7 @@
       "page": 366,
       "heading": "· 도로교통법 제57조(통칙)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19424,7 +19424,7 @@
       "page": 366,
       "heading": "도로교통법 제60조(갓길 통행금지 등)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19438,7 +19438,7 @@
       "page": 366,
       "heading": "도로교통법 제64조 (고속도로등에서의 정차 및 주차의 금지)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19452,7 +19452,7 @@
       "page": 366,
       "heading": "⊙ 대법원 1996. 4. 12 선고 96다716 판결",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19466,7 +19466,7 @@
       "page": 366,
       "heading": "대법원 1997. 3. 11. 선고 96다33808판결",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19480,7 +19480,7 @@
       "page": 366,
       "heading": "대법원 2004. 2. 27. 선고 2003다6873 판결",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19494,7 +19494,7 @@
       "page": 366,
       "heading": "대법원 2004. 8. 20. 선고 2004다19562 판결",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19508,7 +19508,7 @@
       "page": 366,
       "heading": "서울중앙지방법원 2018. 3. 23. 선고 2017나69337 판결",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19522,7 +19522,7 @@
       "page": 366,
       "heading": "(3) 진로변경 사고 [차43]",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19536,7 +19536,7 @@
       "description": "| 차43-1 | 차로 감소 도로 (합류) 사고 | 차로 감소 도로 (합류) 사고 | 차로 감소 도로 (합류) 사고 | 차로 감소 도로 (합류) 사고 | 차로 감소 도로 (합류) 사고 |\n| --- | --- | --- | --- | --- | --- |\n| 차43-1 | (A) 본선차 (B) 합류차 | (A) 본선차 (B) 합류차 | (A) 본선차 (B) 합류차 | (A) 본선차 (B) 합류차 | (A) 본선차 (B) 합류차 |\n| ![image](/image/placeholder)\nA B\nB A | ![image](/image/placeholder)\nA B\nB A | 기본 과실비율 | 기본 과실비율 | A40 | B60 |\n| ![image](/image/placeholder)\nA B\nB A | ![image](/image/placeholder)\nA B\nB A | 과실비율 조정예시 | A 현저한 과실 | +10 |  |\n| ![image](/image/placeholder)\nA B\nB A | ![image](/image/placeholder)\nA B\nB A | 과실비율 조정예시 | A 중대한 과실 | +20 |  |\n| ![image](/image/placeholder)\nA B\nB A | ![image](/image/placeholder)\nA B\nB A | 과실비율 조정예시 | B 현저한 과실 |  | +10 |\n| ![image](/image/placeholder)\nA B\nB A | ![image](/image/placeholder)\nA B\nB A | 과실비율 조정예시 | B 중대한 과실 |  | +20 |\n",
       "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_371_table_1.png",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19548,7 +19548,7 @@
       "subsection": "진로변경 사고",
       "page": 371,
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19562,7 +19562,7 @@
       "page": 371,
       "heading": "- ※사고발생, 손해확대와의 인과관계를 감안하여 기본 과실비율을 가(+), 감(-) 조정 가능합니다.",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19576,7 +19576,7 @@
       "page": 371,
       "heading": "사고 상황",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19590,7 +19590,7 @@
       "page": 371,
       "heading": "기본 과실비율 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19604,7 +19604,7 @@
       "page": 371,
       "heading": "활용시 참고 사항",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19618,7 +19618,7 @@
       "page": 371,
       "heading": "관련 법규",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19632,7 +19632,7 @@
       "page": 371,
       "heading": "도로교통법 제38조(차의 신호)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19646,7 +19646,7 @@
       "page": 371,
       "heading": "참고 판례",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19660,7 +19660,7 @@
       "description": "| 차43-2 | 후행 직진 대 선행 진로변경 | 후행 직진 대 선행 진로변경 | 후행 직진 대 선행 진로변경 | 후행 직진 대 선행 진로변경 | 후행 직진 대 선행 진로변경 | 후행 직진 대 선행 진로변경 |\n| --- | --- | --- | --- | --- | --- | --- |\n| 차43-2 | 후행 직진 (A) (B) 선행 진로 변경 | 후행 직진 (A) (B) 선행 진로 변경 | 후행 직진 (A) (B) 선행 진로 변경 | 후행 직진 (A) (B) 선행 진로 변경 | 후행 직진 (A) (B) 선행 진로 변경 | 후행 직진 (A) (B) 선행 진로 변경 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 기본 과실비율 | 기본 과실비율 | 기본 과실비율 | A30 | B70 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | A | 현저한 과실 | +10 |  |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | A | 중대한 과실 | +20 |  |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 |  | B 진로변경 신호불이행·지연 |  | +10 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 |  | B 버스·다인승전용차로 위반 |  | +10 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | B | 진로변경금지장소 |  | +20 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 |  | B 현저한 과실 |  | +10 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | B | 중대한 과실 |  | +20 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 |  | B 고속도로(자동차 전용도로 포함) 추월 차로로 차로 변경 |  | +10 |\n",
       "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_373_table_1.png",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19672,7 +19672,7 @@
       "subsection": "진로변경 사고",
       "page": 373,
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19686,7 +19686,7 @@
       "page": 373,
       "heading": "- ※사고발생, 손해확대와의 인과관계를 감안하여 기본 과실비율을 가(+), 감(-) 조정 가능합니다.",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19700,7 +19700,7 @@
       "page": 373,
       "heading": "사고 상황",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19714,7 +19714,7 @@
       "page": 373,
       "heading": "기본 과실비율 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19728,7 +19728,7 @@
       "page": 373,
       "heading": "수정요소(인과관계를 감안한 과실비율 조정) 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19742,7 +19742,7 @@
       "page": 373,
       "heading": "활용시 참고 사항",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19756,7 +19756,7 @@
       "page": 373,
       "heading": "도로교통법 제14조(차로의 설치 등)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19770,7 +19770,7 @@
       "page": 373,
       "heading": "도로교통법 제15조(전용차로의 설치)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19784,7 +19784,7 @@
       "page": 373,
       "heading": "도로교통법 제19조(안전거리 확보 등)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19798,7 +19798,7 @@
       "page": 373,
       "heading": "도로교통법 제38조(차의 신호)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19812,7 +19812,7 @@
       "page": 373,
       "heading": "도로교통법 제48조(안전운전 및 친환경 경제운전의 의무)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19826,7 +19826,7 @@
       "page": 373,
       "heading": "도로교통법 시행령 제10조(전용차로통행차 외에 전용차로로 통행할 수 있는 경우)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19840,7 +19840,7 @@
       "page": 373,
       "heading": "⊙ 대법원 1986.12 9. 선고 86다카1551 판결",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19854,7 +19854,7 @@
       "page": 373,
       "heading": "대법원 2015. 11. 12. 선고 2015도3107 판결",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19868,7 +19868,7 @@
       "page": 373,
       "heading": "서울중앙지방법원 2019. 4. 23. 선고 2018나47693 판결",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19882,7 +19882,7 @@
       "page": 373,
       "heading": "2021. 7. 8. 선고 2020나56904판결",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19896,7 +19896,7 @@
       "page": 373,
       "heading": "서울중앙지방법원 2021. 5. 26. 선고 2020나71767판결",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19910,7 +19910,7 @@
       "description": "| 차43-3 | 좌우 동시 차로 변경(진로 변경) 사고 | 좌우 동시 차로 변경(진로 변경) 사고 | 좌우 동시 차로 변경(진로 변경) 사고 | 좌우 동시 차로 변경(진로 변경) 사고 | 좌우 동시 차로 변경(진로 변경) 사고 | 좌우 동시 차로 변경(진로 변경) 사고 |\n| --- | --- | --- | --- | --- | --- | --- |\n| 차43-3 | (A) 진로변경 (B) 진로변경 | (A) 진로변경 (B) 진로변경 | (A) 진로변경 (B) 진로변경 | (A) 진로변경 (B) 진로변경 | (A) 진로변경 (B) 진로변경 | (A) 진로변경 (B) 진로변경 |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 기본 과실비율 | 기본 과실비율 | 기본 과실비율 | A50 | B50 |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | A진로변경 신호불이행·지연 | +10 |  |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | A 전용차로 위반 | +10 |  |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 | ① | A 정체차로변경 | +10 |  |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | A 진로변경 금지장소 | +20 |  |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | A 현저한 과실 | +10 |  |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | A 중대한 과실 | +20 |  |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 | ② | A 정차후 출발 | +20 |  |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | B진로변경 신호불이행·지연 |  | +10 |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | B 전용차로 위반 |  | +10 |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 | ① | B 정체차로변경 |  | +10 |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | B 진로변경 금지장소 |  | +20 |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | B 현저한 과실 |  | +10 |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | B 중대한 과실 |  | +20 |\n",
       "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_378_table_1.png",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19922,7 +19922,7 @@
       "subsection": "진로변경 사고",
       "page": 378,
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19936,7 +19936,7 @@
       "page": 378,
       "heading": "- ※사고발생, 손해확대와의 인과관계를 감안하여 기본 과실비율을 가(+), 감(-) 조정 가능합니다.",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19950,7 +19950,7 @@
       "page": 378,
       "heading": "사고 상황",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19964,7 +19964,7 @@
       "page": 378,
       "heading": "기본 과실비율 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19978,7 +19978,7 @@
       "page": 378,
       "heading": "수정요소(인과관계를 감안한 과실비율 조정) 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -19992,7 +19992,7 @@
       "page": 378,
       "heading": "활용시 참고 사항",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20006,7 +20006,7 @@
       "page": 378,
       "heading": "관련 법규",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20020,7 +20020,7 @@
       "page": 378,
       "heading": "도로교통법 제38조 (차의 신호)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20034,7 +20034,7 @@
       "description": "| 차43-4 | 정체 중 급 차로 변경 사고 |\n| --- | --- |\n| 차43-4 | 정체차로에서 대기 중 진로변경(측면 충돌) (A) (B) 직진(측면 충돌) <table><thead></thead><tbody><tr><td rowspan=\"5\">B A</td><td colspan=\"2\">기본 과실비율</td><td>A100</td><td>BO</td></tr><tr><td rowspan=\"4\">과실비율 조정예시</td><td>A 현저한 과실</td><td>+10</td><td></td></tr><tr><td>A 중대한 과실</td><td>+20</td><td></td></tr><tr><td>B 현저한 과실</td><td></td><td>+10</td></tr><tr><td>B 중대한 과실</td><td></td><td>+20</td></tr></tbody></table> |\n",
       "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_381_table_1.png",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20046,7 +20046,7 @@
       "subsection": "진로변경 사고",
       "page": 381,
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20060,7 +20060,7 @@
       "page": 381,
       "heading": "사고 상황",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20074,7 +20074,7 @@
       "page": 381,
       "heading": "기본 과실비율 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20088,7 +20088,7 @@
       "page": 381,
       "heading": "활용시 참고 사항",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20102,7 +20102,7 @@
       "page": 381,
       "heading": "관련 법규",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20116,7 +20116,7 @@
       "description": "| 차43-5 | 동일차로 후행차 선 진로변경 대 선행차 후 진로변경 | 동일차로 후행차 선 진로변경 대 선행차 후 진로변경 | 동일차로 후행차 선 진로변경 대 선행차 후 진로변경 | 동일차로 후행차 선 진로변경 대 선행차 후 진로변경 | 동일차로 후행차 선 진로변경 대 선행차 후 진로변경 |\n| --- | --- | --- | --- | --- | --- |\n| 차43-5 | 후행 선진로변경 (A) (B) 선행 후진로변경 | 후행 선진로변경 (A) (B) 선행 후진로변경 | 후행 선진로변경 (A) (B) 선행 후진로변경 | 후행 선진로변경 (A) (B) 선행 후진로변경 | 후행 선진로변경 (A) (B) 선행 후진로변경 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 기본 과실비율 | 기본 과실비율 | A40 | B60 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | A 과속 | +10 |  |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | A 연속진로변경 | +10 |  |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | A 신호 불이행 | +10 |  |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | A 현저한 과실 | +10 |  |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | A 중대한 과실 | +20 |  |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | A 원거리 진로변경 | -10 |  |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | B 신호 불이행 |  | +10 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | B 정차 후 진로변경 |  | +10 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | B 진로변경 금지구간 |  | +10 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | B 현저한 과실 |  | +10 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | B 중대한 과실 |  | +20 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | B 진로변경의사 선표시 |  | -20 |\n",
       "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_383_table_1.png",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20128,7 +20128,7 @@
       "subsection": "진로변경 사고",
       "page": 383,
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20142,7 +20142,7 @@
       "page": 383,
       "heading": "※사고발생, 손해확대와의 인과관계를 감안하여 기본 과실비율을 가(+), 감(-) 조정 가능합니다.",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20156,7 +20156,7 @@
       "page": 383,
       "heading": "사고 상황",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20170,7 +20170,7 @@
       "page": 383,
       "heading": "기본 과실비율 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20184,7 +20184,7 @@
       "page": 383,
       "heading": "수정요소(인과관계를 감안한 과실비율 조정) 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20198,7 +20198,7 @@
       "page": 383,
       "heading": "⊙ 도로교통법 제14조(차로의 설치 등)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20212,7 +20212,7 @@
       "page": 383,
       "heading": "도로교통법 제19조(안전거리 확보 등)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20226,7 +20226,7 @@
       "page": 383,
       "heading": "도로교통법 제38조(차의 신호)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20240,7 +20240,7 @@
       "page": 383,
       "heading": "도로교통법 시행령 별표 2(신호의 시기 및 방법 [제21조 관련])",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20254,7 +20254,7 @@
       "page": 383,
       "heading": "참고 판례",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20268,7 +20268,7 @@
       "page": 383,
       "heading": "· 서울중앙지방법원 2021. 5. 11. 선고 2020나84220판결",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20282,7 +20282,7 @@
       "description": "| 차43-6 | 갓길로 진로변경 대 갓길 직진 | 갓길로 진로변경 대 갓길 직진 | 갓길로 진로변경 대 갓길 직진 | 갓길로 진로변경 대 갓길 직진 | 갓길로 진로변경 대 갓길 직진 | 갓길로 진로변경 대 갓길 직진 |\n| --- | --- | --- | --- | --- | --- | --- |\n| 차43-6 | (A) 갓길로 진로변경 (B) 갓길 직진 | (A) 갓길로 진로변경 (B) 갓길 직진 | (A) 갓길로 진로변경 (B) 갓길 직진 | (A) 갓길로 진로변경 (B) 갓길 직진 | (A) 갓길로 진로변경 (B) 갓길 직진 | (A) 갓길로 진로변경 (B) 갓길 직진 |\n| ![image](/image/placeholder)\n갓 길\n갓 길 | ![image](/image/placeholder)\n갓 길\n갓 길 | 기본 과실비율 | 기본 과실비율 | 기본 과실비율 | A60 | B40 |\n| ![image](/image/placeholder)\n갓 길\n갓 길 | ![image](/image/placeholder)\n갓 길\n갓 길 | 과실비율 조정예시 |  | A 진로변경 신호불이행·지연 | +10 |  |\n| ![image](/image/placeholder)\n갓 길\n갓 길 | ![image](/image/placeholder)\n갓 길\n갓 길 | 과실비율 조정예시 | ② | A추월상황 | +10 |  |\n| ![image](/image/placeholder)\n갓 길\n갓 길 | ![image](/image/placeholder)\n갓 길\n갓 길 | 과실비율 조정예시 |  | A 현저한 과실 | +10 |  |\n| ![image](/image/placeholder)\n갓 길\n갓 길 | ![image](/image/placeholder)\n갓 길\n갓 길 | 과실비율 조정예시 |  | A중대한 과실 | +20 |  |\n| ![image](/image/placeholder)\n갓 길\n갓 길 | ![image](/image/placeholder)\n갓 길\n갓 길 | 과실비율 조정예시 |  | B 현저한 과실 |  | +10 |\n| ![image](/image/placeholder)\n갓 길\n갓 길 | ![image](/image/placeholder)\n갓 길\n갓 길 | 과실비율 조정예시 |  | B중대한 과실 |  | +20 |\n",
       "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_386_table_1.png",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20294,7 +20294,7 @@
       "subsection": "진로변경 사고",
       "page": 386,
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20308,7 +20308,7 @@
       "page": 386,
       "heading": "- ※사고발생, 손해확대와의 인과관계를 감안하여 기본 과실비율을 가(+), 감(-) 조정 가능합니다.",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20322,7 +20322,7 @@
       "page": 386,
       "heading": "사고 상황",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20336,7 +20336,7 @@
       "page": 386,
       "heading": "기본 과실비율 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20350,7 +20350,7 @@
       "page": 386,
       "heading": "수정요소(인과관계를 감안한 과실비율 조정) 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20364,7 +20364,7 @@
       "page": 386,
       "heading": "활용시 참고 사항",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20378,7 +20378,7 @@
       "page": 386,
       "heading": "도로교통법 제19조 (안전거리 확보 등)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20392,7 +20392,7 @@
       "page": 386,
       "heading": "도로교통법 제38조 (차의 신호)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20406,7 +20406,7 @@
       "page": 386,
       "heading": "도로교통법 제48조(안전운전 및 친환경 경제운전의 의무)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20420,7 +20420,7 @@
       "page": 386,
       "heading": "도로교통법 제60조 (갓길 통행금지 등)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20434,7 +20434,7 @@
       "page": 386,
       "heading": "참고 판례",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20448,7 +20448,7 @@
       "description": "| 차43-7 | 안전지대 통과 직진 대 선행 진로변경 | 안전지대 통과 직진 대 선행 진로변경 | 안전지대 통과 직진 대 선행 진로변경 | 안전지대 통과 직진 대 선행 진로변경 | 안전지대 통과 직진 대 선행 진로변경 | 안전지대 통과 직진 대 선행 진로변경 |\n| --- | --- | --- | --- | --- | --- | --- |\n| 차43-7 | (A) 후행직진 안전지대 벗어나기 전 (가) (나) 안전지대 벗어난 후 (B) 선행진로변경 |  |  |  |  |  |\n| <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>GDP</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td></tr></tbody></table> | <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>GDP</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td></tr></tbody></table> | (가) 기본 과실비율 (나) | (가) 기본 과실비율 (나) | (가) 기본 과실비율 (나) | A100 A70 | BO B30 |\n| <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>GDP</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td></tr></tbody></table> | <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>GDP</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td></tr></tbody></table> | 과실비율 조정예시 | A | 현저한 과실 | +10 |  |\n| <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>GDP</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td></tr></tbody></table> | <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>GDP</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td></tr></tbody></table> | 과실비율 조정예시 |  | A 중대한 과실 | +20 |  |\n| <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>GDP</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td></tr></tbody></table> | <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>GDP</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td></tr></tbody></table> | 과실비율 조정예시 |  | B진로변경 신호불이행· 지연 |  | +10 |\n| <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>GDP</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td></tr></tbody></table> | <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>GDP</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td></tr></tbody></table> | 과실비율 조정예시 |  | B 현저한 과실 |  | +10 |\n| <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>GDP</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td></tr></tbody></table> | <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>GDP</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td></tr></tbody></table> | 과실비율 조정예시 |  | B 중대한 | 과실 | +20 |\n",
       "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_389_table_1.png",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20460,7 +20460,7 @@
       "subsection": "진로변경 사고",
       "page": 389,
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20474,7 +20474,7 @@
       "page": 389,
       "heading": "※사고발생, 손해확대와의 인과관계를 감안하여 기본 과실비율을 가(+), 감(-) 조정 가능합니다.",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20488,7 +20488,7 @@
       "page": 389,
       "heading": "사고 상황",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20502,7 +20502,7 @@
       "page": 389,
       "heading": "기본 과실비율 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20516,7 +20516,7 @@
       "page": 389,
       "heading": "수정요소(인과관계를 감안한 과실비율 조정) 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20530,7 +20530,7 @@
       "page": 389,
       "heading": "· 도로교통법 제13조(차마의 통행)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20544,7 +20544,7 @@
       "page": 389,
       "heading": "도로교통법 제19조(안전거리 확보 등)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20558,7 +20558,7 @@
       "page": 389,
       "heading": "도로교통법 제38조(차의 신호)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20572,7 +20572,7 @@
       "page": 389,
       "heading": "도로교통법 시행규칙 별표6",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20586,7 +20586,7 @@
       "page": 389,
       "heading": "참고 판례",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20600,7 +20600,7 @@
       "description": "| 차44-1 | 직진 대 도로가 아닌 장소에서 도로로 우회전 진입 | 직진 대 도로가 아닌 장소에서 도로로 우회전 진입 | 직진 대 도로가 아닌 장소에서 도로로 우회전 진입 | 직진 대 도로가 아닌 장소에서 도로로 우회전 진입 | 직진 대 도로가 아닌 장소에서 도로로 우회전 진입 | 직진 대 도로가 아닌 장소에서 도로로 우회전 진입 |\n| --- | --- | --- | --- | --- | --- | --- |\n| 차44-1 | 직진 (A) (B) 도로가 아닌 장소에서 도로로 진입 | 직진 (A) (B) 도로가 아닌 장소에서 도로로 진입 | 직진 (A) (B) 도로가 아닌 장소에서 도로로 진입 | 직진 (A) (B) 도로가 아닌 장소에서 도로로 진입 | 직진 (A) (B) 도로가 아닌 장소에서 도로로 진입 | 직진 (A) (B) 도로가 아닌 장소에서 도로로 진입 |\n|  | ![image](/image/placeholder)\nA | 기본 과실비율 | 기본 과실비율 | 기본 과실비율 | A20 | B80 |\n| 과실비율 조정예시 | ![image](/image/placeholder)\nA |  | A 현저한 과실 | +10 |  |  |\n| 과실비율 조정예시 | ![image](/image/placeholder)\nA | A중대한 과실 | +20 |  |  |  |\n| 과실비율 조정예시 | ![image](/image/placeholder)\nA |  | B 서행불이행 |  | +10 |  |\n| 과실비율 조정예시 | ![image](/image/placeholder)\nA |  | B 현저한 과실 |  | +10 |  |\n| 과실비율 조정예시 | ![image](/image/placeholder)\nA |  | B 중대한 과실 |  | +20 |  |\n| 과실비율 조정예시 | ![image](/image/placeholder)\nA |  | B 차량 앞부분 내밀고 대기 |  | -10 |  |\n",
       "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_392_table_1.png",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20612,7 +20612,7 @@
       "subsection": "도로로 진입하는 차와 직진차와의 사고",
       "page": 392,
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20626,7 +20626,7 @@
       "page": 392,
       "heading": "- ※사고발생, 손해확대와의 인과관계를 감안하여 기본 과실비율을 가(+), 감(-)조정 가능합니다.",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20640,7 +20640,7 @@
       "page": 392,
       "heading": "사고 상황",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20654,7 +20654,7 @@
       "page": 392,
       "heading": "기본 과실비율 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20668,7 +20668,7 @@
       "page": 392,
       "heading": "수정요소(인과관계를 감안한 과실비율 조정) 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20682,7 +20682,7 @@
       "page": 392,
       "heading": "활용시 참고 사항",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20696,7 +20696,7 @@
       "page": 392,
       "heading": "관련 법규",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20710,7 +20710,7 @@
       "page": 392,
       "heading": "참고 판례",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20724,7 +20724,7 @@
       "description": "| 차45-1 | 황색실선 추월 직진(좌회전) 대 선행 좌회전 | 황색실선 추월 직진(좌회전) 대 선행 좌회전 | 황색실선 추월 직진(좌회전) 대 선행 좌회전 | 황색실선 추월 직진(좌회전) 대 선행 좌회전 | 황색실선 추월 직진(좌회전) 대 선행 좌회전 | 황색실선 추월 직진(좌회전) 대 선행 좌회전 |\n| --- | --- | --- | --- | --- | --- | --- |\n| 차45-1 | (A) 추월 직진(또는 좌회전) (B) 좌회전 | (A) 추월 직진(또는 좌회전) (B) 좌회전 | (A) 추월 직진(또는 좌회전) (B) 좌회전 | (A) 추월 직진(또는 좌회전) (B) 좌회전 | (A) 추월 직진(또는 좌회전) (B) 좌회전 | (A) 추월 직진(또는 좌회전) (B) 좌회전 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 기본 과실비율 | 기본 과실비율 | 기본 과실비율 | A100 | BO |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 |  | A 현저한 과실 | +10 |  |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 |  | A중대한 과실 | +20 |  |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | ① | B 진로변경신호 지연 |  | +10 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | ① | B진로변경신호 불이행 |  | +10 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | ② | B 미리 중앙선에 다가서지 않음 |  | +10 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 |  | B 현저한 과실 |  | +10 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 |  | B 중대한 과실 |  | +20 |\n",
       "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_394_table_1.png",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20736,7 +20736,7 @@
       "subsection": "앞지르기 금지 장소에서 추월사고",
       "page": 394,
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20750,7 +20750,7 @@
       "page": 394,
       "heading": "- ※사고발생, 손해확대와의 인과관계를 감안하여 기본 과실비율을 가(+), 감(-) 조정 가능합니다.",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20764,7 +20764,7 @@
       "page": 394,
       "heading": "사고 상황",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20778,7 +20778,7 @@
       "page": 394,
       "heading": "기본 과실비율 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20792,7 +20792,7 @@
       "page": 394,
       "heading": "수정요소(인과관계를 감안한 과실비율 조정) 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20806,7 +20806,7 @@
       "page": 394,
       "heading": "활용시 참고 사항",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20820,7 +20820,7 @@
       "page": 394,
       "heading": "관련 법규",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20834,7 +20834,7 @@
       "page": 394,
       "heading": "도로교통법 제21조(앞지르기 방법 등)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20848,7 +20848,7 @@
       "page": 394,
       "heading": "도로교통법 제22조(앞지르기 금지의 시기 및 장소)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20862,7 +20862,7 @@
       "page": 394,
       "heading": "도로교통법 제25조(교차로 통행방법)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20876,7 +20876,7 @@
       "page": 394,
       "heading": "⊙ 도로교통법 제38조(차의 신호)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20890,7 +20890,7 @@
       "page": 394,
       "heading": "도로교통법 시행령 별표 2(신호의 시기 및 방법 [제21조 관련])",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20904,7 +20904,7 @@
       "page": 394,
       "heading": "⊙ 서울중앙지방법원 2016.10.21. 선고 2016나36026 판결",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20918,7 +20918,7 @@
       "description": "| 차45-2 | 동일차로 내 우측 급진입 추월 이륜차 대 선행 우회전 |\n| --- | --- |\n| 차45-2 | (A) 우측 급진입 추월 (B) 선행 우회전 <table><thead></thead><tbody><tr><td rowspan=\"12\">과실비율 조정예시</td><td>기본 과실비율</td><td>A90 B10</td></tr><tr><td>A 도로경계 침범</td><td>+10</td></tr><tr><td>A 진로변경 진입 직후 추월</td><td>+10</td></tr><tr><td>A 현저한 과실</td><td>+10</td></tr><tr><td>A 중대한 과실</td><td>+20</td></tr><tr><td>B 신호불이행·지연</td><td>+10</td></tr><tr><td>B 서행불이행</td><td>+10</td></tr><tr><td>B 대우회전</td><td>+10</td></tr><tr><td>B 급우회전</td><td>+10</td></tr><tr><td>B 현저한 과실</td><td>+10</td></tr><tr><td>B 중대한 과실</td><td>+20</td></tr><tr><td>B 정차 후 출발</td><td>+20</td></tr></tbody></table> |\n",
       "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_398_table_1.png",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20930,7 +20930,7 @@
       "subsection": "앞지르기 금지 장소에서 추월사고",
       "page": 398,
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20944,7 +20944,7 @@
       "page": 398,
       "heading": "※사고발생, 손해확대와의 인과관계를 감안하여 기본 과실비율을 가(+), 감(-) 조정 가능합니다.",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20958,7 +20958,7 @@
       "page": 398,
       "heading": "사고 상황",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20972,7 +20972,7 @@
       "page": 398,
       "heading": "기본 과실비율 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -20986,7 +20986,7 @@
       "page": 398,
       "heading": "수정요소(인과관계를 감안한 과실비율 조정) 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21000,7 +21000,7 @@
       "page": 398,
       "heading": "도로교통법 제14조(차로의 설치 등)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21014,7 +21014,7 @@
       "page": 398,
       "heading": "도로교통법 제19조(안전거리 확보 등)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21028,7 +21028,7 @@
       "page": 398,
       "heading": "도로교통법 21조(앞지르기 방법 등)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21042,7 +21042,7 @@
       "page": 398,
       "heading": "참고 판례",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21056,7 +21056,7 @@
       "page": 398,
       "heading": "서울남부지방법원 2018. 9. 7. 선고 2018나50626 판결",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21070,7 +21070,7 @@
       "description": "| 차45-3 | 선행 직진 대 후행 좌측 앞지르기(금지 장소) | 선행 직진 대 후행 좌측 앞지르기(금지 장소) | 선행 직진 대 후행 좌측 앞지르기(금지 장소) | 선행 직진 대 후행 좌측 앞지르기(금지 장소) | 선행 직진 대 후행 좌측 앞지르기(금지 장소) |\n| --- | --- | --- | --- | --- | --- |\n| 차45-3 | 선행 직진 (A) (B) 후행 추월(금지장소) | 선행 직진 (A) (B) 후행 추월(금지장소) | 선행 직진 (A) (B) 후행 추월(금지장소) | 선행 직진 (A) (B) 후행 추월(금지장소) | 선행 직진 (A) (B) 후행 추월(금지장소) |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 기본 과실비율 | 기본 과실비율 | A0 | B100 |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 | A 현저한 과실 | +10 |  |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 | A 중대한 과실 | +20 |  |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 | B 현저한 과실 |  | +10 |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 | B 중대한 과실 |  | +20 |\n",
       "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_401_table_1.png",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21082,7 +21082,7 @@
       "subsection": "앞지르기 금지 장소에서 추월사고",
       "page": 401,
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21096,7 +21096,7 @@
       "page": 401,
       "heading": "- ※사고발생, 손해확대와의 인과관계를 감안하여 기본 과실비율을 가(+), 감(-) 조정 가능합니다.",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21110,7 +21110,7 @@
       "page": 401,
       "heading": "사고 상황",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21124,7 +21124,7 @@
       "page": 401,
       "heading": "기본 과실비율 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21138,7 +21138,7 @@
       "page": 401,
       "heading": "수정요소(인과관계를 감안한 과실비율 조정) 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21152,7 +21152,7 @@
       "page": 401,
       "heading": "활용시 참고 사항",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21166,7 +21166,7 @@
       "page": 401,
       "heading": "관련 법규",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21180,7 +21180,7 @@
       "page": 401,
       "heading": "도로교통법 제21조(앞지르기 방법 등)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21194,7 +21194,7 @@
       "page": 401,
       "heading": "도로교통법 제60조(갓길 통행금지 등)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21208,7 +21208,7 @@
       "page": 401,
       "heading": "도로교통법 제22조 (앞지르기 금지 장소)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21222,7 +21222,7 @@
       "description": "| 차45-4 | 정체중 후행 중앙선 침범 추월 대 선행 중앙선침범 추월 | 정체중 후행 중앙선 침범 추월 대 선행 중앙선침범 추월 | 정체중 후행 중앙선 침범 추월 대 선행 중앙선침범 추월 | 정체중 후행 중앙선 침범 추월 대 선행 중앙선침범 추월 | 정체중 후행 중앙선 침범 추월 대 선행 중앙선침범 추월 | 정체중 후행 중앙선 침범 추월 대 선행 중앙선침범 추월 |\n| --- | --- | --- | --- | --- | --- | --- |\n| 차45-4 | 중앙선 침범 추월(후방) (A) (B) 중앙선 침범 추월(전방) | 중앙선 침범 추월(후방) (A) (B) 중앙선 침범 추월(전방) | 중앙선 침범 추월(후방) (A) (B) 중앙선 침범 추월(전방) | 중앙선 침범 추월(후방) (A) (B) 중앙선 침범 추월(전방) | 중앙선 침범 추월(후방) (A) (B) 중앙선 침범 추월(전방) | 중앙선 침범 추월(후방) (A) (B) 중앙선 침범 추월(전방) |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 기본 과실비율 | 기본 과실비율 | 기본 과실비율 | A60 | B40 |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | A 현저한 과실 | +10 |  |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | A 중대한 과실 | +20 |  |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | B 현저한 과실 |  | +10 |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | B 중대한 과실 |  | +20 |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 | ① | B 신호이행 |  | -5 |\n",
       "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_404_table_1.png",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21234,7 +21234,7 @@
       "subsection": "앞지르기 금지 장소에서 추월사고",
       "page": 404,
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21248,7 +21248,7 @@
       "page": 404,
       "heading": "- ※사고발생, 손해확대와의 인과관계를 감안하여 기본 과실비율을 가(+), 감(-) 조정 가능합니다.",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21262,7 +21262,7 @@
       "page": 404,
       "heading": "사고 상황",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21276,7 +21276,7 @@
       "page": 404,
       "heading": "기본 과실비율 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21290,7 +21290,7 @@
       "page": 404,
       "heading": "수정요소(인과관계를 감안한 과실비율 조정) 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21304,7 +21304,7 @@
       "page": 404,
       "heading": "활용시 참고 사항",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21318,7 +21318,7 @@
       "page": 404,
       "heading": "도로교통법 제13조 (차마의 통행)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21332,7 +21332,7 @@
       "page": 404,
       "heading": "도로교통법 제21조(앞지르기 방법 등)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21346,7 +21346,7 @@
       "page": 404,
       "heading": "도로교통법 제38조 (차의 신호)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21360,7 +21360,7 @@
       "page": 404,
       "heading": "참고 판례",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21374,7 +21374,7 @@
       "description": "| 차45-5 | 선행 직진 대 후행 근접거리 추월(황색점선 중앙선) | 선행 직진 대 후행 근접거리 추월(황색점선 중앙선) | 선행 직진 대 후행 근접거리 추월(황색점선 중앙선) | 선행 직진 대 후행 근접거리 추월(황색점선 중앙선) | 선행 직진 대 후행 근접거리 추월(황색점선 중앙선) | 선행 직진 대 후행 근접거리 추월(황색점선 중앙선) | 선행 직진 대 후행 근접거리 추월(황색점선 중앙선) |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| 차45-5 | 선행 직진 (A) (B) 후행 근접거리 추월 | 선행 직진 (A) (B) 후행 근접거리 추월 | 선행 직진 (A) (B) 후행 근접거리 추월 | 선행 직진 (A) (B) 후행 근접거리 추월 | 선행 직진 (A) (B) 후행 근접거리 추월 | 선행 직진 (A) (B) 후행 근접거리 추월 | 선행 직진 (A) (B) 후행 근접거리 추월 |\n|  |  | A | 기본 과실비율 | 기본 과실비율 | 기본 과실비율 | A0 | B100 |\n| 과실비율 조정예시 | A | A | 진로양보의무 위반 | +10 |  |  |  |\n| 과실비율 조정예시 | ② | A | A앞지르기방해금지위반 | +20 |  |  |  |\n| 과실비율 조정예시 |  | A | A 현저한 과실 | +10 |  |  |  |\n| 과실비율 조정예시 |  | A | A중대한 과실 | +20 |  |  |  |\n| 과실비율 조정예시 | ③ | A | B 앞지르기 위험 장소 B 현저한 과실 |  | +10 |  |  |\n| 과실비율 조정예시 |  | A | B 중대한 과실 |  | +10 +20 |  |  |\n",
       "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_406_table_1.png",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21386,7 +21386,7 @@
       "subsection": "앞지르기 금지 장소에서 추월사고",
       "page": 406,
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21400,7 +21400,7 @@
       "page": 406,
       "heading": "※사고발생, 손해확대와의 인과관계를 감안하여 기본 과실비율을 가(+), 감(-) 조정 가능합니다.",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21414,7 +21414,7 @@
       "page": 406,
       "heading": "사고 상황",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21428,7 +21428,7 @@
       "page": 406,
       "heading": "기본 과실비율 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21442,7 +21442,7 @@
       "page": 406,
       "heading": "수정요소(인과관계를 감안한 과실비율 조정) 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21456,7 +21456,7 @@
       "page": 406,
       "heading": "도로교통법 제20조(진로양보의무)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21470,7 +21470,7 @@
       "page": 406,
       "heading": "도로교통법 시행규칙 별표 6",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21484,7 +21484,7 @@
       "page": 406,
       "heading": "참고 판례",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21498,7 +21498,7 @@
       "description": "| 차45-6 | 후행 흰색 실선 앞지르기 대 선행 직진 | 후행 흰색 실선 앞지르기 대 선행 직진 | 후행 흰색 실선 앞지르기 대 선행 직진 | 후행 흰색 실선 앞지르기 대 선행 직진 | 후행 흰색 실선 앞지르기 대 선행 직진 | 후행 흰색 실선 앞지르기 대 선행 직진 | 후행 흰색 실선 앞지르기 대 선행 직진 |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| 차45-6 | 실선 추월 (A) (B) 선행 직진 | 실선 추월 (A) (B) 선행 직진 | 실선 추월 (A) (B) 선행 직진 | 실선 추월 (A) (B) 선행 직진 | 실선 추월 (A) (B) 선행 직진 | 실선 추월 (A) (B) 선행 직진 | 실선 추월 (A) (B) 선행 직진 |\n| ![image](/image/placeholder)\nB\nA | ![image](/image/placeholder)\nB\nA | ![image](/image/placeholder)\nB\nA | 기본 과실비율 | 기본 과실비율 | 기본 과실비율 | A100 | BO |\n| ![image](/image/placeholder)\nB\nA | ![image](/image/placeholder)\nB\nA | ![image](/image/placeholder)\nB\nA | 과실비율 조정예시 | A | 현저한 과실 | +10 |  |\n| ![image](/image/placeholder)\nB\nA | ![image](/image/placeholder)\nB\nA | ![image](/image/placeholder)\nB\nA | 과실비율 조정예시 |  | A중대한 과실 | +20 |  |\n| ![image](/image/placeholder)\nB\nA | ![image](/image/placeholder)\nB\nA | ![image](/image/placeholder)\nB\nA | 과실비율 조정예시 | ① | B 진로양보의무 | 위반 | +10 |\n| ![image](/image/placeholder)\nB\nA | ![image](/image/placeholder)\nB\nA | ![image](/image/placeholder)\nB\nA | 과실비율 조정예시 | ② | B앞지르기방해금지 | 위반 | +20 |\n| ![image](/image/placeholder)\nB\nA | ![image](/image/placeholder)\nB\nA | ![image](/image/placeholder)\nB\nA | 과실비율 조정예시 | B | 현저한 과실 |  | +10 |\n| ![image](/image/placeholder)\nB\nA | ![image](/image/placeholder)\nB\nA | ![image](/image/placeholder)\nB\nA | 과실비율 조정예시 |  | B중대한 과실 |  | +20 |\n",
       "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_409_table_1.png",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21510,7 +21510,7 @@
       "subsection": "앞지르기 금지 장소에서 추월사고",
       "page": 409,
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21524,7 +21524,7 @@
       "page": 409,
       "heading": "※사고발생, 손해확대와의 인과관계를 감안하여 기본 과실비율을 가(+), 감(-) 조정 가능합니다.",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21538,7 +21538,7 @@
       "page": 409,
       "heading": "사고 상황",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21552,7 +21552,7 @@
       "page": 409,
       "heading": "기본 과실비율 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21566,7 +21566,7 @@
       "page": 409,
       "heading": "수정요소(인과관계를 감안한 과실비율 조정) 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21580,7 +21580,7 @@
       "page": 409,
       "heading": "활용시 참고 사항",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21594,7 +21594,7 @@
       "page": 409,
       "heading": "관련 법규",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21608,7 +21608,7 @@
       "page": 409,
       "heading": "도로교통법 제19조(안전거리 확보 등)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21622,7 +21622,7 @@
       "page": 409,
       "heading": "도로교통법 제20조(진로 양보의 의무)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21636,7 +21636,7 @@
       "page": 409,
       "heading": "도로교통법 제21조(앞지르기 방법 등)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21650,7 +21650,7 @@
       "page": 409,
       "heading": "도로교통법 제38조(차의 신호)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21664,7 +21664,7 @@
       "page": 409,
       "heading": "(6) 선행 유턴 대 후행 유턴 사고 [차46]",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21678,7 +21678,7 @@
       "description": "| 차46-1 | 양 차량 유턴 사고 | 양 차량 유턴 사고 | 양 차량 유턴 사고 | 양 차량 유턴 사고 | 양 차량 유턴 사고 | 양 차량 유턴 사고 |\n| --- | --- | --- | --- | --- | --- | --- |\n| 차46-1 | (A) 유턴(선행) (B) 유턴(후행) (가) 급 유턴 (나) 동시 유턴 | (A) 유턴(선행) (B) 유턴(후행) (가) 급 유턴 (나) 동시 유턴 | (A) 유턴(선행) (B) 유턴(후행) (가) 급 유턴 (나) 동시 유턴 | (A) 유턴(선행) (B) 유턴(후행) (가) 급 유턴 (나) 동시 유턴 | (A) 유턴(선행) (B) 유턴(후행) (가) 급 유턴 (나) 동시 유턴 | (A) 유턴(선행) (B) 유턴(후행) (가) 급 유턴 (나) 동시 유턴 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | (가) 기본 과실비율 (나) | (가) 기본 과실비율 (나) | (가) 기본 과실비율 (나) | A0 A20 | B100 B80 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | ① | A유턴구역을 벗어난유턴 | +10 |  |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | ② | A 현저한 과실 | +10 |  |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 |  | A중대한 과실 | +20 |  |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | ① | B유턴구역을 벗어난유턴 |  | +10 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 |  | B 현저한 과실 |  | +10 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 |  | B중대한 과실 |  | +20 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | ③ | B회전종료 직후의사고 |  | -10 |\n",
       "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_412_table_1.png",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21690,7 +21690,7 @@
       "subsection": "선행 유턴 대 후행 유턴 사고",
       "page": 412,
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21704,7 +21704,7 @@
       "page": 412,
       "heading": "※사고발생, 손해확대와의 인과관계를 감안하여 기본 과실비율을 가(+), 감(-) 조정 가능합니다.",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21718,7 +21718,7 @@
       "page": 412,
       "heading": "※舊 254-2, 392-2, 393-2 기준",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21732,7 +21732,7 @@
       "page": 412,
       "heading": "사고 상황",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21746,7 +21746,7 @@
       "page": 412,
       "heading": "기본 과실비율 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21760,7 +21760,7 @@
       "page": 412,
       "heading": "수정요소(인과관계를 감안한 과실비율 조정) 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21774,7 +21774,7 @@
       "page": 412,
       "heading": "활용시 참고 사항",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21788,7 +21788,7 @@
       "page": 412,
       "heading": "관련 법규",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21802,7 +21802,7 @@
       "description": "| 차47-1 | 정차 후 출발 대 직진(우회전) 사고 | 정차 후 출발 대 직진(우회전) 사고 | 정차 후 출발 대 직진(우회전) 사고 | 정차 후 출발 대 직진(우회전) 사고 | 정차 후 출발 대 직진(우회전) 사고 | 정차 후 출발 대 직진(우회전) 사고 |\n| --- | --- | --- | --- | --- | --- | --- |\n| 차47-1 | (A) 정차 후 출발 (B) 직진(우회전) 위해 추월 | (A) 정차 후 출발 (B) 직진(우회전) 위해 추월 | (A) 정차 후 출발 (B) 직진(우회전) 위해 추월 | (A) 정차 후 출발 (B) 직진(우회전) 위해 추월 | (A) 정차 후 출발 (B) 직진(우회전) 위해 추월 | (A) 정차 후 출발 (B) 직진(우회전) 위해 추월 |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 기본 과실비율 | 기본 과실비율 | 기본 과실비율 | A80 | B20 |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | A 현저한 과실 | +10 |  |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | A중대한 과실 | +20 |  |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | B 진로변경 신호불이행·지연 |  | +10 |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | B 현저한 과실 |  | +10 |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | B 중대한 과실 |  | +20 |\n",
       "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_414_table_1.png",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21814,7 +21814,7 @@
       "subsection": "정차 후 출발 대 직진 사고",
       "page": 414,
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21828,7 +21828,7 @@
       "page": 414,
       "heading": "- ※사고발생, 손해확대와의 인과관계를 감안하여 기본 과실비율을 가(+), 감(-) 조정 가능합니다.",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21842,7 +21842,7 @@
       "page": 414,
       "heading": "사고 상황",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21856,7 +21856,7 @@
       "page": 414,
       "heading": "기본 과실비율 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21870,7 +21870,7 @@
       "page": 414,
       "heading": "수정요소(인과관계를 감안한 과실비율 조정) 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21884,7 +21884,7 @@
       "page": 414,
       "heading": "활용시 참고 사항",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21898,7 +21898,7 @@
       "page": 414,
       "heading": "도로교통법 제2조(정의)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21912,7 +21912,7 @@
       "page": 414,
       "heading": "도로교통법 제19조(안전거리 확보 등)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21926,7 +21926,7 @@
       "page": 414,
       "heading": "도로교통법 제32조(정차 및 주차의 금지)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21940,7 +21940,7 @@
       "page": 414,
       "heading": "도로교통법 제38조(차의 신호)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21954,7 +21954,7 @@
       "description": "| 차47-2 | 정차후 출발차량과 그 앞으로 진로변경(교차로 아닌 곳) | 정차후 출발차량과 그 앞으로 진로변경(교차로 아닌 곳) | 정차후 출발차량과 그 앞으로 진로변경(교차로 아닌 곳) | 정차후 출발차량과 그 앞으로 진로변경(교차로 아닌 곳) | 정차후 출발차량과 그 앞으로 진로변경(교차로 아닌 곳) |\n| --- | --- | --- | --- | --- | --- |\n| 차47-2 | (A) 정차후 출발 (B) 진로변경 | (A) 정차후 출발 (B) 진로변경 | (A) 정차후 출발 (B) 진로변경 | (A) 정차후 출발 (B) 진로변경 | (A) 정차후 출발 (B) 진로변경 |\n| ![image](/image/placeholder)\n정차후 출발 | ![image](/image/placeholder)\n정차후 출발 | 기본 과실비율 | 기본 과실비율 | A70 | B30 |\n| ![image](/image/placeholder)\n정차후 출발 | ![image](/image/placeholder)\n정차후 출발 | 과실비율 조정예시 | A 현저한 과실 | +10 |  |\n| ![image](/image/placeholder)\n정차후 출발 | ![image](/image/placeholder)\n정차후 출발 | 과실비율 조정예시 | A 중대한 과실 | +20 |  |\n| ![image](/image/placeholder)\n정차후 출발 | ![image](/image/placeholder)\n정차후 출발 | 과실비율 조정예시 | A 어린이 통학버스 차량인 경우 | -40 |  |\n| ![image](/image/placeholder)\n정차후 출발 | ![image](/image/placeholder)\n정차후 출발 | 과실비율 조정예시 | B 진로변경(앞지르기) 신호불이행·지연 |  | +10 |\n| ![image](/image/placeholder)\n정차후 출발 | ![image](/image/placeholder)\n정차후 출발 | 과실비율 조정예시 | B 현저한 과실 |  | +10 |\n| ![image](/image/placeholder)\n정차후 출발 | ![image](/image/placeholder)\n정차후 출발 | 과실비율 조정예시 | B 중대한 과실 |  | +20 |\n",
       "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_417_table_1.png",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21966,7 +21966,7 @@
       "subsection": "정차 후 출발 대 직진 사고",
       "page": 417,
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21980,7 +21980,7 @@
       "page": 417,
       "heading": "※사고발생, 손해확대와의 인과관계를 감안하여 기본 과실비율을 가(+), 감(-) 조정 가능합니다.",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -21994,7 +21994,7 @@
       "page": 417,
       "heading": "사고 상황",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22008,7 +22008,7 @@
       "page": 417,
       "heading": "기본 과실비율 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22022,7 +22022,7 @@
       "page": 417,
       "heading": "수정요소(인과관계를 감안한 과실비율 조정) 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22036,7 +22036,7 @@
       "page": 417,
       "heading": "도로교통법 제2조(정의)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22050,7 +22050,7 @@
       "page": 417,
       "heading": "도로교통법 제19조(안전거리 확보 등)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22064,7 +22064,7 @@
       "page": 417,
       "heading": "도로교통법 제21조(앞지르기 방법 등)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22078,7 +22078,7 @@
       "page": 417,
       "heading": "도로교통법 제38조(차의 신호)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22092,7 +22092,7 @@
       "page": 417,
       "heading": "참고 판례",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22106,7 +22106,7 @@
       "description": "| 차47-3 | 버스정류장에서 정차후 출발 버스와 그 앞으로 진로변경 |\n| --- | --- |\n| 차47-3 | 정차 후 출발 버스차량 (A) (B) 추월 진로변경(추월해서 A차량 앞으로 들어옴) <table><thead></thead><tbody><tr><td rowspan=\"6\">A 정차후</td><td rowspan=\"6\" colspan=\"2\">기본 과실비율 BUS 과실비율 조정예시</td><td rowspan=\"6\"></td><td colspan=\"2\">B60</td><td>A40</td></tr><tr><td>A 현저한 과실</td><td>+10</td><td></td></tr><tr><td>A 중대한 과실</td><td>+20</td><td></td></tr><tr><td>B 진로변경(앞지르기) 신호불이행·지연</td><td></td><td>+10</td></tr><tr><td>B 현저한 과실</td><td>출발</td><td>+10</td></tr><tr><td>B 중대한 과실</td><td></td><td>+20</td></tr></tbody></table> |\n",
       "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_420_table_1.png",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22118,7 +22118,7 @@
       "subsection": "정차 후 출발 대 직진 사고",
       "page": 420,
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22132,7 +22132,7 @@
       "page": 420,
       "heading": "※사고발생, 손해확대와의 인과관계를 감안하여 기본 과실비율을 가(+), 감(-) 조정 가능합니다.",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22146,7 +22146,7 @@
       "page": 420,
       "heading": "사고 상황",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22160,7 +22160,7 @@
       "page": 420,
       "heading": "기본 과실비율 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22174,7 +22174,7 @@
       "page": 420,
       "heading": "수정요소(인과관계를 감안한 과실비율 조정) 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22188,7 +22188,7 @@
       "page": 420,
       "heading": "도로교통법 제2조(정의)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22202,7 +22202,7 @@
       "page": 420,
       "heading": "도로교통법 제18조(횡단 등의 금지)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22216,7 +22216,7 @@
       "page": 420,
       "heading": "도로교통법 제19조(안전거리 확보 등)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22230,7 +22230,7 @@
       "page": 420,
       "heading": "도로교통법 제21조(앞지르기 방법 등)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22244,7 +22244,7 @@
       "page": 420,
       "heading": "도로교통법 제38조(차의 신호)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22258,7 +22258,7 @@
       "page": 420,
       "heading": "(8) 낙하물 사고 [차48]",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22272,7 +22272,7 @@
       "description": "| 차48-1 | 선행차량의 적재물 낙하 | 선행차량의 적재물 낙하 | 선행차량의 적재물 낙하 | 선행차량의 적재물 낙하 | 선행차량의 적재물 낙하 | 선행차량의 적재물 낙하 |\n| --- | --- | --- | --- | --- | --- | --- |\n| 차48-1 | 후행 (A) (B) 선행(적재물 낙하) | 후행 (A) (B) 선행(적재물 낙하) | 후행 (A) (B) 선행(적재물 낙하) | 후행 (A) (B) 선행(적재물 낙하) | 후행 (A) (B) 선행(적재물 낙하) | 후행 (A) (B) 선행(적재물 낙하) |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 기본 과실비율 | 기본 과실비율 | 기본 과실비율 | A0 | B100 |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | A 전용차로 위반 | +10 |  |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 | ② | A 현저한 과실 | +10 |  |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 | ② | A 중대한 과실 | +20 |  |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 | ③ | A 안전거리 미확보 | +20 |  |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | B 전용차로 위반 |  | +10 |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | B 야간, 악천후 등 시야확보 곤란 |  | +10 |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | B 추월차선 |  | +10 |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | B 현저한 과실 |  | +10 |\n| ![image](/image/placeholder)\nA | ![image](/image/placeholder)\nA | 과실비율 조정예시 |  | B 중대한 과실 |  | +20 |\n",
       "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_423_table_1.png",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22284,7 +22284,7 @@
       "subsection": "낙하물 사고",
       "page": 423,
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22298,7 +22298,7 @@
       "page": 423,
       "heading": "- ※사고발생, 손해확대와의 인과관계를 감안하여 기본 과실비율을 가(+), 감(-) 조정 가능합니다.",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22312,7 +22312,7 @@
       "page": 423,
       "heading": "사고 상황",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22326,7 +22326,7 @@
       "page": 423,
       "heading": "기본 과실비율 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22340,7 +22340,7 @@
       "page": 423,
       "heading": "수정요소(인과관계를 감안한 과실비율 조정) 해설",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22354,7 +22354,7 @@
       "page": 423,
       "heading": "활용시 참고 사항",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22368,7 +22368,7 @@
       "page": 423,
       "heading": "관련 법규",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22382,7 +22382,7 @@
       "page": 423,
       "heading": "도로교통법 제19조(안전거리 확보 등)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22396,7 +22396,7 @@
       "page": 423,
       "heading": "도로교통법 제39조(승차 또는 적재의 방법과 제한)",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22410,7 +22410,7 @@
       "page": 423,
       "heading": "참고 판례",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22424,7 +22424,7 @@
       "page": 423,
       "heading": "서울중앙지방법원 2016.11.11. 선고 2016나31823 판결",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22438,7 +22438,7 @@
       "page": 423,
       "heading": "서울중앙지방법원 2020. 1. 16. 선고 2019나27351 판결",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22452,7 +22452,7 @@
       "page": 423,
       "heading": "라. 기타 유형의 사고",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -22466,7 +22466,7 @@
       "page": 423,
       "heading": "주차장 사고 [차51]",
       "party_type": "자동차",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29112,7 +29112,7 @@
       "description": "| 거31-1 | 자동차 추돌 사고 | 자동차 추돌 사고 | 자동차 추돌 사고 | 자동차 추돌 사고 | 자동차 추돌 사고 | 자동차 추돌 사고 |\n| --- | --- | --- | --- | --- | --- | --- |\n| 거31-1 | (A) 피추돌 (B) 추돌 | (A) 피추돌 (B) 추돌 | (A) 피추돌 (B) 추돌 | (A) 피추돌 (B) 추돌 | (A) 피추돌 (B) 추돌 | (A) 피추돌 (B) 추돌 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 기본 과실비율 | 기본 과실비율 | 기본 과실비율 | A0 | B100 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 |  | A야간·기타 시야장애 | +5 |  |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 |  | A인근에 자전거도로가 있는 경우 |  | +5 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 |  | A급 진로변경 | +10 |  |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 |  | A우측가장자리로 가지않음 |  | +10 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | ① | A이유 없는 급정지 | +10 |  |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | A | 현저한 과실 |  | +5 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 |  | A중대한 과실 | +10 |  |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | A | 어린이·노인·장애인 | -10 |  |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | B | 현저한 과실 |  | +10 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 |  | B 중대한 과실 |  | +20 |\n",
       "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_569_table_1.png",
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29124,7 +29124,7 @@
       "subsection": "안전거리미확보로 인한 추돌사고",
       "page": 569,
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29138,7 +29138,7 @@
       "page": 569,
       "heading": "※사고발생, 손해확대와의 인과관계를 감안하여 기본 과실비율을 가(+), 감(-) 조정 가능합니다. / ※舊 450 기준",
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29152,7 +29152,7 @@
       "description": "| 거31-2 | 거31-2 | 자전거 추돌 사고 | 자전거 추돌 사고 | 자전거 추돌 사고 | 자전거 추돌 사고 | 자전거 추돌 사고 | 자전거 추돌 사고 | 자전거 추돌 사고 | 자전거 추돌 사고 |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| 거31-2 | 거31-2 | 추돌 (A) (B) 피추돌 | 추돌 (A) (B) 피추돌 | 추돌 (A) (B) 피추돌 | 추돌 (A) (B) 피추돌 | 추돌 (A) (B) 피추돌 | 추돌 (A) (B) 피추돌 | 추돌 (A) (B) 피추돌 | 추돌 (A) (B) 피추돌 |\n|  |  |  |  |  | 기본 과실비율 | 기본 과실비율 | 기본 과실비율 | A100 | BO |\n| 과실비율 조정예시 | A | 현저한 과실 | +5 |  |  |  |  |  |  |\n| 과실비율 조정예시 |  | A중대한 과실 | +10 |  |  |  |  |  |  |\n| 과실비율 조정예시 | A | 어린이·노인·장애인 | -10 |  |  |  |  |  |  |\n| 과실비율 조정예시 |  | A인근에 자전거도로가 있는 경우 | 비적용 | 비적용 |  |  |  |  |  |\n| 과실비율 조정예시 |  | A 우측 가장자리로 가지 않음 | 비적용 | 비적용 |  |  |  |  |  |\n| 과실비율 조정예시 | B | 제동 등 고장 |  | +10 |  |  |  |  |  |\n| 과실비율 조정예시 |  | B급 진로변경 |  | +20 |  |  |  |  |  |\n| 과실비율 조정예시 | ① | B 이유 없는 급정지 |  | +30 |  |  |  |  |  |\n| 과실비율 조정예시 |  | B 현저한 과실 B 중대한 과실 |  | +10 +20 |  |  |  |  |  |\n",
       "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_569_table_2.png",
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29164,7 +29164,7 @@
       "subsection": "안전거리미확보로 인한 추돌사고",
       "page": 569,
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29178,7 +29178,7 @@
       "page": 569,
       "heading": "※사고발생, 손해확대와의 인과관계를 감안하여 기본 과실비율을 가(+), 감(-) 조정 가능합니다. / ※舊 451 기준",
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29192,7 +29192,7 @@
       "page": 569,
       "heading": "수정요소(인과관계를 감안한 과실비율 조정) 해설",
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29206,7 +29206,7 @@
       "page": 569,
       "heading": "관련 법규",
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29220,7 +29220,7 @@
       "page": 569,
       "heading": "참고 판례",
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29234,7 +29234,7 @@
       "page": 569,
       "heading": "(2) 진로변경 사고 [거32]",
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29248,7 +29248,7 @@
       "description": "| 거32-1 | 선행 진로변경 자전거 대 후행 직진 자동차 | 선행 진로변경 자전거 대 후행 직진 자동차 | 선행 진로변경 자전거 대 후행 직진 자동차 | 선행 진로변경 자전거 대 후행 직진 자동차 | 선행 진로변경 자전거 대 후행 직진 자동차 |\n| --- | --- | --- | --- | --- | --- |\n| 거32-1 | 좌 또는 우로 진로변경 (A) (B) 직진 | 좌 또는 우로 진로변경 (A) (B) 직진 | 좌 또는 우로 진로변경 (A) (B) 직진 | 좌 또는 우로 진로변경 (A) (B) 직진 | 좌 또는 우로 진로변경 (A) (B) 직진 |\n| ![image](/image/placeholder)\nA\nA | ![image](/image/placeholder)\nA\nA | 기본 과실비율 | 기본 과실비율 | A50 | B50 |\n| ![image](/image/placeholder)\nA\nA | ![image](/image/placeholder)\nA\nA | 과실비율 조정예시 | A 야간·기타 시야장애 | +5 |  |\n| ![image](/image/placeholder)\nA\nA | ![image](/image/placeholder)\nA\nA | 과실비율 조정예시 | A 인근에 자전거도로가 있는 경우 | +5 |  |\n| ![image](/image/placeholder)\nA\nA | ![image](/image/placeholder)\nA\nA | 과실비율 조정예시 | A급 진로변경 | +10 |  |\n| ![image](/image/placeholder)\nA\nA | ![image](/image/placeholder)\nA\nA | 과실비율 조정예시 | A 현저한 과실 | +5 |  |\n| ![image](/image/placeholder)\nA\nA | ![image](/image/placeholder)\nA\nA | 과실비율 조정예시 | A 중대한 과실 | +10 |  |\n| ![image](/image/placeholder)\nA\nA | ![image](/image/placeholder)\nA\nA | 과실비율 조정예시 | A 어린이·노인·장애인 | -10 |  |\n| ![image](/image/placeholder)\nA\nA | ![image](/image/placeholder)\nA\nA | 과실비율 조정예시 | A전방에 장해물이 있는 경우 | -10 |  |\n| ![image](/image/placeholder)\nA\nA | ![image](/image/placeholder)\nA\nA | 과실비율 조정예시 | B 현저한 과실 |  | +10 |\n| ![image](/image/placeholder)\nA\nA | ![image](/image/placeholder)\nA\nA | 과실비율 조정예시 | B 중대한 과실 |  | +20 |\n",
       "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_572_table_1.png",
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29260,7 +29260,7 @@
       "subsection": "진로변경 사고",
       "page": 572,
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29274,7 +29274,7 @@
       "page": 572,
       "heading": "※사고발생, 손해확대와의 인과관계를 감안하여 기본 과실비율을 가(+), 감(-) 조정 가능합니다.",
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29288,7 +29288,7 @@
       "description": "| 거32-2 | 후행 직진 자전거 대 선행 진로변경 자동차 | 후행 직진 자전거 대 선행 진로변경 자동차 | 후행 직진 자전거 대 선행 진로변경 자동차 | 후행 직진 자전거 대 선행 진로변경 자동차 | 후행 직진 자전거 대 선행 진로변경 자동차 |\n| --- | --- | --- | --- | --- | --- |\n| 거32-2 | (A) 직진 (B) 좌 또는 우로 진로변경 | (A) 직진 (B) 좌 또는 우로 진로변경 | (A) 직진 (B) 좌 또는 우로 진로변경 | (A) 직진 (B) 좌 또는 우로 진로변경 | (A) 직진 (B) 좌 또는 우로 진로변경 |\n| <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>A</td><td>B</td><td>C</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td><td>25%</td><td>25%</td></tr></tbody></table> | <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>A</td><td>B</td><td>C</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td><td>25%</td><td>25%</td></tr></tbody></table> | 기본 과실비율 | 기본 과실비율 | A10 | B90 |\n| <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>A</td><td>B</td><td>C</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td><td>25%</td><td>25%</td></tr></tbody></table> | <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>A</td><td>B</td><td>C</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td><td>25%</td><td>25%</td></tr></tbody></table> | 과실비율 조정예시 | A 야간·기타 시야장애 | +5 |  |\n| <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>A</td><td>B</td><td>C</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td><td>25%</td><td>25%</td></tr></tbody></table> | <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>A</td><td>B</td><td>C</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td><td>25%</td><td>25%</td></tr></tbody></table> | 과실비율 조정예시 | A 인근에 자전거도로가 있는 경우 | +5 |  |\n| <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>A</td><td>B</td><td>C</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td><td>25%</td><td>25%</td></tr></tbody></table> | <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>A</td><td>B</td><td>C</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td><td>25%</td><td>25%</td></tr></tbody></table> | 과실비율 조정예시 | A 현저한 과실 | +5 |  |\n| <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>A</td><td>B</td><td>C</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td><td>25%</td><td>25%</td></tr></tbody></table> | <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>A</td><td>B</td><td>C</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td><td>25%</td><td>25%</td></tr></tbody></table> | 과실비율 조정예시 | A 중대한 과실 | +10 |  |\n| <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>A</td><td>B</td><td>C</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td><td>25%</td><td>25%</td></tr></tbody></table> | <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>A</td><td>B</td><td>C</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td><td>25%</td><td>25%</td></tr></tbody></table> | 과실비율 조정예시 | A 어린이·노인·장애인 | -10 |  |\n| <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>A</td><td>B</td><td>C</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td><td>25%</td><td>25%</td></tr></tbody></table> | <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>A</td><td>B</td><td>C</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td><td>25%</td><td>25%</td></tr></tbody></table> | 과실비율 조정예시 | A전방에 장해물이 있는 경우 | -10 |  |\n| <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>A</td><td>B</td><td>C</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td><td>25%</td><td>25%</td></tr></tbody></table> | <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>A</td><td>B</td><td>C</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td><td>25%</td><td>25%</td></tr></tbody></table> | 과실비율 조정예시 | B 급 진로변경 |  | +10 |\n| <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>A</td><td>B</td><td>C</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td><td>25%</td><td>25%</td></tr></tbody></table> | <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>A</td><td>B</td><td>C</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td><td>25%</td><td>25%</td></tr></tbody></table> | 과실비율 조정예시 | B 진로변경 신호불이행 |  | +10 |\n| <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>A</td><td>B</td><td>C</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td><td>25%</td><td>25%</td></tr></tbody></table> | <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>A</td><td>B</td><td>C</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td><td>25%</td><td>25%</td></tr></tbody></table> | 과실비율 조정예시 | B 현저한 과실 |  | +10 |\n| <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>A</td><td>B</td><td>C</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td><td>25%</td><td>25%</td></tr></tbody></table> | <figcaption><p>Chart Type: pie</p></figcaption><table><thead><tr><td></td><td>A</td><td>B</td><td>C</td></tr></thead><tbody><tr><td>item_01</td><td>50%</td><td>25%</td><td>25%</td></tr></tbody></table> | 과실비율 조정예시 | B 중대한 과실 |  | +20 |\n",
       "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_572_table_2.png",
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29300,7 +29300,7 @@
       "subsection": "진로변경 사고",
       "page": 572,
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29314,7 +29314,7 @@
       "page": 572,
       "heading": "※사고발생, 손해확대와의 인과관계를 감안하여 기본 과실비율을 가(+), 감(-) 조정 가능합니다.",
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29328,7 +29328,7 @@
       "page": 572,
       "heading": "사고 상황",
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29342,7 +29342,7 @@
       "page": 572,
       "heading": "기본 과실비율 해설",
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29356,7 +29356,7 @@
       "page": 572,
       "heading": "도로교통법 제13조의2(자전거의 통행방법의 특례)",
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29370,7 +29370,7 @@
       "page": 572,
       "heading": "도로교통법 제19조(안전거리 확보 등)",
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29384,7 +29384,7 @@
       "page": 572,
       "heading": "도로교통법 제38조(차의 신호)",
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29398,7 +29398,7 @@
       "page": 572,
       "heading": "⊙ 대법원 1984. 4. 10. 선고 84도79 판결",
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29412,7 +29412,7 @@
       "page": 572,
       "heading": "· 대법원 2001. 3. 27. 선고 2001다8592 판결",
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29426,7 +29426,7 @@
       "page": 572,
       "heading": "대법원 2010. 2. 11. 선고 2009다94278호 판결",
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29440,7 +29440,7 @@
       "page": 572,
       "heading": "서울중앙지방법원 2018. 8. 30. 선고 18나6739 판결",
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29454,7 +29454,7 @@
       "description": "| 거33-1 | 직진 자전거 대 도로가 아닌 장소에서 도로로 진입 자동차 | 직진 자전거 대 도로가 아닌 장소에서 도로로 진입 자동차 | 직진 자전거 대 도로가 아닌 장소에서 도로로 진입 자동차 |\n| --- | --- | --- | --- |\n| 거33-1 | 직진 (B) \"차도가 아닌 장소\"에서 차도로 | 직진 (B) \"차도가 아닌 장소\"에서 차도로 | 직진 (B) \"차도가 아닌 장소\"에서 차도로 |\n|  | <table><thead></thead><tbody><tr><td rowspan=\"10\">GO</td><td rowspan=\"10\"></td><td rowspan=\"10\" colspan=\"2\">기본 과실비율 과실비율 조정예시</td><td>A5</td><td>B95</td></tr><tr><td>A 야간·기타 시야장애</td><td>+5</td><td></td></tr><tr><td>A 인근에 자전거도로가 있는 경우</td><td>+5</td><td></td></tr><tr><td>A 역통행</td><td>+10</td><td></td></tr><tr><td>A 현저한 과실</td><td>+5</td><td></td></tr><tr><td>A 중대한 과실</td><td>+10</td><td></td></tr><tr><td>A 어린이·노인·장애인</td><td>-10</td><td></td></tr><tr><td>A 자전거도로를 통행 중인 경우</td><td>-10</td><td></td></tr><tr><td>B 현저한 과실</td><td></td><td>+10</td></tr><tr><td>B 중대한 과실</td><td></td><td>+20</td></tr></tbody></table> | 진입 |  |\n|  | <table><thead></thead><tbody><tr><td rowspan=\"10\">GO</td><td rowspan=\"10\"></td><td rowspan=\"10\" colspan=\"2\">기본 과실비율 과실비율 조정예시</td><td>A5</td><td>B95</td></tr><tr><td>A 야간·기타 시야장애</td><td>+5</td><td></td></tr><tr><td>A 인근에 자전거도로가 있는 경우</td><td>+5</td><td></td></tr><tr><td>A 역통행</td><td>+10</td><td></td></tr><tr><td>A 현저한 과실</td><td>+5</td><td></td></tr><tr><td>A 중대한 과실</td><td>+10</td><td></td></tr><tr><td>A 어린이·노인·장애인</td><td>-10</td><td></td></tr><tr><td>A 자전거도로를 통행 중인 경우</td><td>-10</td><td></td></tr><tr><td>B 현저한 과실</td><td></td><td>+10</td></tr><tr><td>B 중대한 과실</td><td></td><td>+20</td></tr></tbody></table> |  |  |\n|  | <table><thead></thead><tbody><tr><td rowspan=\"10\">GO</td><td rowspan=\"10\"></td><td rowspan=\"10\" colspan=\"2\">기본 과실비율 과실비율 조정예시</td><td>A5</td><td>B95</td></tr><tr><td>A 야간·기타 시야장애</td><td>+5</td><td></td></tr><tr><td>A 인근에 자전거도로가 있는 경우</td><td>+5</td><td></td></tr><tr><td>A 역통행</td><td>+10</td><td></td></tr><tr><td>A 현저한 과실</td><td>+5</td><td></td></tr><tr><td>A 중대한 과실</td><td>+10</td><td></td></tr><tr><td>A 어린이·노인·장애인</td><td>-10</td><td></td></tr><tr><td>A 자전거도로를 통행 중인 경우</td><td>-10</td><td></td></tr><tr><td>B 현저한 과실</td><td></td><td>+10</td></tr><tr><td>B 중대한 과실</td><td></td><td>+20</td></tr></tbody></table> |  |  |\n|  | <table><thead></thead><tbody><tr><td rowspan=\"10\">GO</td><td rowspan=\"10\"></td><td rowspan=\"10\" colspan=\"2\">기본 과실비율 과실비율 조정예시</td><td>A5</td><td>B95</td></tr><tr><td>A 야간·기타 시야장애</td><td>+5</td><td></td></tr><tr><td>A 인근에 자전거도로가 있는 경우</td><td>+5</td><td></td></tr><tr><td>A 역통행</td><td>+10</td><td></td></tr><tr><td>A 현저한 과실</td><td>+5</td><td></td></tr><tr><td>A 중대한 과실</td><td>+10</td><td></td></tr><tr><td>A 어린이·노인·장애인</td><td>-10</td><td></td></tr><tr><td>A 자전거도로를 통행 중인 경우</td><td>-10</td><td></td></tr><tr><td>B 현저한 과실</td><td></td><td>+10</td></tr><tr><td>B 중대한 과실</td><td></td><td>+20</td></tr></tbody></table> |  |  |\n|  | <table><thead></thead><tbody><tr><td rowspan=\"10\">GO</td><td rowspan=\"10\"></td><td rowspan=\"10\" colspan=\"2\">기본 과실비율 과실비율 조정예시</td><td>A5</td><td>B95</td></tr><tr><td>A 야간·기타 시야장애</td><td>+5</td><td></td></tr><tr><td>A 인근에 자전거도로가 있는 경우</td><td>+5</td><td></td></tr><tr><td>A 역통행</td><td>+10</td><td></td></tr><tr><td>A 현저한 과실</td><td>+5</td><td></td></tr><tr><td>A 중대한 과실</td><td>+10</td><td></td></tr><tr><td>A 어린이·노인·장애인</td><td>-10</td><td></td></tr><tr><td>A 자전거도로를 통행 중인 경우</td><td>-10</td><td></td></tr><tr><td>B 현저한 과실</td><td></td><td>+10</td></tr><tr><td>B 중대한 과실</td><td></td><td>+20</td></tr></tbody></table> |  |  |\n|  | <table><thead></thead><tbody><tr><td rowspan=\"10\">GO</td><td rowspan=\"10\"></td><td rowspan=\"10\" colspan=\"2\">기본 과실비율 과실비율 조정예시</td><td>A5</td><td>B95</td></tr><tr><td>A 야간·기타 시야장애</td><td>+5</td><td></td></tr><tr><td>A 인근에 자전거도로가 있는 경우</td><td>+5</td><td></td></tr><tr><td>A 역통행</td><td>+10</td><td></td></tr><tr><td>A 현저한 과실</td><td>+5</td><td></td></tr><tr><td>A 중대한 과실</td><td>+10</td><td></td></tr><tr><td>A 어린이·노인·장애인</td><td>-10</td><td></td></tr><tr><td>A 자전거도로를 통행 중인 경우</td><td>-10</td><td></td></tr><tr><td>B 현저한 과실</td><td></td><td>+10</td></tr><tr><td>B 중대한 과실</td><td></td><td>+20</td></tr></tbody></table> |  |  |\n|  | <table><thead></thead><tbody><tr><td rowspan=\"10\">GO</td><td rowspan=\"10\"></td><td rowspan=\"10\" colspan=\"2\">기본 과실비율 과실비율 조정예시</td><td>A5</td><td>B95</td></tr><tr><td>A 야간·기타 시야장애</td><td>+5</td><td></td></tr><tr><td>A 인근에 자전거도로가 있는 경우</td><td>+5</td><td></td></tr><tr><td>A 역통행</td><td>+10</td><td></td></tr><tr><td>A 현저한 과실</td><td>+5</td><td></td></tr><tr><td>A 중대한 과실</td><td>+10</td><td></td></tr><tr><td>A 어린이·노인·장애인</td><td>-10</td><td></td></tr><tr><td>A 자전거도로를 통행 중인 경우</td><td>-10</td><td></td></tr><tr><td>B 현저한 과실</td><td></td><td>+10</td></tr><tr><td>B 중대한 과실</td><td></td><td>+20</td></tr></tbody></table> |  |  |\n| (A) | <table><thead></thead><tbody><tr><td rowspan=\"10\">GO</td><td rowspan=\"10\"></td><td rowspan=\"10\" colspan=\"2\">기본 과실비율 과실비율 조정예시</td><td>A5</td><td>B95</td></tr><tr><td>A 야간·기타 시야장애</td><td>+5</td><td></td></tr><tr><td>A 인근에 자전거도로가 있는 경우</td><td>+5</td><td></td></tr><tr><td>A 역통행</td><td>+10</td><td></td></tr><tr><td>A 현저한 과실</td><td>+5</td><td></td></tr><tr><td>A 중대한 과실</td><td>+10</td><td></td></tr><tr><td>A 어린이·노인·장애인</td><td>-10</td><td></td></tr><tr><td>A 자전거도로를 통행 중인 경우</td><td>-10</td><td></td></tr><tr><td>B 현저한 과실</td><td></td><td>+10</td></tr><tr><td>B 중대한 과실</td><td></td><td>+20</td></tr></tbody></table> |  |  |\n",
       "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_576_table_1.png",
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29466,7 +29466,7 @@
       "subsection": "도로로 진입하는 차와 직진차와의 사고",
       "page": 576,
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29480,7 +29480,7 @@
       "page": 576,
       "heading": "- ※사고발생, 손해확대와의 인과관계를 감안하여 기본 과실비율을 가(+), 감(-) 조정 가능합니다.",
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29494,7 +29494,7 @@
       "description": "| 거33-2 | 도로가 아닌 장소에서 도로로 진입 자전거 대 직진 자동차 | 도로가 아닌 장소에서 도로로 진입 자전거 대 직진 자동차 | 도로가 아닌 장소에서 도로로 진입 자전거 대 직진 자동차 | 도로가 아닌 장소에서 도로로 진입 자전거 대 직진 자동차 | 도로가 아닌 장소에서 도로로 진입 자전거 대 직진 자동차 |\n| --- | --- | --- | --- | --- | --- |\n| 거33-2 | 아닌 장소\"에서 차도로 진입 (A) \"차도가 (B) 직진 | 아닌 장소\"에서 차도로 진입 (A) \"차도가 (B) 직진 | 아닌 장소\"에서 차도로 진입 (A) \"차도가 (B) 직진 | 아닌 장소\"에서 차도로 진입 (A) \"차도가 (B) 직진 | 아닌 장소\"에서 차도로 진입 (A) \"차도가 (B) 직진 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 기본 과실비율 | 기본 과실비율 | A60 | B40 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | A 야간·기타 시야장애 | +5 |  |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | A 인근에 자전거도로가 있는 경우 | +5 |  |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | A 현저한 과실 | +5 |  |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | A 중대한 과실 | +10 |  |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | A 어린이·노인·장애인 | -10 |  |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | 중인 경우 A 자전거도로를 통행 | -10 |  |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | B 역통행 |  | +10 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | B 현저한 과실 |  | +10 |\n| ![image](/image/placeholder)\n | ![image](/image/placeholder)\n | 과실비율 조정예시 | B 중대한 과실 |  | +20 |\n",
       "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_576_table_2.png",
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29506,7 +29506,7 @@
       "subsection": "도로로 진입하는 차와 직진차와의 사고",
       "page": 576,
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29520,7 +29520,7 @@
       "page": 576,
       "heading": "※사고발생, 손해확대와의 인과관계를 감안하여 기본 과실비율을 가(+), 감(-) 조정 가능합니다.",
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29534,7 +29534,7 @@
       "page": 576,
       "heading": "사고 상황",
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29548,7 +29548,7 @@
       "page": 576,
       "heading": "기본 과실비율 해설",
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29562,7 +29562,7 @@
       "page": 576,
       "heading": "활용시 참고 사항",
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
@@ -29576,7 +29576,7 @@
       "page": 576,
       "heading": "관련 법규",
       "party_type": "자전거",
-      "location": "동일차로 통행 중 사고"
+      "location": "신호등 없는 교차로"
     }
   },
   {
