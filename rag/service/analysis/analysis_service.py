@@ -2,7 +2,7 @@
 
 from langchain_openai import ChatOpenAI
 
-from config import DEFAULT_LOADER_STRATEGY, LLM_MODEL
+from config import DEFAULT_EMBEDDING_PROVIDER, DEFAULT_LOADER_STRATEGY, LLM_MODEL
 from rag.pipeline.retrieval import RetrievalPipelineConfig, run_retrieval_pipeline
 from rag.service.analysis.answer_schema import parse_structured_answer
 from rag.service.analysis.prompt import build_prompt
@@ -18,9 +18,10 @@ def analyze_question(
     pipeline_config: RetrievalPipelineConfig | None = None,
     loader_strategy: str = DEFAULT_LOADER_STRATEGY,
     chat_history: list[ChatMessage] | None = None,
+    embedding_provider: str = DEFAULT_EMBEDDING_PROVIDER,
 ) -> tuple[str, list[str]]:
     """질문을 검색하고 LLM 답변과 검색 컨텍스트를 반환합니다."""
-    components = get_retrieval_components(loader_strategy)
+    components = get_retrieval_components(loader_strategy, embedding_provider)
     filters = build_metadata_filters(search_metadata)
     documents = run_retrieval_pipeline(
         components,

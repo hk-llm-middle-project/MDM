@@ -5,6 +5,9 @@ from unittest.mock import MagicMock, patch
 from langchain_core.documents import Document
 
 from rag.chunker import chunk_text, split_documents
+from rag.embeddings import EMBEDDING_STRATEGIES, create_embeddings
+from rag.embeddings.strategies.bge import BGEM3Embeddings
+from rag.embeddings.strategies.google import GoogleGeminiEmbeddings
 from rag.indexer import build_vectorstore, vectorstore_exists
 from rag.pipeline.retriever import build_retrieval_components
 from rag.pipeline.retrieval import RetrievalPipelineConfig, run_retrieval_pipeline
@@ -229,11 +232,83 @@ class BasicRagTest(unittest.TestCase):
         with (
             patch("pathlib.Path.mkdir"),
             patch("rag.indexer.Chroma", FakeChroma),
-            patch("rag.indexer.create_embeddings", return_value="embeddings"),
+            patch("rag.indexer.create_embeddings", return_value="embeddings") as embeddings_mock,
         ):
-            vectorstore = build_vectorstore(documents, Path("vectorstore"), batch_size=2)
+            vectorstore = build_vectorstore(
+                documents,
+                Path("vectorstore"),
+                batch_size=2,
+                embedding_provider="google",
+            )
 
         self.assertEqual([len(batch) for batch in vectorstore.batches], [2, 2, 1])
+        embeddings_mock.assert_called_once_with("google")
+
+    def test_create_embeddings_returns_bge_provider(self):
+        with patch.dict(EMBEDDING_STRATEGIES, {"bge": lambda: "bge"}, clear=False):
+            self.assertEqual(create_embeddings("bge"), "bge")
+
+    def test_embedding_registry_includes_current_providers(self):
+        self.assertIn("openai", EMBEDDING_STRATEGIES)
+        self.assertIn("bge", EMBEDDING_STRATEGIES)
+        self.assertIn("google", EMBEDDING_STRATEGIES)
+
+    def test_bge_embeddings_calls_embedding_endpoint(self):
+        response = MagicMock()
+        response.json.return_value = {"data": [{"dense": [0.1, 0.2]}, {"dense": [0.3, 0.4]}]}
+
+        with (
+            patch.dict("os.environ", {"BGE_BASE_URL": "https://bge.example", "BGE_API_KEY": "secret"}),
+            patch("rag.embeddings.strategies.bge.requests.Session") as session_mock,
+        ):
+            post_mock = session_mock.return_value.post
+            post_mock.return_value = response
+            embeddings = BGEM3Embeddings()
+            result = embeddings.embed_documents(["one", "two"])
+
+        self.assertEqual(result, [[0.1, 0.2], [0.3, 0.4]])
+        post_mock.assert_called_once_with(
+            "https://bge.example/v1/embeddings/m3",
+            headers={"Authorization": "Bearer secret"},
+            json={"input": ["one", "two"], "return_dense": True},
+            timeout=120,
+        )
+        response.raise_for_status.assert_called_once()
+
+    def test_bge_embeddings_splits_document_batches(self):
+        first_response = MagicMock()
+        first_response.json.return_value = {
+            "data": [{"dense": [float(index)]} for index in range(16)]
+        }
+        second_response = MagicMock()
+        second_response.json.return_value = {"data": [{"dense": [16.0]}]}
+        texts = [str(index) for index in range(17)]
+
+        with (
+            patch.dict("os.environ", {"BGE_BASE_URL": "https://bge.example", "BGE_API_KEY": "secret"}),
+            patch("rag.embeddings.strategies.bge.requests.Session") as session_mock,
+        ):
+            post_mock = session_mock.return_value.post
+            post_mock.side_effect = [first_response, second_response]
+            embeddings = BGEM3Embeddings()
+            result = embeddings.embed_documents(texts)
+
+        self.assertEqual(result, [[float(index)] for index in range(17)])
+        self.assertEqual(post_mock.call_count, 2)
+        self.assertEqual(post_mock.call_args_list[0].kwargs["json"]["input"], texts[:16])
+        self.assertEqual(post_mock.call_args_list[1].kwargs["json"]["input"], texts[16:])
+        first_response.raise_for_status.assert_called_once()
+        second_response.raise_for_status.assert_called_once()
+
+    def test_google_embeddings_use_default_dimension(self):
+        with patch("rag.embeddings.strategies.google.GoogleGenerativeAIEmbeddings") as google_mock:
+            embeddings = GoogleGeminiEmbeddings()
+            embeddings.embed_documents(["one", "two"])
+            embeddings.embed_query("query")
+
+        google_mock.assert_called_once_with(model="models/gemini-embedding-001")
+        google_mock.return_value.embed_documents.assert_called_once_with(["one", "two"])
+        google_mock.return_value.embed_query.assert_called_once_with("query")
 
     def test_vectorstore_service_uses_loader_specific_directory(self):
         from rag.service.vectorstore import vectorstore_service as vectorstore_service
@@ -241,20 +316,63 @@ class BasicRagTest(unittest.TestCase):
         vectorstore_service.get_vectorstore.cache_clear()
 
         with (
-            patch("rag.service.vectorstore.service.get_vectorstore_dir", return_value=Path("vectorstore/llamaparser")) as dir_mock,
-            patch("rag.service.vectorstore.service.vectorstore_exists", return_value=False),
-            patch("rag.service.vectorstore.service.load_pdf", return_value=[Document(page_content="doc")]) as load_mock,
-            patch("rag.service.vectorstore.service.split_documents", return_value=[Document(page_content="chunk")]),
-            patch("rag.service.vectorstore.service.build_vectorstore", return_value="vectorstore") as build_mock,
+            patch("rag.service.vectorstore.vectorstore_service.get_vectorstore_dir", return_value=Path("vectorstore/llamaparser/google")) as dir_mock,
+            patch("rag.service.vectorstore.vectorstore_service.vectorstore_exists", return_value=False),
+            patch("rag.service.vectorstore.vectorstore_service.load_pdf", return_value=[Document(page_content="doc")]) as load_mock,
+            patch("rag.service.vectorstore.vectorstore_service.split_documents", return_value=[Document(page_content="chunk")]),
+            patch("rag.service.vectorstore.vectorstore_service.build_vectorstore", return_value="vectorstore") as build_mock,
         ):
-            result = vectorstore_service.get_vectorstore("llamaparser")
+            result = vectorstore_service.get_vectorstore("llamaparser", "google")
 
         self.assertEqual(result, "vectorstore")
-        dir_mock.assert_called_once_with("llamaparser")
+        dir_mock.assert_called_once_with("llamaparser", "google")
         load_mock.assert_called_once()
         self.assertEqual(load_mock.call_args.kwargs["strategy"], "llamaparser")
         build_mock.assert_called_once()
-        self.assertEqual(build_mock.call_args.args[1], Path("vectorstore/llamaparser"))
+        self.assertEqual(build_mock.call_args.args[1], Path("vectorstore/llamaparser/google"))
+        self.assertEqual(build_mock.call_args.kwargs["embedding_provider"], "google")
+
+        vectorstore_service.get_vectorstore.cache_clear()
+
+    def test_vectorstore_service_loads_embedding_specific_directory(self):
+        from rag.service.vectorstore import vectorstore_service
+
+        vectorstore_service.get_vectorstore.cache_clear()
+
+        with (
+            patch("rag.service.vectorstore.vectorstore_service.get_vectorstore_dir", return_value=Path("vectorstore/pdfplumber/openai")),
+            patch("rag.service.vectorstore.vectorstore_service.vectorstore_exists", return_value=True),
+            patch("rag.service.vectorstore.vectorstore_service.load_vectorstore", return_value="vectorstore") as load_mock,
+        ):
+            result = vectorstore_service.get_vectorstore("pdfplumber", "openai")
+
+        self.assertEqual(result, "vectorstore")
+        load_mock.assert_called_once_with(
+            Path("vectorstore/pdfplumber/openai"),
+            embedding_provider="openai",
+        )
+
+        vectorstore_service.get_vectorstore.cache_clear()
+
+    def test_vectorstore_service_does_not_split_upstage_final_chunks(self):
+        from rag.service.vectorstore import vectorstore_service
+
+        vectorstore_service.get_vectorstore.cache_clear()
+        upstage_documents = [Document(page_content="already chunked")]
+
+        with (
+            patch("rag.service.vectorstore.vectorstore_service.get_vectorstore_dir", return_value=Path("vectorstore/upstage/bge")),
+            patch("rag.service.vectorstore.vectorstore_service.vectorstore_exists", return_value=False),
+            patch("rag.service.vectorstore.vectorstore_service.load_pdf", return_value=upstage_documents),
+            patch("rag.service.vectorstore.vectorstore_service.split_documents") as split_mock,
+            patch("rag.service.vectorstore.vectorstore_service.build_vectorstore", return_value="vectorstore") as build_mock,
+        ):
+            result = vectorstore_service.get_vectorstore("upstage", "bge")
+
+        self.assertEqual(result, "vectorstore")
+        split_mock.assert_not_called()
+        build_mock.assert_called_once()
+        self.assertEqual(build_mock.call_args.args[0], upstage_documents)
 
         vectorstore_service.get_vectorstore.cache_clear()
 
@@ -276,7 +394,7 @@ class BasicRagTest(unittest.TestCase):
         decision = normalize_metadata_response(
             {
                 "party_type": "자동차",
-                "location": "교차로 사고",
+                "location": "신호등 없는 교차로",
                 "confidence": {"party_type": 0.95, "location": 0.9},
                 "missing_fields": [],
                 "follow_up_questions": [],
@@ -285,7 +403,7 @@ class BasicRagTest(unittest.TestCase):
 
         self.assertTrue(decision.is_sufficient)
         self.assertEqual(decision.search_metadata.party_type, "자동차")
-        self.assertEqual(decision.search_metadata.location, "교차로 사고")
+        self.assertEqual(decision.search_metadata.location, "신호등 없는 교차로")
         self.assertEqual(decision.missing_fields, [])
 
     def test_normalize_metadata_response_rejects_invalid_or_low_confidence_values(self):
@@ -439,6 +557,7 @@ class BasicRagTest(unittest.TestCase):
             search_metadata=metadata,
             pipeline_config=None,
             loader_strategy="pdfplumber",
+            embedding_provider="bge",
         )
 
     def test_answer_question_with_intake_accumulates_metadata_across_turns(self):
@@ -472,6 +591,7 @@ class BasicRagTest(unittest.TestCase):
             search_metadata=UserSearchMetadata(party_type="자동차", location="교차로 사고"),
             pipeline_config=None,
             loader_strategy="pdfplumber",
+            embedding_provider="bge",
         )
 
     def test_answer_question_passes_intake_metadata_to_analysis(self):
@@ -496,9 +616,10 @@ class BasicRagTest(unittest.TestCase):
             search_metadata=metadata,
             pipeline_config=None,
             loader_strategy="pdfplumber",
+            embedding_provider="bge",
         )
 
-    def test_answer_question_passes_loader_strategy_to_analysis(self):
+    def test_answer_question_passes_loader_and_embedding_strategy_to_analysis(self):
         metadata = UserSearchMetadata(party_type="자동차", location="교차로 사고")
         with (
             patch(
@@ -511,7 +632,11 @@ class BasicRagTest(unittest.TestCase):
             ),
             patch("rag.service.conversation.app_service.analyze_question", return_value=("answer", ["context"])) as analyze_mock,
         ):
-            answer, contexts = answer_question("원문 입력", loader_strategy="llamaparser")
+            answer, contexts = answer_question(
+                "원문 입력",
+                loader_strategy="llamaparser",
+                embedding_provider="google",
+            )
 
         self.assertEqual(answer, "answer")
         self.assertEqual(contexts, ["context"])
@@ -520,6 +645,7 @@ class BasicRagTest(unittest.TestCase):
             search_metadata=metadata,
             pipeline_config=None,
             loader_strategy="llamaparser",
+            embedding_provider="google",
         )
 
     def test_answer_question_without_intake_bypasses_intake(self):
@@ -564,23 +690,29 @@ class BasicRagTest(unittest.TestCase):
             pipeline_config=None,
         )
 
-    def test_analyze_question_uses_loader_strategy_for_retrieval_components(self):
+    def test_analyze_question_uses_loader_and_embedding_strategy_for_retrieval_components(self):
         from rag.service.analysis.analysis_service import analyze_question
 
         fake_document = Document(page_content="context")
         fake_llm = MagicMock()
-        fake_llm.invoke.return_value = MagicMock(content="answer")
+        fake_llm.invoke.return_value = MagicMock(
+            content='{"fault_ratio_a":70,"fault_ratio_b":30,"response":"answer"}'
+        )
 
         with (
             patch("rag.service.analysis.analysis_service.get_retrieval_components", return_value="components") as components_mock,
             patch("rag.service.analysis.analysis_service.run_retrieval_pipeline", return_value=[fake_document]),
             patch("rag.service.analysis.analysis_service.ChatOpenAI", return_value=fake_llm),
         ):
-            answer, contexts = analyze_question("query", loader_strategy="llamaparser")
+            answer, contexts = analyze_question(
+                "query",
+                loader_strategy="llamaparser",
+                embedding_provider="google",
+            )
 
         self.assertEqual(answer, "answer")
         self.assertEqual(contexts, ["context"])
-        components_mock.assert_called_once_with("llamaparser")
+        components_mock.assert_called_once_with("llamaparser", "google")
 
 
 if __name__ == "__main__":

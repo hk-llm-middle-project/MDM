@@ -1,6 +1,6 @@
 """대화형 RAG 서비스의 공개 진입점입니다."""
 
-from config import DEFAULT_LOADER_STRATEGY
+from config import DEFAULT_EMBEDDING_PROVIDER, DEFAULT_LOADER_STRATEGY
 from rag.pipeline.retrieval import RetrievalPipelineConfig
 from rag.service.analysis import analyze_question
 from rag.service.conversation.orchestrator import AnswerResult, answer_conversation_turn
@@ -22,6 +22,7 @@ def answer_question_with_intake(
     pipeline_config: RetrievalPipelineConfig | None = None,
     intake_state: IntakeState | None = None,
     loader_strategy: str = DEFAULT_LOADER_STRATEGY,
+    embedding_provider: str = DEFAULT_EMBEDDING_PROVIDER,
     chat_history: list[ChatMessage] | None = None,
 ) -> AnswerResult:
     """intake, 일반 대화, RAG 분석을 조율해 답변을 반환합니다."""
@@ -31,6 +32,7 @@ def answer_question_with_intake(
             pipeline_config=pipeline_config,
             intake_state=intake_state,
             loader_strategy=loader_strategy,
+            embedding_provider=embedding_provider,
             chat_history=chat_history,
             intake_evaluator=evaluate_input_sufficiency,
             analyzer=analyze_question,
@@ -48,6 +50,7 @@ def answer_question_with_intake(
         pipeline_config=pipeline_config,
         intake_state=intake_state,
         loader_strategy=loader_strategy,
+        embedding_provider=embedding_provider,
         chat_history=chat_history,
         intake_evaluator=evaluate_input_sufficiency,
         analyzer=analyze_question,
@@ -58,6 +61,7 @@ def answer_question(
     question: str,
     pipeline_config: RetrievalPipelineConfig | None = None,
     loader_strategy: str = DEFAULT_LOADER_STRATEGY,
+    embedding_provider: str = DEFAULT_EMBEDDING_PROVIDER,
     chat_history: list[ChatMessage] | None = None,
 ) -> tuple[str, list[str]]:
     """사용자 질문에 대한 답변과 검색 컨텍스트를 반환합니다."""
@@ -65,6 +69,7 @@ def answer_question(
         question,
         pipeline_config=pipeline_config,
         loader_strategy=loader_strategy,
+        embedding_provider=embedding_provider,
         chat_history=chat_history,
     )
     return result.answer, result.contexts

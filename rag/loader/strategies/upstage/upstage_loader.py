@@ -12,6 +12,9 @@ from typing import TYPE_CHECKING, Any
 from dotenv import load_dotenv
 from langchain_core.documents import Document
 
+from config import UPSTAGE_FINAL_DOCUMENTS_PATH, UPSTAGE_RAW_DOCUMENTS_PATH
+from rag.loader.strategies.upstage.storage import load_documents_json, save_documents_json
+
 if TYPE_CHECKING:
     from langchain_upstage import UpstageDocumentParseLoader
 
@@ -32,6 +35,8 @@ class UpstageLoaderConfig:
     page_size: int = DEFAULT_PAGE_SIZE
     save_images: bool = True
     image_output_dir: Path | None = None
+    final_documents_path: Path = UPSTAGE_FINAL_DOCUMENTS_PATH
+    raw_documents_path: Path = UPSTAGE_RAW_DOCUMENTS_PATH
     upstage_options: dict[str, Any] = field(
         default_factory=lambda: dict(DEFAULT_UPSTAGE_OPTIONS)
     )
@@ -69,6 +74,18 @@ def restore_page_metadata(docs: list[Document], source_path: Path, page_offset: 
             doc.metadata["page"] = int(page) + page_offset
         doc.metadata["source"] = str(source_path)
         doc.metadata["parser"] = "upstage"
+
+
+def normalize_cached_document_metadata(docs: list[Document], source_path: Path) -> None:
+    for doc in docs:
+        metadata = {
+            key: value
+            for key, value in doc.metadata.items()
+            if value is not None
+        }
+        metadata["source"] = str(source_path)
+        metadata["parser"] = "upstage"
+        doc.metadata = metadata
 
 
 def create_upstage_loader(path: Path, config: UpstageLoaderConfig) -> "UpstageDocumentParseLoader":
@@ -110,6 +127,12 @@ def load_with_upstage(
     load_dotenv()
 
     config = strategy_config or UpstageLoaderConfig()
+
+    if config.final_documents_path.is_file():
+        documents = load_documents_json(config.final_documents_path)
+        normalize_cached_document_metadata(documents, path)
+        return documents
+
     documents: list[Document] = []
 
     for split_info in split_pdf_for_upstage(path, config.page_size):
@@ -128,4 +151,5 @@ def load_with_upstage(
         for doc in documents:
             doc.metadata.pop("base64_encoding", None)
 
+    save_documents_json(documents, config.raw_documents_path)
     return documents

@@ -3,14 +3,16 @@
 from dotenv import load_dotenv
 import streamlit as st
 
-from config import DEFAULT_LOADER_STRATEGY
+from config import DEFAULT_EMBEDDING_PROVIDER, DEFAULT_LOADER_STRATEGY
+from rag.embeddings import EMBEDDING_STRATEGIES
 from rag.service.conversation.app_service import answer_question_with_intake
 from rag.service.presentation.result_service import format_context_preview
 from rag.service.session import ConversationStore, get_conversation_store
 
 
 SHOW_RETRIEVED_CONTEXTS = True
-LOADER_STRATEGY_OPTIONS = ("pdfplumber", "llamaparser")
+LOADER_STRATEGY_OPTIONS = ("pdfplumber", "llamaparser", "upstage")
+EMBEDDING_PROVIDER_OPTIONS = tuple(EMBEDDING_STRATEGIES)
 USER_ID = "local"
 
 
@@ -40,10 +42,12 @@ def init_state(store: ConversationStore) -> None:
         if loader_strategy not in LOADER_STRATEGY_OPTIONS:
             loader_strategy = DEFAULT_LOADER_STRATEGY
         st.session_state.loader_strategy = loader_strategy
+    if "embedding_provider" not in st.session_state:
+        st.session_state.embedding_provider = DEFAULT_EMBEDDING_PROVIDER
     st.session_state.active_session = ensure_active_session(store)
 
 
-def render_sidebar(store: ConversationStore) -> str:
+def render_sidebar(store: ConversationStore) -> tuple[str, str]:
     st.sidebar.title("세션 목록")
     if st.sidebar.button("새 세션", use_container_width=True):
         session_count = len(store.list_sessions(USER_ID))
@@ -74,12 +78,26 @@ def render_sidebar(store: ConversationStore) -> str:
     if selected_loader_strategy != current_loader_strategy:
         store.set_loader_strategy(USER_ID, selected_loader_strategy)
     st.session_state.loader_strategy = selected_loader_strategy
-    return selected_loader_strategy
+
+    current_embedding_provider = st.session_state.get(
+        "embedding_provider",
+        DEFAULT_EMBEDDING_PROVIDER,
+    )
+    if current_embedding_provider not in EMBEDDING_PROVIDER_OPTIONS:
+        current_embedding_provider = DEFAULT_EMBEDDING_PROVIDER
+    st.session_state.embedding_provider = st.sidebar.selectbox(
+        "임베딩 모델",
+        EMBEDDING_PROVIDER_OPTIONS,
+        index=EMBEDDING_PROVIDER_OPTIONS.index(current_embedding_provider),
+    )
+    return selected_loader_strategy, st.session_state.embedding_provider
+
 
 
 def render_chat(
     store: ConversationStore,
     loader_strategy: str = DEFAULT_LOADER_STRATEGY,
+    embedding_provider: str = DEFAULT_EMBEDDING_PROVIDER,
 ) -> None:
     active_session = st.session_state.active_session
     messages = store.get_messages(USER_ID, active_session)
@@ -112,6 +130,7 @@ def render_chat(
                     ),
                     loader_strategy=loader_strategy,
                     chat_history=messages,
+                    embedding_provider=embedding_provider,
                 )
                 answer = result.answer
                 contexts = result.contexts
@@ -133,8 +152,8 @@ def main():
     st.set_page_config(page_title="MDM Basic RAG")
     store = get_conversation_store()
     init_state(store)
-    loader_strategy = render_sidebar(store)
-    render_chat(store, loader_strategy)
+    loader_strategy, embedding_provider = render_sidebar(store)
+    render_chat(store, loader_strategy, embedding_provider)
 
 
 if __name__ == "__main__":
