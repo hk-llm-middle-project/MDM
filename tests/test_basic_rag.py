@@ -272,6 +272,32 @@ class BasicRagTest(unittest.TestCase):
         )
         response.raise_for_status.assert_called_once()
 
+    def test_bge_embeddings_splits_document_batches(self):
+        first_response = MagicMock()
+        first_response.json.return_value = {
+            "data": [{"dense": [float(index)]} for index in range(16)]
+        }
+        second_response = MagicMock()
+        second_response.json.return_value = {"data": [{"dense": [16.0]}]}
+        texts = [str(index) for index in range(17)]
+
+        with (
+            patch.dict("os.environ", {"BGE_BASE_URL": "https://bge.example", "BGE_API_KEY": "secret"}),
+            patch(
+                "rag.embeddings.strategies.bge.requests.post",
+                side_effect=[first_response, second_response],
+            ) as post_mock,
+        ):
+            embeddings = BGEM3Embeddings()
+            result = embeddings.embed_documents(texts)
+
+        self.assertEqual(result, [[float(index)] for index in range(17)])
+        self.assertEqual(post_mock.call_count, 2)
+        self.assertEqual(post_mock.call_args_list[0].kwargs["json"]["input"], texts[:16])
+        self.assertEqual(post_mock.call_args_list[1].kwargs["json"]["input"], texts[16:])
+        first_response.raise_for_status.assert_called_once()
+        second_response.raise_for_status.assert_called_once()
+
     def test_google_embeddings_use_default_dimension(self):
         with patch("rag.embeddings.strategies.google.GoogleGenerativeAIEmbeddings") as google_mock:
             embeddings = GoogleGeminiEmbeddings()
