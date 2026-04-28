@@ -3,14 +3,16 @@
 from dotenv import load_dotenv
 import streamlit as st
 
-from config import DEFAULT_LOADER_STRATEGY
+from config import DEFAULT_EMBEDDING_PROVIDER, DEFAULT_LOADER_STRATEGY
+from rag.embeddings import EMBEDDING_STRATEGIES
 from rag.service.app_service import answer_question_with_intake
 from rag.service.intake.schema import IntakeState
 from rag.service.result_service import format_context_preview
 
 
 SHOW_RETRIEVED_CONTEXTS = True
-LOADER_STRATEGY_OPTIONS = ("pdfplumber", "llamaparser")
+LOADER_STRATEGY_OPTIONS = ("pdfplumber", "llamaparser", "upstage")
+EMBEDDING_PROVIDER_OPTIONS = tuple(EMBEDDING_STRATEGIES)
 
 
 def init_state() -> None:
@@ -24,11 +26,13 @@ def init_state() -> None:
         }
     if "loader_strategy" not in st.session_state:
         st.session_state.loader_strategy = DEFAULT_LOADER_STRATEGY
+    if "embedding_provider" not in st.session_state:
+        st.session_state.embedding_provider = DEFAULT_EMBEDDING_PROVIDER
     for name in st.session_state.sessions:
         st.session_state.intake_states.setdefault(name, IntakeState())
 
 
-def render_sidebar() -> str:
+def render_sidebar() -> tuple[str, str]:
     st.sidebar.title("세션 목록")
     if st.sidebar.button("새 세션", use_container_width=True):
         name = f"세션 {len(st.session_state.sessions) + 1}"
@@ -48,10 +52,18 @@ def render_sidebar() -> str:
         LOADER_STRATEGY_OPTIONS,
         index=LOADER_STRATEGY_OPTIONS.index(st.session_state.loader_strategy),
     )
-    return st.session_state.loader_strategy
+    st.session_state.embedding_provider = st.sidebar.selectbox(
+        "임베딩 모델",
+        EMBEDDING_PROVIDER_OPTIONS,
+        index=EMBEDDING_PROVIDER_OPTIONS.index(st.session_state.embedding_provider),
+    )
+    return st.session_state.loader_strategy, st.session_state.embedding_provider
 
 
-def render_chat(loader_strategy: str = DEFAULT_LOADER_STRATEGY) -> None:
+def render_chat(
+    loader_strategy: str = DEFAULT_LOADER_STRATEGY,
+    embedding_provider: str = DEFAULT_EMBEDDING_PROVIDER,
+) -> None:
     active_session = st.session_state.active_session
     messages = st.session_state.sessions[active_session]
 
@@ -79,6 +91,7 @@ def render_chat(loader_strategy: str = DEFAULT_LOADER_STRATEGY) -> None:
                     question,
                     intake_state=st.session_state.intake_states.get(active_session, IntakeState()),
                     loader_strategy=loader_strategy,
+                    embedding_provider=embedding_provider,
                 )
                 answer = result.answer
                 contexts = result.contexts
@@ -99,8 +112,8 @@ def main():
     load_dotenv()
     st.set_page_config(page_title="MDM Basic RAG")
     init_state()
-    loader_strategy = render_sidebar()
-    render_chat(loader_strategy)
+    loader_strategy, embedding_provider = render_sidebar()
+    render_chat(loader_strategy, embedding_provider)
 
 
 if __name__ == "__main__":
