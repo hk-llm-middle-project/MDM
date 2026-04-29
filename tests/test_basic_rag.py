@@ -9,6 +9,7 @@ from rag.chunkers import (
     BaseChunker,
     Chunk,
     FixedSizeChunker,
+    MarkdownStructureChunker,
     RecursiveCharacterChunker,
     chunk_to_document,
 )
@@ -177,6 +178,86 @@ class BasicRagTest(unittest.TestCase):
         self.assertEqual([chunk.chunk_id for chunk in chunks], list(range(len(chunks))))
         self.assertEqual([chunk.page for chunk in chunks], [1, 1, 2, 2])
         self.assertEqual([chunk.source for chunk in chunks], ["a.md", "a.md", "b.md", "b.md"])
+
+    def test_markdown_structure_chunker_builds_text_parent_and_child_chunks(self):
+        document = Document(
+            page_content=(
+                "# 제1장\n\n"
+                "## 차1-1 교차로 직진 대 직진\n\n"
+                "사례 개요입니다.\n\n"
+                "#### 사고 상황\n"
+                "A와 B가 충돌했다.\n\n"
+                "#### 기본 과실비율 해설\n"
+                "기본 비율 설명입니다.\n"
+            ),
+            metadata={"page": "175", "source": "data/llama_md/main_pdf/175.md"},
+        )
+        chunker = MarkdownStructureChunker()
+
+        chunks = chunker.chunk(document)
+
+        self.assertEqual([chunk.chunk_id for chunk in chunks], [0, 1, 2])
+        self.assertEqual([chunk.chunk_type for chunk in chunks], ["text", "child", "child"])
+        self.assertEqual([chunk.diagram_id for chunk in chunks], ["차1-1", "차1-1", "차1-1"])
+        self.assertEqual([chunk.parent_id for chunk in chunks], [None, 0, 0])
+        self.assertEqual([chunk.page for chunk in chunks], [175, 175, 175])
+        self.assertEqual(
+            [chunk.source for chunk in chunks],
+            ["data/llama_md/main_pdf/175.md"] * 3,
+        )
+        self.assertIn("## 차1-1 교차로 직진 대 직진", chunks[0].text)
+        self.assertIn("#### 사고 상황", chunks[1].text)
+        self.assertIn("#### 기본 과실비율 해설", chunks[2].text)
+
+    def test_markdown_structure_chunker_starts_new_parent_for_next_case_heading(self):
+        document = Document(
+            page_content=(
+                "## 보1 횡단보도 사고\n\n"
+                "첫 사례입니다.\n\n"
+                "### 사고 상황\n"
+                "첫 사고 상황입니다.\n\n"
+                "## 보2 다른 횡단보도 사고\n\n"
+                "둘째 사례입니다.\n\n"
+                "### 사고 상황\n"
+                "둘째 사고 상황입니다.\n"
+            ),
+            metadata={"page": 39, "source": "039.md"},
+        )
+        chunker = MarkdownStructureChunker()
+
+        chunks = chunker.chunk(document)
+
+        self.assertEqual([chunk.chunk_id for chunk in chunks], [0, 1, 2, 3])
+        self.assertEqual([chunk.chunk_type for chunk in chunks], ["text", "child", "text", "child"])
+        self.assertEqual([chunk.diagram_id for chunk in chunks], ["보1", "보1", "보2", "보2"])
+        self.assertEqual([chunk.parent_id for chunk in chunks], [None, 0, None, 2])
+
+    def test_markdown_structure_chunker_continues_parent_across_pages(self):
+        documents = [
+            Document(
+                page_content="## 차2-5 신호 교차로 사고\n\n첫 페이지 사례 개요입니다.\n",
+                metadata={"page": 175, "source": "175.md"},
+            ),
+            Document(
+                page_content=(
+                    "#### 기본 과실비율 해설\n"
+                    "다음 페이지에 이어진 해설입니다.\n\n"
+                    "#### 수정요소 해설\n"
+                    "추가 해설입니다.\n"
+                ),
+                metadata={"page": 176, "source": "176.md"},
+            ),
+        ]
+        chunker = MarkdownStructureChunker()
+
+        chunks = chunker.chunk(documents)
+
+        self.assertEqual([chunk.chunk_id for chunk in chunks], [0, 1, 2])
+        self.assertEqual([chunk.chunk_type for chunk in chunks], ["text", "child", "child"])
+        self.assertEqual([chunk.diagram_id for chunk in chunks], ["차2-5", "차2-5", "차2-5"])
+        self.assertEqual([chunk.parent_id for chunk in chunks], [None, 0, 0])
+        self.assertEqual([chunk.page for chunk in chunks], [175, 176, 176])
+        self.assertEqual([chunk.source for chunk in chunks], ["175.md", "176.md", "176.md"])
 
     def test_retrieve_uses_vectorstore_strategy_by_default(self):
         fake_retriever = MagicMock()
