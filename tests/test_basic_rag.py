@@ -5,7 +5,13 @@ from unittest.mock import MagicMock, patch
 from langchain_core.documents import Document
 
 from rag.chunker import chunk_text, split_documents
-from rag.chunkers import BaseChunker, Chunk, FixedSizeChunker, chunk_to_document
+from rag.chunkers import (
+    BaseChunker,
+    Chunk,
+    FixedSizeChunker,
+    RecursiveCharacterChunker,
+    chunk_to_document,
+)
 from rag.embeddings import EMBEDDING_STRATEGIES, create_embeddings
 from rag.embeddings.strategies.bge import BGEM3Embeddings
 from rag.embeddings.strategies.google import GoogleGeminiEmbeddings
@@ -141,6 +147,36 @@ class BasicRagTest(unittest.TestCase):
         self.assertEqual([chunk.chunk_id for chunk in chunks], [0, 1, 2, 3])
         self.assertEqual([chunk.text for chunk in chunks], ["ab", "cd", "wx", "yz"])
         self.assertEqual([chunk.page for chunk in chunks], [1, 1, 2, 2])
+
+    def test_recursive_character_chunker_splits_by_larger_separators_first(self):
+        document = Document(
+            page_content="첫 문단입니다.\n\n둘째 문단입니다.\n셋째 줄입니다.",
+            metadata={"page": "7", "source": "llama.md"},
+        )
+        chunker = RecursiveCharacterChunker(chunk_size=16, overlap=0)
+
+        chunks = chunker.chunk(document)
+
+        self.assertEqual([chunk.chunk_id for chunk in chunks], list(range(len(chunks))))
+        self.assertEqual([chunk.chunk_type for chunk in chunks], ["flat"] * len(chunks))
+        self.assertEqual([chunk.page for chunk in chunks], [7] * len(chunks))
+        self.assertEqual([chunk.source for chunk in chunks], ["llama.md"] * len(chunks))
+        self.assertIn("첫 문단입니다.", [chunk.text for chunk in chunks])
+        self.assertIn("둘째 문단입니다.", [chunk.text for chunk in chunks])
+        self.assertIn("셋째 줄입니다.", [chunk.text for chunk in chunks])
+
+    def test_recursive_character_chunker_assigns_sequential_ids_across_documents(self):
+        documents = [
+            Document(page_content="alpha beta", metadata={"page": 1, "source": "a.md"}),
+            Document(page_content="gamma delta", metadata={"page": 2, "source": "b.md"}),
+        ]
+        chunker = RecursiveCharacterChunker(chunk_size=5, overlap=0, separators=[" "])
+
+        chunks = chunker.chunk(documents)
+
+        self.assertEqual([chunk.chunk_id for chunk in chunks], list(range(len(chunks))))
+        self.assertEqual([chunk.page for chunk in chunks], [1, 1, 2, 2])
+        self.assertEqual([chunk.source for chunk in chunks], ["a.md", "a.md", "b.md", "b.md"])
 
     def test_retrieve_uses_vectorstore_strategy_by_default(self):
         fake_retriever = MagicMock()
