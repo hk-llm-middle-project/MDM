@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 from langchain_core.documents import Document
 
 from rag.chunker import chunk_text, split_documents
+from rag.chunkers import BaseChunker, Chunk, chunk_to_document
 from rag.embeddings import EMBEDDING_STRATEGIES, create_embeddings
 from rag.embeddings.strategies.bge import BGEM3Embeddings
 from rag.embeddings.strategies.google import GoogleGeminiEmbeddings
@@ -46,6 +47,43 @@ class BasicRagTest(unittest.TestCase):
         self.assertEqual([chunk.page_content for chunk in chunks], ["abc", "def"])
         self.assertEqual([chunk.metadata for chunk in chunks], [{"page": 1}, {"page": 1}])
         self.assertIsNot(chunks[0].metadata, documents[0].metadata)
+
+    def test_chunk_to_document_maps_standard_metadata_and_drops_none_values(self):
+        chunk = Chunk(
+            chunk_id=7,
+            text="사고 본문",
+            chunk_type="child",
+            page=39,
+            source="data/llama_md/main_pdf/039.md",
+            diagram_id="보1",
+            parent_id=3,
+            location=None,
+            party_type="자동차-보행자",
+            image_path=None,
+        )
+
+        document = chunk_to_document(chunk)
+
+        self.assertEqual(document.page_content, "사고 본문")
+        self.assertEqual(
+            document.metadata,
+            {
+                "chunk_id": 7,
+                "chunk_type": "child",
+                "page": 39,
+                "source": "data/llama_md/main_pdf/039.md",
+                "diagram_id": "보1",
+                "parent_id": 3,
+                "party_type": "자동차-보행자",
+            },
+        )
+
+    def test_base_chunker_requires_chunk_implementation(self):
+        class MissingChunker(BaseChunker):
+            pass
+
+        with self.assertRaises(TypeError):
+            MissingChunker()
 
     def test_retrieve_uses_vectorstore_strategy_by_default(self):
         fake_retriever = MagicMock()
