@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 from langchain_core.documents import Document
 
-from config import LLAMA_MD_DIR, VECTORSTORE_DIR, get_vectorstore_dir
+from config import LLAMA_MD_DIR, PDFPLUMBER_OUT_DIR, VECTORSTORE_DIR, get_vectorstore_dir
 from rag.loader import (
     LOADER_STRATEGIES,
     LlamaParserLoaderConfig,
@@ -15,6 +15,9 @@ from rag.loader import (
     load_pdf,
 )
 from rag.loader.strategies.llamaparser_loader import get_document_cache_dir
+from rag.loader.strategies.pdfplumber_loader import (
+    get_document_cache_dir as get_pdfplumber_cache_dir,
+)
 
 
 class LoaderTest(unittest.TestCase):
@@ -56,6 +59,7 @@ class LoaderTest(unittest.TestCase):
         with TemporaryDirectory() as temp_dir:
             pdf_path = Path(temp_dir) / "source.pdf"
             pdf_path.touch()
+            output_dir = Path(temp_dir) / "pdfplumber_out"
             first_page = MagicMock()
             first_page.page_number = 1
             first_page.extract_text.return_value = " first page "
@@ -66,7 +70,13 @@ class LoaderTest(unittest.TestCase):
             fake_pdf.__enter__.return_value.pages = [first_page, empty_page]
 
             with patch("rag.loader.strategies.pdfplumber_loader.pdfplumber.open", return_value=fake_pdf):
-                documents = load_pdf(pdf_path)
+                documents = load_pdf(
+                    pdf_path,
+                    strategy_config=PdfPlumberLoaderConfig(output_dir=output_dir),
+                )
+            saved_content = (get_pdfplumber_cache_dir(pdf_path, output_dir) / "001.md").read_text(
+                encoding="utf-8"
+            )
 
         self.assertEqual(len(documents), 1)
         self.assertEqual(documents[0].page_content, " first page ")
@@ -78,6 +88,135 @@ class LoaderTest(unittest.TestCase):
                 "parser": "pdfplumber",
             },
         )
+        self.assertEqual(saved_content, "first page\n")
+
+    def test_pdfplumber_strategy_inserts_extracted_table_at_page_position(self):
+        with TemporaryDirectory() as temp_dir:
+            pdf_path = Path(temp_dir) / "source.pdf"
+            pdf_path.touch()
+            output_dir = Path(temp_dir) / "pdfplumber_out"
+
+            table = MagicMock()
+            table.bbox = (0, 20, 100, 40)
+            table.extract.return_value = [["구분", "값"], ["기본 과실비율", "A100:B0"]]
+            page = MagicMock()
+            page.page_number = 1
+            page.extract_text.return_value = "위 본문\n구분 값\n기본 과실비율 A100:B0\n아래 본문"
+            page.extract_words.return_value = [
+                {"text": "위", "x0": 0, "top": 10, "bottom": 12},
+                {"text": "본문", "x0": 10, "top": 10, "bottom": 12},
+                {"text": "구분", "x0": 0, "top": 25, "bottom": 27},
+                {"text": "값", "x0": 20, "top": 25, "bottom": 27},
+                {"text": "기본", "x0": 0, "top": 30, "bottom": 32},
+                {"text": "과실비율", "x0": 10, "top": 30, "bottom": 32},
+                {"text": "A100:B0", "x0": 40, "top": 30, "bottom": 32},
+                {"text": "아래", "x0": 0, "top": 50, "bottom": 52},
+                {"text": "본문", "x0": 10, "top": 50, "bottom": 52},
+            ]
+            page.find_tables.return_value = [table]
+            fake_pdf = MagicMock()
+            fake_pdf.__enter__.return_value.pages = [page]
+
+            with patch("rag.loader.strategies.pdfplumber_loader.pdfplumber.open", return_value=fake_pdf):
+                documents = load_pdf(
+                    pdf_path,
+                    strategy_config=PdfPlumberLoaderConfig(output_dir=output_dir),
+                )
+
+        page_content = documents[0].page_content
+        self.assertLess(page_content.index("위 본문"), page_content.index("| 구분 | 값 |"))
+        self.assertLess(page_content.index("| 구분 | 값 |"), page_content.index("아래 본문"))
+        self.assertIn("| 기본 과실비율 | A100:B0 |", page_content)
+        self.assertEqual(page_content.count("기본 과실비율"), 1)
+
+    def test_pdfplumber_strategy_applies_crop_word_and_table_settings(self):
+        with TemporaryDirectory() as temp_dir:
+            pdf_path = Path(temp_dir) / "source.pdf"
+            pdf_path.touch()
+            output_dir = Path(temp_dir) / "pdfplumber_out"
+            original_page = MagicMock()
+            original_page.page_number = 1
+            original_page.width = 600
+            original_page.height = 800
+            cropped_page = MagicMock()
+            cropped_page.extract_text.return_value = "cropped text"
+            cropped_page.find_tables.return_value = []
+            cropped_page.extract_words.return_value = []
+            original_page.crop.return_value = cropped_page
+            fake_pdf = MagicMock()
+            fake_pdf.__enter__.return_value.pages = [original_page]
+            word_settings = {"x_tolerance": 5, "y_tolerance": 4}
+            table_settings = {"vertical_strategy": "lines"}
+
+            with patch("rag.loader.strategies.pdfplumber_loader.pdfplumber.open", return_value=fake_pdf):
+                documents = load_pdf(
+                    pdf_path,
+                    strategy_config=PdfPlumberLoaderConfig(
+                        output_dir=output_dir,
+                        crop_margins=(10, 20, 30, 40),
+                        word_settings=word_settings,
+                        table_settings=table_settings,
+                    ),
+                )
+
+        original_page.crop.assert_called_once_with((10, 20, 570, 760))
+        cropped_page.find_tables.assert_called_once_with(table_settings=table_settings)
+        cropped_page.extract_words.assert_not_called()
+        self.assertEqual([document.page_content for document in documents], ["cropped text"])
+
+    def test_pdfplumber_strategy_reuses_saved_markdown_without_parsing(self):
+        with TemporaryDirectory() as temp_dir:
+            pdf_path = Path(temp_dir) / "source.pdf"
+            pdf_path.touch()
+            output_dir = Path(temp_dir) / "pdfplumber_out"
+            document_cache_dir = get_pdfplumber_cache_dir(pdf_path, output_dir)
+            document_cache_dir.mkdir(parents=True)
+            (document_cache_dir / "001.md").write_text("page one\n", encoding="utf-8")
+            (document_cache_dir / "003.md").write_text("page three\n", encoding="utf-8")
+
+            with patch("rag.loader.strategies.pdfplumber_loader.pdfplumber.open") as open_mock:
+                documents = load_pdf(
+                    pdf_path,
+                    strategy_config=PdfPlumberLoaderConfig(output_dir=output_dir),
+                )
+
+        self.assertEqual(
+            [document.page_content for document in documents],
+            ["page one\n", "page three\n"],
+        )
+        self.assertEqual(
+            [document.metadata for document in documents],
+            [
+                {
+                    "source": str(pdf_path),
+                    "page": 1,
+                    "parser": "pdfplumber",
+                },
+                {
+                    "source": str(pdf_path),
+                    "page": 3,
+                    "parser": "pdfplumber",
+                },
+            ],
+        )
+        open_mock.assert_not_called()
+
+    def test_pdfplumber_default_output_dir_is_data_pdfplumber_out_root(self):
+        self.assertEqual(PdfPlumberLoaderConfig().output_dir, PDFPLUMBER_OUT_DIR)
+
+    def test_pdfplumber_cache_dir_uses_main_pdf_directory(self):
+        with TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir) / "pdfplumber_out"
+            first_pdf = Path(temp_dir) / "source.pdf"
+            second_pdf = Path(temp_dir) / "source-copy.pdf"
+            first_pdf.write_bytes(b"first")
+            second_pdf.write_bytes(b"second")
+
+            first_cache_dir = get_pdfplumber_cache_dir(first_pdf, root)
+            second_cache_dir = get_pdfplumber_cache_dir(second_pdf, root)
+
+        self.assertEqual(first_cache_dir, root / "main_pdf")
+        self.assertEqual(second_cache_dir, root / "main_pdf")
 
     def test_llamaparser_strategy_builds_documents_and_saves_markdown(self):
         with TemporaryDirectory() as temp_dir:
