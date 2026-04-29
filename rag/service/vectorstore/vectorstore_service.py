@@ -11,7 +11,13 @@ from config import (
     get_vectorstore_dir,
 )
 from rag.chunker import split_documents
-from rag.chunkers import CaseBoundaryChunker, SemanticChunker, chunk_to_document
+from rag.chunkers import (
+    CaseBoundaryChunker,
+    MarkdownStructureChunker,
+    RecursiveCharacterChunker,
+    SemanticChunker,
+    chunk_to_document,
+)
 from rag.embeddings import create_embeddings
 from rag.indexer import build_vectorstore, load_vectorstore, vectorstore_exists
 from rag.loader import load_pdf
@@ -24,6 +30,9 @@ PRE_CHUNKED_LOADER_STRATEGIES = {"upstage"}
 CASE_BOUNDARY_CHUNKER_STRATEGY = "case-boundary"
 CASE_BOUNDARY_LOADER_STRATEGY = "llamaparser"
 SEMANTIC_CHUNKER_STRATEGY = "semantic"
+RECURSIVE_CHUNKER_STRATEGY = "recursive"
+MARKDOWN_CHUNKER_STRATEGY = "markdown"
+UPSTAGE_NATIVE_CHUNKER_STRATEGY = "native"
 
 
 def get_page_metadata_cache_path(loader_strategy: str):
@@ -63,6 +72,16 @@ def _semantic_documents(documents, *, embedding_provider: str):
     return [chunk_to_document(chunk) for chunk in chunks]
 
 
+def _standard_chunker_documents(documents, *, chunker_strategy: str):
+    if chunker_strategy == RECURSIVE_CHUNKER_STRATEGY:
+        chunks = RecursiveCharacterChunker().chunk(documents)
+    elif chunker_strategy == MARKDOWN_CHUNKER_STRATEGY:
+        chunks = MarkdownStructureChunker().chunk(documents)
+    else:
+        raise ValueError(f"Unsupported standard chunker strategy: {chunker_strategy}")
+    return [chunk_to_document(chunk) for chunk in chunks]
+
+
 def _chunk_documents_for_vectorstore(
     documents,
     *,
@@ -76,6 +95,8 @@ def _chunk_documents_for_vectorstore(
         return _case_boundary_documents(documents)
     if chunker_strategy == SEMANTIC_CHUNKER_STRATEGY:
         return _semantic_documents(documents, embedding_provider=embedding_provider)
+    if chunker_strategy in {RECURSIVE_CHUNKER_STRATEGY, MARKDOWN_CHUNKER_STRATEGY}:
+        return _standard_chunker_documents(documents, chunker_strategy=chunker_strategy)
     return split_documents(
         enrich_documents_with_llm_metadata(
             documents,
@@ -93,6 +114,13 @@ def _validate_loader_chunker_combination(
         and loader_strategy != CASE_BOUNDARY_LOADER_STRATEGY
     ):
         raise ValueError("case-boundary chunker requires llamaparser loader")
+    if chunker_strategy == MARKDOWN_CHUNKER_STRATEGY and loader_strategy != "llamaparser":
+        raise ValueError("markdown chunker requires llamaparser loader")
+    if loader_strategy == "upstage" and chunker_strategy not in {
+        DEFAULT_CHUNKER_STRATEGY,
+        UPSTAGE_NATIVE_CHUNKER_STRATEGY,
+    }:
+        raise ValueError("upstage loader requires native chunker")
 
 
 @lru_cache(maxsize=32)

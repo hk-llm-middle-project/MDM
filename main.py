@@ -3,7 +3,11 @@
 from dotenv import load_dotenv
 import streamlit as st
 
-from config import DEFAULT_EMBEDDING_PROVIDER, DEFAULT_LOADER_STRATEGY
+from config import (
+    DEFAULT_CHUNKER_STRATEGY,
+    DEFAULT_EMBEDDING_PROVIDER,
+    DEFAULT_LOADER_STRATEGY,
+)
 from rag.embeddings import EMBEDDING_STRATEGIES
 from rag.pipeline.retrieval import RetrievalPipelineConfig
 from rag.pipeline.retriever import EnsembleRetrieverConfig, RETRIEVAL_STRATEGIES
@@ -15,6 +19,11 @@ from rag.service.tracing import TraceContext
 
 SHOW_RETRIEVED_CONTEXTS = True
 LOADER_STRATEGY_OPTIONS = ("pdfplumber", "llamaparser", "upstage")
+CHUNKER_STRATEGY_OPTIONS_BY_LOADER = {
+    "pdfplumber": ("fixed", "recursive", "semantic"),
+    "llamaparser": ("fixed", "recursive", "markdown", "case-boundary", "semantic"),
+    "upstage": ("native",),
+}
 EMBEDDING_PROVIDER_OPTIONS = tuple(EMBEDDING_STRATEGIES)
 RETRIEVER_STRATEGY_OPTIONS = tuple(
     strategy
@@ -53,6 +62,11 @@ def init_state(store: ConversationStore) -> None:
         st.session_state.loader_strategy = loader_strategy
     if "embedding_provider" not in st.session_state:
         st.session_state.embedding_provider = DEFAULT_EMBEDDING_PROVIDER
+    if "chunker_strategy" not in st.session_state:
+        st.session_state.chunker_strategy = normalize_chunker_strategy(
+            DEFAULT_CHUNKER_STRATEGY,
+            st.session_state.loader_strategy,
+        )
     if "retriever_strategy" not in st.session_state:
         st.session_state.retriever_strategy = "similarity"
     if "ensemble_bm25_weight" not in st.session_state:
@@ -60,7 +74,21 @@ def init_state(store: ConversationStore) -> None:
     st.session_state.active_session = ensure_active_session(store)
 
 
-def render_sidebar(store: ConversationStore) -> tuple[str, str, str, float]:
+def get_chunker_strategy_options(loader_strategy: str) -> tuple[str, ...]:
+    return CHUNKER_STRATEGY_OPTIONS_BY_LOADER.get(
+        loader_strategy,
+        CHUNKER_STRATEGY_OPTIONS_BY_LOADER[DEFAULT_LOADER_STRATEGY],
+    )
+
+
+def normalize_chunker_strategy(chunker_strategy: str, loader_strategy: str) -> str:
+    options = get_chunker_strategy_options(loader_strategy)
+    if chunker_strategy in options:
+        return chunker_strategy
+    return options[0]
+
+
+def render_sidebar(store: ConversationStore) -> tuple[str, str, str, str, float]:
     st.sidebar.title("세션 목록")
     if st.sidebar.button("새 세션", use_container_width=True):
         session_count = len(store.list_sessions(USER_ID))
@@ -91,6 +119,17 @@ def render_sidebar(store: ConversationStore) -> tuple[str, str, str, float]:
     if selected_loader_strategy != current_loader_strategy:
         store.set_loader_strategy(USER_ID, selected_loader_strategy)
     st.session_state.loader_strategy = selected_loader_strategy
+
+    chunker_options = get_chunker_strategy_options(selected_loader_strategy)
+    current_chunker_strategy = normalize_chunker_strategy(
+        st.session_state.get("chunker_strategy", DEFAULT_CHUNKER_STRATEGY),
+        selected_loader_strategy,
+    )
+    st.session_state.chunker_strategy = st.sidebar.selectbox(
+        "청커",
+        chunker_options,
+        index=chunker_options.index(current_chunker_strategy),
+    )
 
     current_embedding_provider = st.session_state.get(
         "embedding_provider",
@@ -147,6 +186,7 @@ def render_sidebar(store: ConversationStore) -> tuple[str, str, str, float]:
         )
     return (
         selected_loader_strategy,
+        st.session_state.chunker_strategy,
         st.session_state.embedding_provider,
         st.session_state.retriever_strategy,
         st.session_state.ensemble_bm25_weight,
@@ -237,6 +277,7 @@ def build_pipeline_config(
 def render_chat(
     store: ConversationStore,
     loader_strategy: str = DEFAULT_LOADER_STRATEGY,
+    chunker_strategy: str = DEFAULT_CHUNKER_STRATEGY,
     embedding_provider: str = DEFAULT_EMBEDDING_PROVIDER,
     retriever_strategy: str = "similarity",
     ensemble_bm25_weight: float = DEFAULT_ENSEMBLE_BM25_WEIGHT,
@@ -247,9 +288,17 @@ def render_chat(
         thread_id=active_session,
         session_id=active_session,
         user_id=USER_ID,
-        tags=("streamlit", "mdm", loader_strategy, embedding_provider, retriever_strategy),
+        tags=(
+            "streamlit",
+            "mdm",
+            loader_strategy,
+            chunker_strategy,
+            embedding_provider,
+            retriever_strategy,
+        ),
         metadata={
             "loader_strategy": loader_strategy,
+            "chunker_strategy": chunker_strategy,
             "embedding_provider": embedding_provider,
             "retriever_strategy": retriever_strategy,
             "ensemble_bm25_weight": ensemble_bm25_weight,
@@ -283,6 +332,7 @@ def render_chat(
                         active_session,
                     ),
                     loader_strategy=loader_strategy,
+                    chunker_strategy=chunker_strategy,
                     chat_history=messages,
                     embedding_provider=embedding_provider,
                     pipeline_config=build_pipeline_config(
@@ -313,6 +363,7 @@ def main():
     init_state(store)
     (
         loader_strategy,
+        chunker_strategy,
         embedding_provider,
         retriever_strategy,
         ensemble_bm25_weight,
@@ -320,6 +371,7 @@ def main():
     render_chat(
         store,
         loader_strategy,
+        chunker_strategy,
         embedding_provider,
         retriever_strategy,
         ensemble_bm25_weight,

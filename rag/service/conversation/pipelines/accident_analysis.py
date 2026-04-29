@@ -2,7 +2,7 @@
 
 from collections.abc import Callable, Sequence
 
-from config import DEFAULT_EMBEDDING_PROVIDER, DEFAULT_LOADER_STRATEGY
+from config import DEFAULT_CHUNKER_STRATEGY, DEFAULT_EMBEDDING_PROVIDER, DEFAULT_LOADER_STRATEGY
 from rag.pipeline.retrieval import RetrievalPipelineConfig
 from rag.service.conversation.schema import TurnResultType
 from rag.service.intake.intake_service import build_default_follow_up_questions
@@ -83,6 +83,7 @@ def answer_accident_analysis(
     pipeline_config: RetrievalPipelineConfig | None = None,
     intake_state: IntakeState | None = None,
     loader_strategy: str = DEFAULT_LOADER_STRATEGY,
+    chunker_strategy: str = DEFAULT_CHUNKER_STRATEGY,
     embedding_provider: str = DEFAULT_EMBEDDING_PROVIDER,
     chat_history: list[ChatMessage] | None = None,
     trace_context: TraceContext | None = None,
@@ -130,6 +131,8 @@ def answer_accident_analysis(
             "loader_strategy": loader_strategy,
             "embedding_provider": embedding_provider,
         }
+        if chunker_strategy != DEFAULT_CHUNKER_STRATEGY:
+            analysis_kwargs["chunker_strategy"] = chunker_strategy
         if chat_history is not None:
             analysis_kwargs["chat_history"] = chat_history
         if trace_context is not None:
@@ -157,6 +160,8 @@ def answer_accident_analysis(
         "loader_strategy": loader_strategy,
         "embedding_provider": embedding_provider,
     }
+    if chunker_strategy != DEFAULT_CHUNKER_STRATEGY:
+        analysis_kwargs["chunker_strategy"] = chunker_strategy
     if chat_history is not None:
         analysis_kwargs["chat_history"] = chat_history
     if trace_context is not None:

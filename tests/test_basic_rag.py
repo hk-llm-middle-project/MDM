@@ -1028,6 +1028,37 @@ class BasicRagTest(unittest.TestCase):
             embedding_provider="google",
         )
 
+    def test_answer_question_passes_chunker_strategy_to_analysis(self):
+        metadata = UserSearchMetadata(party_type="자동차", location="교차로 사고")
+        with (
+            patch(
+                "rag.service.conversation.app_service.evaluate_input_sufficiency",
+                return_value=IntakeDecision(
+                    is_sufficient=True,
+                    normalized_description="정규화된 설명",
+                    search_metadata=metadata,
+                ),
+            ),
+            patch("rag.service.conversation.app_service.analyze_question", return_value=("answer", ["context"])) as analyze_mock,
+        ):
+            answer, contexts = answer_question(
+                "원문 입력",
+                loader_strategy="llamaparser",
+                embedding_provider="google",
+                chunker_strategy="semantic",
+            )
+
+        self.assertEqual(answer, "answer")
+        self.assertEqual(contexts, ["context"])
+        analyze_mock.assert_called_once_with(
+            "정규화된 설명",
+            search_metadata=metadata,
+            pipeline_config=None,
+            loader_strategy="llamaparser",
+            embedding_provider="google",
+            chunker_strategy="semantic",
+        )
+
     def test_answer_question_without_intake_bypasses_intake(self):
         with (
             patch("rag.service.conversation.app_service.evaluate_input_sufficiency") as intake_mock,
@@ -1094,7 +1125,32 @@ class BasicRagTest(unittest.TestCase):
 
         self.assertEqual(answer, "answer")
         self.assertEqual(contexts, ["context"])
-        components_mock.assert_called_once_with("llamaparser", "google")
+        components_mock.assert_called_once_with("llamaparser", "google", "fixed")
+
+    def test_analyze_question_uses_chunker_strategy_for_retrieval_components(self):
+        from rag.service.analysis.analysis_service import analyze_question
+
+        fake_document = Document(page_content="context")
+        fake_llm = MagicMock()
+        fake_llm.invoke.return_value = MagicMock(
+            content='{"fault_ratio_a":70,"fault_ratio_b":30,"response":"answer"}'
+        )
+
+        with (
+            patch("rag.service.analysis.analysis_service.get_retrieval_components", return_value="components") as components_mock,
+            patch("rag.service.analysis.analysis_service.run_retrieval_pipeline", return_value=[fake_document]),
+            patch("rag.service.analysis.analysis_service.ChatOpenAI", return_value=fake_llm),
+        ):
+            answer, contexts = analyze_question(
+                "query",
+                loader_strategy="llamaparser",
+                embedding_provider="google",
+                chunker_strategy="semantic",
+            )
+
+        self.assertEqual(answer, "answer")
+        self.assertEqual(contexts, ["context"])
+        components_mock.assert_called_once_with("llamaparser", "google", "semantic")
 
     def test_analyze_question_passes_trace_context_to_langchain_runs(self):
         from rag.service.analysis.analysis_service import analyze_question
