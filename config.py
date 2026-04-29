@@ -20,6 +20,7 @@ UPSTAGE_RAW_DOCUMENTS_PATH = (
     UPSTAGE_MAIN_PDF_OUTPUT_DIR / "raw" / "parsed_documents_raw.json"
 )
 DEFAULT_LOADER_STRATEGY = "pdfplumber"
+DEFAULT_CHUNKER_STRATEGY = "fixed"
 LOADER_VECTORSTORE_DIRS = {
     "pdfplumber": VECTORSTORE_DIR / "pdfplumber",
     "llamaparser": VECTORSTORE_DIR / "llamaparser",
@@ -76,6 +77,7 @@ def get_session_ttl_seconds() -> int | None:
 def get_vectorstore_dir(
     loader_strategy: str = DEFAULT_LOADER_STRATEGY,
     embedding_provider: str = DEFAULT_EMBEDDING_PROVIDER,
+    chunker_strategy: str = DEFAULT_CHUNKER_STRATEGY,
 ) -> Path:
     try:
         loader_vectorstore_dir = LOADER_VECTORSTORE_DIRS[loader_strategy]
@@ -85,4 +87,6 @@ def get_vectorstore_dir(
             f"Unknown loader strategy: {loader_strategy}. Available strategies: {available}"
         ) from error
 
-    return loader_vectorstore_dir / embedding_provider
+    if chunker_strategy == DEFAULT_CHUNKER_STRATEGY:
+        return loader_vectorstore_dir / embedding_provider
+    return loader_vectorstore_dir / chunker_strategy / embedding_provider

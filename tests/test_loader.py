@@ -50,6 +50,10 @@ class LoaderTest(unittest.TestCase):
             get_vectorstore_dir("llama-parse", "openai"),
             VECTORSTORE_DIR / "llamaparser" / "openai",
         )
+        self.assertEqual(
+            get_vectorstore_dir("llamaparser", "bge", chunker_strategy="case-boundary"),
+            VECTORSTORE_DIR / "llamaparser" / "case-boundary" / "bge",
+        )
 
     def test_get_vectorstore_dir_raises_for_unknown_strategy(self):
         with self.assertRaises(ValueError):

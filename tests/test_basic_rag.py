@@ -637,6 +637,75 @@ class BasicRagTest(unittest.TestCase):
 
         vectorstore_service.get_vectorstore.cache_clear()
 
+    def test_vectorstore_service_applies_case_boundary_chunker_strategy(self):
+        from rag.service.vectorstore import vectorstore_service
+
+        vectorstore_service.get_vectorstore.cache_clear()
+        loaded_documents = [
+            Document(
+                page_content=(
+                    "## 차43-7 안전지대 통과 직진 대 선행 진로변경\n"
+                    "|     | 기본 과실비율 | 기본 과실비율 | 기본 과실비율 | 기본 과실비율 | "
+                    "(가) A100<br/>(나) A70 | B0<br/>B30 | B0<br/>B30 |\n"
+                    "| --- | --- | --- | --- | --- | --- | --- | --- |\n"
+                    "| (가) | 과실비율 조정예시 | A 현저한 과실 | | +10 | | | |\n"
+                    "|     | | B 중대한 과실 | | | +20 | | |\n"
+                    "![page_389_table_1](../../upstage_output/main_pdf/final/img/page_389_table_1.png)\n"
+                ),
+                metadata={"page": 389, "source": "389.md"},
+            )
+        ]
+
+        with (
+            patch("rag.service.vectorstore.vectorstore_service.get_vectorstore_dir", return_value=Path("vectorstore/llamaparser/case-boundary/bge")) as dir_mock,
+            patch("rag.service.vectorstore.vectorstore_service.vectorstore_exists", return_value=False),
+            patch("rag.service.vectorstore.vectorstore_service.load_pdf", return_value=loaded_documents) as load_mock,
+            patch("rag.service.vectorstore.vectorstore_service.enrich_documents_with_llm_metadata") as enrich_mock,
+            patch("rag.service.vectorstore.vectorstore_service.split_documents") as split_mock,
+            patch("rag.service.vectorstore.vectorstore_service.build_vectorstore", return_value="vectorstore") as build_mock,
+        ):
+            result = vectorstore_service.get_vectorstore(
+                "llamaparser",
+                "bge",
+                chunker_strategy="case-boundary",
+            )
+
+        self.assertEqual(result, "vectorstore")
+        dir_mock.assert_called_once_with("llamaparser", "bge", chunker_strategy="case-boundary")
+        load_mock.assert_called_once()
+        self.assertEqual(load_mock.call_args.kwargs["strategy"], "llamaparser")
+        enrich_mock.assert_not_called()
+        split_mock.assert_not_called()
+        build_mock.assert_called_once()
+        indexed_documents = build_mock.call_args.args[0]
+        self.assertTrue(
+            any(
+                document.metadata.get("chunk_type") == "child"
+                and document.metadata.get("diagram_id") == "차43-7(가)"
+                and "| 대상 | 수정요소 | A 조정 | B 조정 |" in document.page_content
+                for document in indexed_documents
+            )
+        )
+
+        vectorstore_service.get_vectorstore.cache_clear()
+
+    def test_vectorstore_service_rejects_case_boundary_for_non_llamaparser_loader(self):
+        from rag.service.vectorstore import vectorstore_service
+
+        vectorstore_service.get_vectorstore.cache_clear()
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "case-boundary chunker requires llamaparser loader",
+        ):
+            vectorstore_service.get_vectorstore(
+                "pdfplumber",
+                "bge",
+                chunker_strategy="case-boundary",
+            )
+
+        vectorstore_service.get_vectorstore.cache_clear()
+
     def test_format_context_preview_returns_empty_without_contexts(self):
         self.assertEqual(format_context_preview([]), "")
 
