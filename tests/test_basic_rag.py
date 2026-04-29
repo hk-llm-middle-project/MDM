@@ -85,6 +85,30 @@ class BasicRagTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             MissingChunker()
 
+    def test_base_chunker_concrete_implementation_returns_standard_chunks(self):
+        class EchoChunker(BaseChunker):
+            def chunk(self, parsed_input):
+                return [
+                    Chunk(
+                        chunk_id=0,
+                        text=str(parsed_input),
+                        chunk_type="flat",
+                        page=1,
+                        source="test",
+                        diagram_id=None,
+                        parent_id=None,
+                        location=None,
+                        party_type=None,
+                        image_path=None,
+                    )
+                ]
+
+        chunks = EchoChunker().chunk("parsed")
+
+        self.assertEqual(len(chunks), 1)
+        self.assertIsInstance(chunks[0], Chunk)
+        self.assertEqual(chunks[0].text, "parsed")
+
     def test_retrieve_uses_vectorstore_strategy_by_default(self):
         fake_retriever = MagicMock()
         fake_retriever.invoke.return_value = [Document(page_content="result")]
