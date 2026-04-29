@@ -11,7 +11,8 @@ from config import (
     get_vectorstore_dir,
 )
 from rag.chunker import split_documents
-from rag.chunkers import CaseBoundaryChunker, chunk_to_document
+from rag.chunkers import CaseBoundaryChunker, SemanticChunker, chunk_to_document
+from rag.embeddings import create_embeddings
 from rag.indexer import build_vectorstore, load_vectorstore, vectorstore_exists
 from rag.loader import load_pdf
 from rag.metadata import enrich_documents_with_llm_metadata
@@ -22,6 +23,7 @@ from scripts.clean_case_boundary_chunk_tables import clean_case_boundary_tables
 PRE_CHUNKED_LOADER_STRATEGIES = {"upstage"}
 CASE_BOUNDARY_CHUNKER_STRATEGY = "case-boundary"
 CASE_BOUNDARY_LOADER_STRATEGY = "llamaparser"
+SEMANTIC_CHUNKER_STRATEGY = "semantic"
 
 
 def get_page_metadata_cache_path(loader_strategy: str):
@@ -55,16 +57,25 @@ def _case_boundary_documents(documents):
     return [_dict_to_document(doc) for doc in cleaned_docs]
 
 
+def _semantic_documents(documents, *, embedding_provider: str):
+    embeddings = create_embeddings(embedding_provider)
+    chunks = SemanticChunker(embedding_function=embeddings).chunk(documents)
+    return [chunk_to_document(chunk) for chunk in chunks]
+
+
 def _chunk_documents_for_vectorstore(
     documents,
     *,
     loader_strategy: str,
     chunker_strategy: str,
+    embedding_provider: str,
 ):
     if loader_strategy in PRE_CHUNKED_LOADER_STRATEGIES:
         return documents
     if chunker_strategy == CASE_BOUNDARY_CHUNKER_STRATEGY:
         return _case_boundary_documents(documents)
+    if chunker_strategy == SEMANTIC_CHUNKER_STRATEGY:
+        return _semantic_documents(documents, embedding_provider=embedding_provider)
     return split_documents(
         enrich_documents_with_llm_metadata(
             documents,
@@ -109,6 +120,7 @@ def get_vectorstore(
         documents,
         loader_strategy=loader_strategy,
         chunker_strategy=chunker_strategy,
+        embedding_provider=embedding_provider,
     )
     return build_vectorstore(
         chunks,

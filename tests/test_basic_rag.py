@@ -689,6 +689,56 @@ class BasicRagTest(unittest.TestCase):
 
         vectorstore_service.get_vectorstore.cache_clear()
 
+    def test_vectorstore_service_applies_semantic_chunker_strategy(self):
+        from rag.service.vectorstore import vectorstore_service
+
+        class FakeEmbeddings:
+            def embed_documents(self, texts):
+                return [[1.0, 0.0], [0.99, 0.01], [0.0, 1.0]][: len(texts)]
+
+        vectorstore_service.get_vectorstore.cache_clear()
+        loaded_documents = [
+            Document(
+                page_content=(
+                    "교차로에서 차량 A가 직진했고 신호와 차로를 유지한 상태였습니다. "
+                    "차량 B도 같은 교차로에 진입하면서 같은 사고 상황 설명이 이어집니다."
+                ),
+                metadata={"page": 10, "source": "010.md"},
+            ),
+            Document(
+                page_content="주차장 관리 규정은 별도입니다.",
+                metadata={"page": 11, "source": "011.md"},
+            ),
+        ]
+
+        with (
+            patch("rag.service.vectorstore.vectorstore_service.get_vectorstore_dir", return_value=Path("vectorstore/llamaparser/semantic/bge")) as dir_mock,
+            patch("rag.service.vectorstore.vectorstore_service.vectorstore_exists", return_value=False),
+            patch("rag.service.vectorstore.vectorstore_service.load_pdf", return_value=loaded_documents),
+            patch("rag.service.vectorstore.vectorstore_service.create_embeddings", return_value=FakeEmbeddings()) as embeddings_mock,
+            patch("rag.service.vectorstore.vectorstore_service.enrich_documents_with_llm_metadata") as enrich_mock,
+            patch("rag.service.vectorstore.vectorstore_service.split_documents") as split_mock,
+            patch("rag.service.vectorstore.vectorstore_service.build_vectorstore", return_value="vectorstore") as build_mock,
+        ):
+            result = vectorstore_service.get_vectorstore(
+                "llamaparser",
+                "bge",
+                chunker_strategy="semantic",
+            )
+
+        self.assertEqual(result, "vectorstore")
+        dir_mock.assert_called_once_with("llamaparser", "bge", chunker_strategy="semantic")
+        embeddings_mock.assert_called_once_with("bge")
+        enrich_mock.assert_not_called()
+        split_mock.assert_not_called()
+        indexed_documents = build_mock.call_args.args[0]
+        self.assertEqual([document.metadata["chunk_type"] for document in indexed_documents], ["flat", "flat"])
+        self.assertIn("차량 B도 같은 교차로에 진입하면서", indexed_documents[0].page_content)
+        self.assertEqual(indexed_documents[0].metadata["page"], 10)
+        self.assertEqual(indexed_documents[1].metadata["page"], 11)
+
+        vectorstore_service.get_vectorstore.cache_clear()
+
     def test_vectorstore_service_rejects_case_boundary_for_non_llamaparser_loader(self):
         from rag.service.vectorstore import vectorstore_service
 
