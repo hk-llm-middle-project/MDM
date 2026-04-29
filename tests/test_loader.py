@@ -59,7 +59,7 @@ class LoaderTest(unittest.TestCase):
         with TemporaryDirectory() as temp_dir:
             pdf_path = Path(temp_dir) / "source.pdf"
             pdf_path.touch()
-            output_dir = Path(temp_dir) / "pdfplumber_out"
+            output_dir = Path(temp_dir) / "pdfplumber_output"
             first_page = MagicMock()
             first_page.page_number = 1
             first_page.extract_text.return_value = " first page "
@@ -94,7 +94,7 @@ class LoaderTest(unittest.TestCase):
         with TemporaryDirectory() as temp_dir:
             pdf_path = Path(temp_dir) / "source.pdf"
             pdf_path.touch()
-            output_dir = Path(temp_dir) / "pdfplumber_out"
+            output_dir = Path(temp_dir) / "pdfplumber_output"
 
             table = MagicMock()
             table.bbox = (0, 20, 100, 40)
@@ -133,7 +133,7 @@ class LoaderTest(unittest.TestCase):
         with TemporaryDirectory() as temp_dir:
             pdf_path = Path(temp_dir) / "source.pdf"
             pdf_path.touch()
-            output_dir = Path(temp_dir) / "pdfplumber_out"
+            output_dir = Path(temp_dir) / "pdfplumber_output"
             original_page = MagicMock()
             original_page.page_number = 1
             original_page.width = 600
@@ -168,7 +168,7 @@ class LoaderTest(unittest.TestCase):
         with TemporaryDirectory() as temp_dir:
             pdf_path = Path(temp_dir) / "source.pdf"
             pdf_path.touch()
-            output_dir = Path(temp_dir) / "pdfplumber_out"
+            output_dir = Path(temp_dir) / "pdfplumber_output"
             document_cache_dir = get_pdfplumber_cache_dir(pdf_path, output_dir)
             document_cache_dir.mkdir(parents=True)
             (document_cache_dir / "001.md").write_text("page one\n", encoding="utf-8")
@@ -201,12 +201,13 @@ class LoaderTest(unittest.TestCase):
         )
         open_mock.assert_not_called()
 
-    def test_pdfplumber_default_output_dir_is_data_pdfplumber_out_root(self):
+    def test_pdfplumber_default_output_dir_is_data_pdfplumber_output_root(self):
         self.assertEqual(PdfPlumberLoaderConfig().output_dir, PDFPLUMBER_OUT_DIR)
+        self.assertEqual(PDFPLUMBER_OUT_DIR.name, "pdfplumber_output")
 
     def test_pdfplumber_cache_dir_uses_main_pdf_directory(self):
         with TemporaryDirectory() as temp_dir:
-            root = Path(temp_dir) / "pdfplumber_out"
+            root = Path(temp_dir) / "pdfplumber_output"
             first_pdf = Path(temp_dir) / "source.pdf"
             second_pdf = Path(temp_dir) / "source-copy.pdf"
             first_pdf.write_bytes(b"first")
