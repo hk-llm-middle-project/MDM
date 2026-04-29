@@ -197,7 +197,13 @@ def build_ensemble_slider_css(bm25_weight: float) -> str:
   background: transparent !important;
 }}
 [data-testid="stSidebar"] [data-testid="stSlider"] div[data-baseweb="slider"] [role="slider"] {{
-  opacity: 0 !important;
+  width: 4px !important;
+  height: 1rem !important;
+  border-radius: 999px !important;
+  background: #111827 !important;
+  border: 1px solid #ffffff !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
 }}
 [data-testid="stSidebar"] [data-testid="stSliderThumbValue"],
 [data-testid="stSidebar"] [data-testid="stSlider"] [data-testid="stTickBar"],
