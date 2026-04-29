@@ -42,7 +42,7 @@ class MarkdownStructureChunker(BaseChunker):
                         self._make_chunk(
                             chunk_id=current_parent_id,
                             text=section.text,
-                            chunk_type="text",
+                            chunk_type="parent",
                             document=document,
                             diagram_id=current_diagram_id,
                             parent_id=None,

@@ -197,7 +197,7 @@ class BasicRagTest(unittest.TestCase):
         chunks = chunker.chunk(document)
 
         self.assertEqual([chunk.chunk_id for chunk in chunks], [0, 1, 2])
-        self.assertEqual([chunk.chunk_type for chunk in chunks], ["text", "child", "child"])
+        self.assertEqual([chunk.chunk_type for chunk in chunks], ["parent", "child", "child"])
         self.assertEqual([chunk.diagram_id for chunk in chunks], ["차1-1", "차1-1", "차1-1"])
         self.assertEqual([chunk.parent_id for chunk in chunks], [None, 0, 0])
         self.assertEqual([chunk.page for chunk in chunks], [175, 175, 175])
@@ -228,7 +228,7 @@ class BasicRagTest(unittest.TestCase):
         chunks = chunker.chunk(document)
 
         self.assertEqual([chunk.chunk_id for chunk in chunks], [0, 1, 2, 3])
-        self.assertEqual([chunk.chunk_type for chunk in chunks], ["text", "child", "text", "child"])
+        self.assertEqual([chunk.chunk_type for chunk in chunks], ["parent", "child", "parent", "child"])
         self.assertEqual([chunk.diagram_id for chunk in chunks], ["보1", "보1", "보2", "보2"])
         self.assertEqual([chunk.parent_id for chunk in chunks], [None, 0, None, 2])
 
@@ -253,7 +253,7 @@ class BasicRagTest(unittest.TestCase):
         chunks = chunker.chunk(documents)
 
         self.assertEqual([chunk.chunk_id for chunk in chunks], [0, 1, 2])
-        self.assertEqual([chunk.chunk_type for chunk in chunks], ["text", "child", "child"])
+        self.assertEqual([chunk.chunk_type for chunk in chunks], ["parent", "child", "child"])
         self.assertEqual([chunk.diagram_id for chunk in chunks], ["차2-5", "차2-5", "차2-5"])
         self.assertEqual([chunk.parent_id for chunk in chunks], [None, 0, 0])
         self.assertEqual([chunk.page for chunk in chunks], [175, 176, 176])
