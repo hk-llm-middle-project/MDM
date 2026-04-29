@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 from langchain_core.documents import Document
 
 from rag.chunker import chunk_text, split_documents
-from rag.chunkers import BaseChunker, Chunk, chunk_to_document
+from rag.chunkers import BaseChunker, Chunk, FixedSizeChunker, chunk_to_document
 from rag.embeddings import EMBEDDING_STRATEGIES, create_embeddings
 from rag.embeddings.strategies.bge import BGEM3Embeddings
 from rag.embeddings.strategies.google import GoogleGeminiEmbeddings
@@ -108,6 +108,39 @@ class BasicRagTest(unittest.TestCase):
         self.assertEqual(len(chunks), 1)
         self.assertIsInstance(chunks[0], Chunk)
         self.assertEqual(chunks[0].text, "parsed")
+
+    def test_fixed_size_chunker_returns_flat_chunks_with_document_metadata(self):
+        document = Document(
+            page_content="abcdef",
+            metadata={"page": 39, "source": "data/llama_md/main_pdf/039.md"},
+        )
+        chunker = FixedSizeChunker(chunk_size=3, overlap=1)
+
+        chunks = chunker.chunk(document)
+
+        self.assertEqual([chunk.chunk_id for chunk in chunks], [0, 1, 2])
+        self.assertEqual([chunk.text for chunk in chunks], ["abc", "cde", "ef"])
+        self.assertEqual([chunk.chunk_type for chunk in chunks], ["flat", "flat", "flat"])
+        self.assertEqual([chunk.page for chunk in chunks], [39, 39, 39])
+        self.assertEqual(
+            [chunk.source for chunk in chunks],
+            ["data/llama_md/main_pdf/039.md"] * 3,
+        )
+        self.assertTrue(all(chunk.diagram_id is None for chunk in chunks))
+        self.assertTrue(all(chunk.parent_id is None for chunk in chunks))
+
+    def test_fixed_size_chunker_assigns_sequential_ids_across_documents(self):
+        documents = [
+            Document(page_content="abcd", metadata={"page": 1, "source": "a.md"}),
+            Document(page_content="wxyz", metadata={"page": 2, "source": "b.md"}),
+        ]
+        chunker = FixedSizeChunker(chunk_size=2, overlap=0)
+
+        chunks = chunker.chunk(documents)
+
+        self.assertEqual([chunk.chunk_id for chunk in chunks], [0, 1, 2, 3])
+        self.assertEqual([chunk.text for chunk in chunks], ["ab", "cd", "wx", "yz"])
+        self.assertEqual([chunk.page for chunk in chunks], [1, 1, 2, 2])
 
     def test_retrieve_uses_vectorstore_strategy_by_default(self):
         fake_retriever = MagicMock()
