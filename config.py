@@ -14,12 +14,16 @@ LLAMA_MD_DIR = BASE_DIR / "data" / "llama_md"
 PDFPLUMBER_OUT_DIR = BASE_DIR / "data" / "pdfplumber_output"
 UPSTAGE_OUTPUT_DIR = BASE_DIR / "data" / "upstage_output"
 UPSTAGE_MAIN_PDF_OUTPUT_DIR = UPSTAGE_OUTPUT_DIR / "main_pdf"
-UPSTAGE_FINAL_DOCUMENTS_PATH = (
-    UPSTAGE_MAIN_PDF_OUTPUT_DIR / "final" / "chunked_documents_final_compact.json"
-)
 UPSTAGE_RAW_DOCUMENTS_PATH = (
+    UPSTAGE_MAIN_PDF_OUTPUT_DIR / "raw" / "parsed_documents.json"
+)
+UPSTAGE_LEGACY_RAW_DOCUMENTS_PATH = (
     UPSTAGE_MAIN_PDF_OUTPUT_DIR / "raw" / "parsed_documents_raw.json"
 )
+UPSTAGE_CUSTOM_DOCUMENTS_PATH = (
+    UPSTAGE_MAIN_PDF_OUTPUT_DIR / "final" / "chunked_documents_final.table_clean.json"
+)
+UPSTAGE_FINAL_DOCUMENTS_PATH = UPSTAGE_CUSTOM_DOCUMENTS_PATH
 DEFAULT_LOADER_STRATEGY = "pdfplumber"
 DEFAULT_CHUNKER_STRATEGY = "fixed"
 LOADER_VECTORSTORE_DIRS = {

@@ -1,4 +1,4 @@
-"""Build a Chroma vectorstore from Upstage post-processed chunks."""
+"""Build a Chroma vectorstore from the curated Upstage custom chunks."""
 
 from __future__ import annotations
 
@@ -12,23 +12,23 @@ from pathlib import Path
 from dotenv import load_dotenv
 from langchain_core.documents import Document
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from config import BASE_DIR, DEFAULT_EMBEDDING_PROVIDER, INDEX_BATCH_SIZE, get_vectorstore_dir
-from rag.embeddings import EMBEDDING_STRATEGIES
-
-
-INPUT_PATH = (
-    BASE_DIR
-    / "data"
-    / "upstage_output"
-    / "main_pdf"
-    / "final"
-    / "chunked_documents_final.json"
+from config import (  # noqa: E402
+    BASE_DIR,
+    DEFAULT_EMBEDDING_PROVIDER,
+    INDEX_BATCH_SIZE,
+    UPSTAGE_CUSTOM_DOCUMENTS_PATH,
+    get_vectorstore_dir,
 )
+from rag.embeddings import EMBEDDING_STRATEGIES  # noqa: E402
+
+
+INPUT_PATH = UPSTAGE_CUSTOM_DOCUMENTS_PATH
 VECTORSTORE_STRATEGY = "upstage"
+DEFAULT_CHUNKER_STRATEGY = "custom"
 DEFAULT_EXCLUDED_CHUNK_TYPES = {"preface"}
 IMAGE_CONTENT_METADATA_KEY = "description"
 ALLOWED_METADATA_TYPES = (str, int, float, bool)
@@ -88,9 +88,7 @@ def build_document(chunk: dict) -> Document | None:
 def sanitize_metadata(metadata: dict) -> dict:
     sanitized: dict = {}
     for key, value in metadata.items():
-        if key in EXCLUDED_METADATA_KEYS:
-            continue
-        if value is None:
+        if key in EXCLUDED_METADATA_KEYS or value is None:
             continue
         if isinstance(value, ALLOWED_METADATA_TYPES):
             sanitized[key] = value
@@ -118,7 +116,11 @@ def main() -> None:
     args = parse_args()
     embedding_provider = args.embedding_provider
     include_text = not args.exclude_text
-    output_dir = get_vectorstore_dir(VECTORSTORE_STRATEGY, embedding_provider)
+    output_dir = get_vectorstore_dir(
+        VECTORSTORE_STRATEGY,
+        embedding_provider,
+        chunker_strategy=DEFAULT_CHUNKER_STRATEGY,
+    )
 
     load_dotenv(BASE_DIR / ".env")
     if (

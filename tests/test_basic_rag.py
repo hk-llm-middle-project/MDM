@@ -40,6 +40,8 @@ from rag.service.intake.schema import IntakeDecision, IntakeState, UserSearchMet
 from rag.service.presentation.result_service import format_context_preview, truncate_context
 from rag.service.tracing import TraceContext
 
+PDF_SOURCE = "data/raw/230630_자동차사고 과실비율 인정기준_최종.pdf"
+
 
 class BasicRagTest(unittest.TestCase):
     def test_chunk_text_uses_fixed_size_without_overlap(self):
@@ -259,6 +261,30 @@ class BasicRagTest(unittest.TestCase):
         self.assertEqual([chunk.parent_id for chunk in chunks], [None, 0, 0])
         self.assertEqual([chunk.page for chunk in chunks], [175, 176, 176])
         self.assertEqual([chunk.source for chunk in chunks], ["175.md", "176.md", "176.md"])
+
+    def test_markdown_structure_chunker_extracts_first_image_path_per_chunk(self):
+        document = Document(
+            page_content=(
+                "## 차2-5 신호 교차로 사고\n\n"
+                "대표 이미지입니다.\n"
+                "![parent](../img/parent.png)\n\n"
+                "#### 사고 상황\n"
+                "사고 설명입니다.\n"
+                "![child](../img/child.png)\n\n"
+                "#### 기본 과실비율 해설\n"
+                "이미지 없는 해설입니다.\n"
+            ),
+            metadata={"page": 175, "source": "175.md"},
+        )
+        chunker = MarkdownStructureChunker()
+
+        chunks = chunker.chunk(document)
+
+        self.assertEqual([chunk.image_path for chunk in chunks], [
+            "../img/parent.png",
+            "../img/child.png",
+            None,
+        ])
 
     def test_retrieve_uses_vectorstore_strategy_by_default(self):
         fake_retriever = MagicMock()
@@ -566,7 +592,7 @@ class BasicRagTest(unittest.TestCase):
                 text="chunk",
                 chunk_type="flat",
                 page=1,
-                source=str(PDF_PATH),
+                source=PDF_SOURCE,
                 diagram_id=None,
                 parent_id=None,
                 location=None,
@@ -581,7 +607,7 @@ class BasicRagTest(unittest.TestCase):
                     "chunk_id": 0,
                     "chunk_type": "flat",
                     "page": 1,
-                    "source": str(PDF_PATH),
+                    "source": PDF_SOURCE,
                     "party_type": "pedestrian",
                     "location": "crosswalk",
                 },
@@ -629,7 +655,7 @@ class BasicRagTest(unittest.TestCase):
                 text="chunk",
                 chunk_type="flat",
                 page=147,
-                source=str(PDF_PATH),
+                source=PDF_SOURCE,
                 diagram_id=None,
                 parent_id=None,
                 location=None,
@@ -727,7 +753,7 @@ class BasicRagTest(unittest.TestCase):
                 text="chunk",
                 chunk_type="flat",
                 page=147,
-                source=str(PDF_PATH),
+                source=PDF_SOURCE,
                 diagram_id=None,
                 parent_id=None,
                 location=None,
@@ -772,33 +798,44 @@ class BasicRagTest(unittest.TestCase):
 
         vectorstore_service.get_vectorstore.cache_clear()
 
-    def test_vectorstore_service_does_not_split_upstage_final_chunks(self):
+    def test_vectorstore_service_uses_prebuilt_upstage_chunk_cache(self):
         from rag.service.vectorstore import vectorstore_service
 
         vectorstore_service.get_vectorstore.cache_clear()
-        upstage_documents = [Document(page_content="already chunked")]
+        cached_chunks = [Document(page_content="already chunked", metadata={"page": 3})]
 
         with (
-            patch("rag.service.vectorstore.vectorstore_service.get_vectorstore_dir", return_value=Path("vectorstore/upstage/bge")),
-            patch("rag.service.vectorstore.vectorstore_service.vectorstore_exists", return_value=False),
-            patch("rag.service.vectorstore.vectorstore_service.chunk_cache_exists", return_value=False),
-            patch("rag.service.vectorstore.vectorstore_service.load_pdf", return_value=upstage_documents),
             patch(
-                "rag.service.vectorstore.vectorstore_service.enrich_documents_with_page_metadata",
-                side_effect=lambda docs, cache_path=None: docs,
-            ) as enrich_mock,
+                "rag.service.vectorstore.vectorstore_service.get_vectorstore_dir",
+                return_value=Path("vectorstore/upstage/raw/bge"),
+            ),
+            patch("rag.service.vectorstore.vectorstore_service.vectorstore_exists", return_value=False),
+            patch("rag.service.vectorstore.vectorstore_service.chunk_cache_exists", return_value=True),
+            patch(
+                "rag.service.vectorstore.vectorstore_service.load_chunk_cache",
+                return_value=cached_chunks,
+            ) as load_chunk_cache_mock,
+            patch("rag.service.vectorstore.vectorstore_service.load_pdf") as load_pdf_mock,
+            patch("rag.service.vectorstore.vectorstore_service.ensure_page_metadata_cache") as ensure_mock,
+            patch("rag.service.vectorstore.vectorstore_service.enrich_documents_with_page_metadata") as enrich_mock,
             patch("rag.service.vectorstore.vectorstore_service.FixedSizeChunker") as fixed_chunker_mock,
             patch("rag.service.vectorstore.vectorstore_service.build_vectorstore", return_value="vectorstore") as build_mock,
         ):
-            result = vectorstore_service.get_vectorstore("upstage", "bge")
+            result = vectorstore_service.get_vectorstore("upstage", "bge", "raw")
 
         self.assertEqual(result, "vectorstore")
-        enrich_mock.assert_called_once()
+        load_chunk_cache_mock.assert_called_once_with(
+            Path("/home/nyong/mdm/data/chunks/upstage/raw"),
+            source_path=PDF_PATH,
+        )
+        load_pdf_mock.assert_not_called()
+        ensure_mock.assert_not_called()
+        enrich_mock.assert_not_called()
         fixed_chunker_mock.assert_not_called()
         build_mock.assert_called_once()
         self.assertEqual(
             build_mock.call_args.args[0],
-            [Document(page_content="already chunked", metadata={"source": str(PDF_PATH)})],
+            cached_chunks,
         )
 
         vectorstore_service.get_vectorstore.cache_clear()

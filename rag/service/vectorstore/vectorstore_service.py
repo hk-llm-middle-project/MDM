@@ -34,13 +34,19 @@ CASE_BOUNDARY_LOADER_STRATEGY = "llamaparser"
 SEMANTIC_CHUNKER_STRATEGY = "semantic"
 RECURSIVE_CHUNKER_STRATEGY = "recursive"
 MARKDOWN_CHUNKER_STRATEGY = "markdown"
-UPSTAGE_NATIVE_CHUNKER_STRATEGY = "native"
+UPSTAGE_RAW_CHUNKER_STRATEGY = "raw"
+UPSTAGE_CUSTOM_CHUNKER_STRATEGY = "custom"
+UPSTAGE_LEGACY_CHUNKER_ALIASES = {DEFAULT_CHUNKER_STRATEGY, "native"}
 
 
 def get_page_metadata_cache_path(loader_strategy: str):
     """Return the cache path for page-level LLM metadata labels."""
     del loader_strategy
     return PAGE_METADATA_PATH
+
+
+def _should_enrich_page_metadata(loader_strategy: str) -> bool:
+    return loader_strategy != "upstage"
 
 
 def _document_to_dict(document):
@@ -107,6 +113,8 @@ def _chunk_documents_for_vectorstore(
         chunks = _standard_chunker_documents(documents, chunker_strategy=chunker_strategy)
     else:
         raise ValueError(f"Unsupported chunker strategy: {chunker_strategy}")
+    if not _should_enrich_page_metadata(loader_strategy):
+        return chunks
     return enrich_documents_with_page_metadata(
         chunks,
         cache_path=get_page_metadata_cache_path(loader_strategy),
@@ -129,10 +137,20 @@ def _validate_loader_chunker_combination(
     if chunker_strategy == MARKDOWN_CHUNKER_STRATEGY and loader_strategy != "llamaparser":
         raise ValueError("markdown chunker requires llamaparser loader")
     if loader_strategy == "upstage" and chunker_strategy not in {
-        DEFAULT_CHUNKER_STRATEGY,
-        UPSTAGE_NATIVE_CHUNKER_STRATEGY,
+        UPSTAGE_RAW_CHUNKER_STRATEGY,
+        UPSTAGE_CUSTOM_CHUNKER_STRATEGY,
+        *UPSTAGE_LEGACY_CHUNKER_ALIASES,
     }:
-        raise ValueError("upstage loader requires native chunker")
+        raise ValueError("upstage loader requires raw or custom chunker")
+
+
+def _normalize_chunker_strategy_for_loader(
+    loader_strategy: str,
+    chunker_strategy: str,
+) -> str:
+    if loader_strategy == "upstage" and chunker_strategy in UPSTAGE_LEGACY_CHUNKER_ALIASES:
+        return UPSTAGE_RAW_CHUNKER_STRATEGY
+    return chunker_strategy
 
 
 @lru_cache(maxsize=32)
@@ -142,6 +160,10 @@ def get_vectorstore(
     chunker_strategy: str = DEFAULT_CHUNKER_STRATEGY,
 ):
     """기존 벡터스토어를 불러오거나 PDF에서 새로 생성합니다."""
+    chunker_strategy = _normalize_chunker_strategy_for_loader(
+        loader_strategy,
+        chunker_strategy,
+    )
     _validate_loader_chunker_combination(loader_strategy, chunker_strategy)
     vectorstore_dir = (
         get_vectorstore_dir(loader_strategy, embedding_provider)
@@ -164,11 +186,17 @@ def get_vectorstore(
             embedding_provider=embedding_provider,
         )
 
+    if loader_strategy == "upstage":
+        raise FileNotFoundError(
+            f"Upstage chunk cache is required but missing: {chunk_cache_dir / 'chunks.json'}"
+        )
+
     documents = load_pdf(PDF_PATH, strategy=loader_strategy)
-    ensure_page_metadata_cache(
-        documents,
-        get_page_metadata_cache_path(loader_strategy),
-    )
+    if _should_enrich_page_metadata(loader_strategy):
+        ensure_page_metadata_cache(
+            documents,
+            get_page_metadata_cache_path(loader_strategy),
+        )
     chunks = _chunk_documents_for_vectorstore(
         documents,
         loader_strategy=loader_strategy,

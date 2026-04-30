@@ -22,7 +22,7 @@ LOADER_STRATEGY_OPTIONS = ("pdfplumber", "llamaparser", "upstage")
 CHUNKER_STRATEGY_OPTIONS_BY_LOADER = {
     "pdfplumber": ("fixed", "recursive", "semantic"),
     "llamaparser": ("fixed", "recursive", "markdown", "case-boundary", "semantic"),
-    "upstage": ("native",),
+    "upstage": ("raw", "custom"),
 }
 EMBEDDING_PROVIDER_OPTIONS = tuple(EMBEDDING_STRATEGIES)
 RETRIEVER_STRATEGY_OPTIONS = tuple(

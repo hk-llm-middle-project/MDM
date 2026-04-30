@@ -32,12 +32,12 @@ class StreamlitUiTest(unittest.TestCase):
             get_chunker_strategy_options("llamaparser"),
             ("fixed", "recursive", "markdown", "case-boundary", "semantic"),
         )
-        self.assertEqual(get_chunker_strategy_options("upstage"), ("native",))
+        self.assertEqual(get_chunker_strategy_options("upstage"), ("raw", "custom"))
         self.assertNotIn("case-boundary", CHUNKER_STRATEGY_OPTIONS_BY_LOADER["pdfplumber"])
 
     def test_normalize_chunker_strategy_falls_back_to_loader_compatible_default(self):
         self.assertEqual(normalize_chunker_strategy("case-boundary", "pdfplumber"), "fixed")
-        self.assertEqual(normalize_chunker_strategy("fixed", "upstage"), "native")
+        self.assertEqual(normalize_chunker_strategy("fixed", "upstage"), "raw")
         self.assertEqual(normalize_chunker_strategy("semantic", "llamaparser"), "semantic")
 
     def test_build_pipeline_config_uses_ensemble_weight_slider_value(self):

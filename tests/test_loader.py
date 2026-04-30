@@ -41,14 +41,17 @@ class LoaderTest(unittest.TestCase):
             load_pdf(Path("source.pdf"), strategy="missing")
 
     def test_get_vectorstore_dir_separates_loader_and_embedding_strategies(self):
-        self.assertEqual(get_vectorstore_dir("pdfplumber"), VECTORSTORE_DIR / "pdfplumber" / "bge")
+        self.assertEqual(
+            get_vectorstore_dir("pdfplumber"),
+            VECTORSTORE_DIR / "pdfplumber" / "fixed" / "bge",
+        )
         self.assertEqual(
             get_vectorstore_dir("llamaparser", "google"),
-            VECTORSTORE_DIR / "llamaparser" / "google",
+            VECTORSTORE_DIR / "llamaparser" / "fixed" / "google",
         )
         self.assertEqual(
             get_vectorstore_dir("llama-parse", "openai"),
-            VECTORSTORE_DIR / "llamaparser" / "openai",
+            VECTORSTORE_DIR / "llamaparser" / "fixed" / "openai",
         )
         self.assertEqual(
             get_vectorstore_dir("llamaparser", "bge", chunker_strategy="case-boundary"),
@@ -328,78 +331,80 @@ class LoaderTest(unittest.TestCase):
         self.assertEqual(first_cache_dir, root / "main_pdf")
         self.assertEqual(second_cache_dir, root / "main_pdf")
 
-    def test_upstage_strategy_reuses_final_json_without_api_parsing(self):
+    def test_upstage_strategy_loads_raw_json_without_api_parsing(self):
         with TemporaryDirectory() as temp_dir:
             pdf_path = Path(temp_dir) / "source.pdf"
             pdf_path.touch()
-            final_path = Path(temp_dir) / "final" / "chunked_documents_final.json"
-            final_path.parent.mkdir(parents=True)
-            final_path.write_text(
+            raw_path = Path(temp_dir) / "raw" / "parsed_documents_raw.json"
+            raw_path.parent.mkdir(parents=True)
+            raw_path.write_text(
                 json.dumps(
                     [
                         {
-                            "page_content": "already chunked",
+                            "page_content": "raw parsed",
                             "metadata": {
-                                "chunk_type": "general",
-                                "diagram_id": None,
                                 "page": 3,
+                                "category": "paragraph",
                             },
                         }
                     ]
                 ),
                 encoding="utf-8",
             )
-            config = UpstageLoaderConfig(final_documents_path=final_path)
+            config = UpstageLoaderConfig(raw_documents_path=raw_path)
 
-            with patch("rag.loader.strategies.upstage.upstage_loader.create_upstage_loader") as loader_mock:
-                documents = load_pdf(pdf_path, strategy="upstage", strategy_config=config)
+            documents = load_pdf(pdf_path, strategy="upstage", strategy_config=config)
 
-        self.assertEqual([document.page_content for document in documents], ["already chunked"])
+        self.assertEqual([document.page_content for document in documents], ["raw parsed"])
         self.assertEqual(
             documents[0].metadata,
             {
-                "chunk_type": "general",
                 "page": 3,
+                "category": "paragraph",
                 "source": str(pdf_path),
                 "parser": "upstage",
             },
         )
-        loader_mock.assert_not_called()
 
-    def test_upstage_strategy_saves_raw_json_when_final_cache_is_missing(self):
+    def test_upstage_strategy_loads_custom_json(self):
         with TemporaryDirectory() as temp_dir:
             pdf_path = Path(temp_dir) / "source.pdf"
             pdf_path.touch()
-            final_path = Path(temp_dir) / "final" / "chunked_documents_final.json"
-            raw_path = Path(temp_dir) / "raw" / "parsed_documents_raw.json"
-            loader = MagicMock()
-            loader.load.return_value = [
-                Document(page_content="raw parsed", metadata={"page": 1, "category": "paragraph"})
-            ]
+            custom_path = Path(temp_dir) / "final" / "chunked_documents_final.table_clean.json"
+            custom_path.parent.mkdir(parents=True)
+            custom_path.write_text(
+                json.dumps(
+                    [
+                        {
+                            "page_content": "custom chunk",
+                            "metadata": {
+                                "chunk_type": "child",
+                                "page": 389,
+                                "diagram_id": "차43-7(가)",
+                            },
+                        }
+                    ]
+                ),
+                encoding="utf-8",
+            )
             config = UpstageLoaderConfig(
-                final_documents_path=final_path,
-                raw_documents_path=raw_path,
-                save_images=False,
+                variant="custom",
+                custom_documents_path=custom_path,
             )
 
-            with (
-                patch(
-                    "rag.loader.strategies.upstage.upstage_loader.split_pdf_for_upstage",
-                    return_value=[{"path": pdf_path, "page_offset": 0}],
-                ),
-                patch(
-                    "rag.loader.strategies.upstage.upstage_loader.create_upstage_loader",
-                    return_value=loader,
-                ),
-            ):
-                documents = load_pdf(pdf_path, strategy="upstage", strategy_config=config)
+            documents = load_pdf(pdf_path, strategy="upstage", strategy_config=config)
 
-            self.assertEqual([document.page_content for document in documents], ["raw parsed"])
-            self.assertTrue(raw_path.exists())
-            saved_payload = json.loads(raw_path.read_text(encoding="utf-8"))
-            self.assertEqual(saved_payload[0]["page_content"], "raw parsed")
-            self.assertEqual(saved_payload[0]["metadata"]["parser"], "upstage")
-            self.assertEqual(saved_payload[0]["metadata"]["source"], str(pdf_path))
+        self.assertEqual([document.page_content for document in documents], ["custom chunk"])
+        self.assertEqual(
+            documents[0].metadata,
+            {
+                "chunk_type": "child",
+                "page": 389,
+                "diagram_id": "차43-7(가)",
+                "source": str(pdf_path),
+                "parser": "upstage",
+            },
+        )
 
 
 if __name__ == "__main__":
