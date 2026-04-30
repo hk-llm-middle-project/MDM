@@ -21,19 +21,22 @@ class PageMetadataClassification:
 
     party_type: str | None = None
     location: str | None = None
-    confidence: dict[str, float] | None = None
+    confidence: dict[str, float | None] | None = None
 
 
 def normalize_page_metadata_cache_entry(data: dict[str, object]) -> PageMetadataClassification:
     """Validate cached metadata output against allowed values."""
     confidence_data = data.get("confidence")
     if not isinstance(confidence_data, dict):
-        confidence_data = {}
-
-    confidence = {
-        "party_type": _normalize_confidence(confidence_data.get("party_type")),
-        "location": _normalize_confidence(confidence_data.get("location")),
-    }
+        confidence = {
+            "party_type": None,
+            "location": None,
+        }
+    else:
+        confidence = {
+            "party_type": _normalize_confidence(confidence_data.get("party_type")),
+            "location": _normalize_confidence(confidence_data.get("location")),
+        }
 
     party_type = data.get("party_type")
     if party_type not in PARTY_TYPES:
@@ -122,7 +125,6 @@ def _page_cache_key(document: Document, fallback_index: int) -> str:
 def _merge_classification_metadata(
     document: Document,
     classification: PageMetadataClassification,
-    metadata_source: str,
 ) -> Document:
     metadata = dict(document.metadata)
     confidence = classification.confidence or {}
@@ -132,9 +134,8 @@ def _merge_classification_metadata(
     if classification.location is not None:
         metadata["location"] = classification.location
 
-    metadata["metadata_source"] = metadata_source
-    metadata["metadata_confidence_party_type"] = confidence.get("party_type", 0.0)
-    metadata["metadata_confidence_location"] = confidence.get("location", 0.0)
+    metadata["metadata_confidence_party_type"] = confidence.get("party_type")
+    metadata["metadata_confidence_location"] = confidence.get("location")
 
     return Document(page_content=document.page_content, metadata=metadata)
 
@@ -192,7 +193,6 @@ def enrich_documents_with_page_metadata(
             _merge_classification_metadata(
                 document,
                 classification,
-                metadata_source="rule_based_cache",
             )
         )
 
@@ -206,31 +206,29 @@ def _classification_for_page(page: int | None) -> PageMetadataClassification:
     party_type: str | None = None
     location: str | None = None
 
-    if 38 <= page <= 65:
+    if 39 <= page <= 69:
         party_type, location = "보행자", "횡단보도 내"
-    elif 66 <= page <= 68:
-        party_type, location = "보행자", "횡단보도 내"
-    elif 69 <= page <= 88:
+    elif 70 <= page <= 89:
         party_type, location = "보행자", "횡단보도 부근"
-    elif 89 <= page <= 105:
+    elif 90 <= page <= 106:
         party_type, location = "보행자", "횡단보도 없음"
-    elif 106 <= page <= 122:
+    elif 107 <= page <= 123:
         party_type, location = "보행자", "기타"
-    elif 147 <= page <= 326:
+    elif 148 <= page <= 327:
         party_type, location = "자동차", "교차로 사고"
-    elif 327 <= page <= 350:
+    elif 328 <= page <= 351:
         party_type, location = "자동차", "마주보는 방향 진행차량 상호 간의 사고"
-    elif 351 <= page <= 424:
+    elif 352 <= page <= 425:
         party_type, location = "자동차", "같은 방향 진행차량 상호간의 사고"
-    elif 425 <= page <= 487:
+    elif 426 <= page <= 488:
         party_type, location = "자동차", "기타"
-    elif 500 <= page <= 564:
+    elif 501 <= page <= 565:
         party_type, location = "자전거", "교차로 사고"
-    elif 565 <= page <= 567:
+    elif 566 <= page <= 568:
         party_type, location = "자전거", "마주보는 방향 진행차량 상호 간의 사고"
-    elif 568 <= page <= 577:
+    elif 569 <= page <= 578:
         party_type, location = "자전거", "같은 방향 진행차량 상호간의 사고"
-    elif 578 <= page:
+    elif 579 <= page <= 587:
         party_type, location = "자전거", "기타"
 
     if party_type is None or location is None:
