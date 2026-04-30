@@ -25,11 +25,12 @@ class ChunkCacheTest(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as temp_dir:
             cache_dir = Path(temp_dir)
-            save_chunk_cache(documents, cache_dir)
+            saved_documents = save_chunk_cache(documents, cache_dir)
 
             chunks_payload = json.loads((cache_dir / "chunks.json").read_text(encoding="utf-8"))
             preview = (cache_dir / "preview.md").read_text(encoding="utf-8")
 
+        self.assertEqual(saved_documents, documents)
         self.assertEqual(len(chunks_payload), 2)
         self.assertEqual(chunks_payload[0]["page_content"], "첫 번째 청크 내용")
         self.assertEqual(chunks_payload[0]["metadata"]["diagram_id"], "보1")
@@ -48,9 +49,13 @@ class ChunkCacheTest(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as temp_dir:
             cache_dir = Path(temp_dir)
-            save_chunk_cache(documents, cache_dir, source_path=PDF_PATH)
+            saved_documents = save_chunk_cache(documents, cache_dir, source_path=PDF_PATH)
             chunks_payload = json.loads((cache_dir / "chunks.json").read_text(encoding="utf-8"))
 
+        self.assertEqual(
+            saved_documents[0].metadata["source"],
+            "data/raw/230630_자동차사고 과실비율 인정기준_최종.pdf",
+        )
         self.assertEqual(chunks_payload[0]["metadata"]["source"], "data/raw/230630_자동차사고 과실비율 인정기준_최종.pdf")
 
     def test_load_chunk_cache_restores_documents(self):

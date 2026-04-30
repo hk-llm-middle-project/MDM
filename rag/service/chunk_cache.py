@@ -31,7 +31,7 @@ def save_chunk_cache(
     cache_dir: Path,
     *,
     source_path: Path | None = None,
-) -> None:
+) -> list[Document]:
     cache_dir.mkdir(parents=True, exist_ok=True)
     normalized_documents = _normalize_document_sources(documents, source_path)
     payload = [_document_to_dict(document) for document in normalized_documents]
@@ -43,6 +43,7 @@ def save_chunk_cache(
         build_chunk_preview(normalized_documents),
         encoding="utf-8",
     )
+    return normalized_documents
 
 
 def build_chunk_preview(documents: list[Document]) -> str:

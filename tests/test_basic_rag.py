@@ -837,11 +837,10 @@ class BasicRagTest(unittest.TestCase):
                 "rag.service.vectorstore.vectorstore_service.enrich_documents_with_page_metadata",
                 return_value=chunk_documents,
             ),
-            patch("rag.service.vectorstore.vectorstore_service.save_chunk_cache") as save_chunk_cache_mock,
             patch(
-                "rag.service.vectorstore.vectorstore_service.load_chunk_cache",
+                "rag.service.vectorstore.vectorstore_service.save_chunk_cache",
                 return_value=chunk_documents,
-            ) as load_chunk_cache_mock,
+            ) as save_chunk_cache_mock,
             patch("rag.service.vectorstore.vectorstore_service.build_vectorstore", return_value="vectorstore"),
         ):
             fixed_chunker_mock.return_value.chunk.return_value = fixed_chunks
@@ -850,10 +849,6 @@ class BasicRagTest(unittest.TestCase):
         chunk_dir_mock.assert_called_once_with("llamaparser", "fixed")
         save_chunk_cache_mock.assert_called_once_with(
             chunk_documents,
-            Path("data/chunks/llamaparser/fixed"),
-            source_path=PDF_PATH,
-        )
-        load_chunk_cache_mock.assert_called_once_with(
             Path("data/chunks/llamaparser/fixed"),
             source_path=PDF_PATH,
         )
