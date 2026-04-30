@@ -15,6 +15,27 @@ RAW_INPUT = Path("data/upstage_output/main_pdf/raw/parsed_documents.json")
 FINAL_OUTPUT = Path("data/upstage_output/main_pdf/final/chunked_documents_final.v2.json")
 REPORT_OUTPUT = Path("data/upstage_output/main_pdf/final/chunked_documents_final.v2.report.json")
 FINAL_IMAGE_DIR = Path("data/upstage_output/main_pdf/final/img")
+EXCLUDED_IMAGE_FILENAMES = {
+    "page_29_table_1.png",
+    "page_455_table_1.png",
+    "page_459_table_1.png",
+    "page_464_table_1.png",
+    "page_468_table_1.png",
+    "page_471_table_1.png",
+    "page_476_table_1.png",
+    "page_479_table_1.png",
+    "page_600_table_1.png",
+}
+
+# Pedestrian diagram ranges from the source document.
+PEDESTRIAN_CROSSWALK_IN_MAX = 19
+PEDESTRIAN_CROSSWALK_NEAR_MAX = 21
+PEDESTRIAN_NO_CROSSWALK_MAX = 28
+
+# Vehicle diagram ranges from the source document.
+CAR_INTERSECTION_MAX = 19
+CAR_MOTORCYCLE_SPECIAL_MIN = 61
+BICYCLE_INTERSECTION_MAX = 21
 
 PARTY_TYPES = ["보행자", "자동차", "자전거"]
 LOCATIONS = [
@@ -199,30 +220,30 @@ def location_for(diagram_id: str | None, context: str = "") -> str | None:
         return None
 
     if diagram_id.startswith("보"):
-        if number <= 19:
+        if number <= PEDESTRIAN_CROSSWALK_IN_MAX:
             return "횡단보도 내"
-        if number <= 21:
+        if number <= PEDESTRIAN_CROSSWALK_NEAR_MAX:
             return "횡단보도 부근"
-        if number <= 28:
+        if number <= PEDESTRIAN_NO_CROSSWALK_MAX:
             return "횡단보도 없음"
         return "기타"
 
     joined = context.replace(" ", "")
     if diagram_id.startswith("차"):
-        if number >= 61:
+        if number >= CAR_MOTORCYCLE_SPECIAL_MIN:
             return "자동차 대 이륜차 특수유형"
         if any(token in joined for token in ["중앙선", "마주보는", "유턴"]):
             return "마주보는 방향 진행차량 상호 간의 사고"
         if any(token in joined for token in ["추돌", "진로변경", "동일차로", "정차후출발", "낙하물", "주정차", "앞지르기"]):
             return "같은 방향 진행차량 상호간의 사고"
-        if "교차로" in joined or number <= 19:
+        if "교차로" in joined or number <= CAR_INTERSECTION_MAX:
             return "교차로 사고"
         return "기타"
 
     if diagram_id.startswith("거"):
         if "동일차로" in joined:
             return "같은 방향 진행차량 상호간의 사고"
-        if "교차로" in joined or number <= 21:
+        if "교차로" in joined or number <= BICYCLE_INTERSECTION_MAX:
             return "교차로 사고"
         return "기타"
     return None
@@ -437,6 +458,8 @@ def image_path_from(doc: dict[str, Any]) -> str | None:
     if not image_path:
         return None
     raw_candidate = Path(str(image_path))
+    if raw_candidate.name in EXCLUDED_IMAGE_FILENAMES:
+        return None
     raw_img_candidate = RAW_INPUT.parent / "img" / raw_candidate.name
     candidate = FINAL_IMAGE_DIR / Path(str(image_path)).name
     if candidate.exists():
@@ -521,6 +544,78 @@ def make_flat_chunk(doc: dict[str, Any], chunk_type: str, raw_path: Path) -> dic
     }
 
 
+def should_merge_flat_chunk(previous: dict[str, Any], current: dict[str, Any]) -> bool:
+    previous_metadata = previous.get("metadata", {})
+    current_metadata = current.get("metadata", {})
+    previous_content = str(previous.get("page_content", ""))
+    previous_is_section = is_flat_section_start(previous_content)
+    previous_image_path = previous_metadata.get("image_path")
+    current_image_path = current_metadata.get("image_path")
+    has_different_image = bool(
+        previous_image_path and current_image_path and previous_image_path != current_image_path
+    )
+
+    return (
+        previous_metadata.get("chunk_type") == current_metadata.get("chunk_type")
+        and current_metadata.get("chunk_type") in {GENERAL, PREFACE}
+        and (previous_metadata.get("page") == current_metadata.get("page") or previous_is_section)
+        and not has_different_image
+    )
+
+
+def materialize_chunks(items: list[dict[str, Any] | ParentDraft]) -> list[dict[str, Any]]:
+    output: list[dict[str, Any]] = []
+    next_id = 1
+
+    for item in items:
+        if isinstance(item, dict):
+            item["metadata"]["chunk_id"] = next_id
+            output.append(item)
+            next_id += 1
+            continue
+
+        parent = item
+        parent_id = next_id
+        output.append(
+            {
+                "page_content": render_parent_content(parent),
+                "metadata": {
+                    "chunk_id": parent_id,
+                    "chunk_type": PARENT,
+                    "diagram_id": parent.diagram_id,
+                    "parent_id": None,
+                    "page": parent.page,
+                    "source": parent.source,
+                    "party_type": parent.party_type,
+                    "location": parent.location,
+                    "image_path": parent.image_path,
+                },
+            }
+        )
+        next_id += 1
+
+        for child in parent.children:
+            output.append(
+                {
+                    "page_content": render_child_content(child),
+                    "metadata": {
+                        "chunk_id": next_id,
+                        "chunk_type": CHILD,
+                        "diagram_id": parent.diagram_id,
+                        "parent_id": parent_id,
+                        "page": child.page,
+                        "source": child.source or parent.source,
+                        "party_type": parent.party_type,
+                        "location": parent.location,
+                        "image_path": child.image_path,
+                    },
+                }
+            )
+            next_id += 1
+
+    return output
+
+
 def build_chunks(raw_docs: list[dict[str, Any]], raw_path: Path) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     items: list[dict[str, Any] | ParentDraft] = []
     parents: list[ParentDraft] = []
@@ -556,19 +651,9 @@ def build_chunks(raw_docs: list[dict[str, Any]], raw_path: Path) -> tuple[list[d
         if items and isinstance(items[-1], dict):
             previous = items[-1]
             previous_metadata = previous.get("metadata", {})
-            previous_content = str(previous.get("page_content", ""))
-            previous_is_section = is_flat_section_start(previous_content)
             previous_image_path = previous_metadata.get("image_path")
             current_image_path = metadata.get("image_path")
-            has_different_image = bool(
-                previous_image_path and current_image_path and previous_image_path != current_image_path
-            )
-            if (
-                previous_metadata.get("chunk_type") == metadata.get("chunk_type")
-                and metadata.get("chunk_type") in {GENERAL, PREFACE}
-                and (previous_metadata.get("page") == metadata.get("page") or previous_is_section)
-                and not has_different_image
-            ):
+            if should_merge_flat_chunk(previous, chunk):
                 previous["page_content"] = f"{previous.get('page_content', '').rstrip()}\n\n{content}"
                 if current_image_path and previous_image_path is None:
                     previous_metadata["image_path"] = current_image_path
@@ -765,55 +850,7 @@ def build_chunks(raw_docs: list[dict[str, Any]], raw_path: Path) -> tuple[list[d
 
     flush_active()
 
-    output: list[dict[str, Any]] = []
-
-    next_id = 1
-    for item in items:
-        if isinstance(item, dict):
-            item["metadata"]["chunk_id"] = next_id
-            output.append(item)
-            next_id += 1
-            continue
-
-        parent = item
-        parent_id = next_id
-        output.append(
-            {
-                "page_content": render_parent_content(parent),
-                "metadata": {
-                    "chunk_id": parent_id,
-                    "chunk_type": PARENT,
-                    "diagram_id": parent.diagram_id,
-                    "parent_id": None,
-                    "page": parent.page,
-                    "source": parent.source,
-                    "party_type": parent.party_type,
-                    "location": parent.location,
-                    "image_path": parent.image_path,
-                },
-            }
-        )
-        next_id += 1
-
-        for child in parent.children:
-            output.append(
-                {
-                    "page_content": render_child_content(child),
-                    "metadata": {
-                        "chunk_id": next_id,
-                        "chunk_type": CHILD,
-                        "diagram_id": parent.diagram_id,
-                        "parent_id": parent_id,
-                        "page": child.page,
-                        "source": child.source or parent.source,
-                        "party_type": parent.party_type,
-                        "location": parent.location,
-                        "image_path": child.image_path,
-                    },
-                }
-            )
-            next_id += 1
-
+    output = materialize_chunks(items)
     return output, validate_output(output, warnings)
 
 

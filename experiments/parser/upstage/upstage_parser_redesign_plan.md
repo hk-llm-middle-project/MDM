@@ -225,10 +225,11 @@ Implement and run the new parser under:
 
 Existing files in that directory may be moved to a timestamped legacy folder before writing the new implementation.
 
-표 + 주석
-사고 상황
-기본 과실비율 해설
-수정요소 해설
-활용시 참고 사항
-관련 법규
-참고 판례
+## Additional Section Headings
+
+- 사고 상황
+- 기본 과실비율 해설
+- 수정요소 해설
+- 활용시 참고 사항
+- 관련 법규
+- 참고 판례

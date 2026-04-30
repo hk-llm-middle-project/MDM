@@ -39,8 +39,6 @@ image_path: data\upstage_output\main_pdf\final\img\page_23_table_1.png
 
 ## chunk 28 | general | - | page 29
 
-image_path: data\upstage_output\main_pdf\final\img\page_29_table_1.png
-
 | 제1장 | 자동차와 | 보행자의 사고 |
 | --- | --- | --- |
 | 제2장 | 자동차와 자동차(이륜차 | 포함)의 사고 |
@@ -7934,7 +7932,7 @@ parent_id: 1222 / image_path: data\upstage_output\main_pdf\final\img\page_453_ta
 
 ## chunk 1228 | child | 차55-1 | page 455
 
-parent_id: 1222 / image_path: data\upstage_output\main_pdf\final\img\page_455_table_1.png
+parent_id: 1222
 
 | 가. | 소방차 |
 | --- | --- |
@@ -7984,7 +7982,7 @@ parent_id: 1230 / image_path: data\upstage_output\main_pdf\final\img\page_458_ta
 
 ## chunk 1236 | child | 차55-2 | page 459
 
-parent_id: 1230 / image_path: data\upstage_output\main_pdf\final\img\page_459_table_1.png
+parent_id: 1230
 
 | 가. | 소방차 |
 | --- | --- |
@@ -8042,7 +8040,7 @@ parent_id: 1237 / image_path: data\upstage_output\main_pdf\final\img\page_462_ta
 
 ## chunk 1243 | child | 차55-3 | page 464
 
-parent_id: 1237 / image_path: data\upstage_output\main_pdf\final\img\page_464_table_1.png
+parent_id: 1237
 
 | 가. | 소방차 |
 | --- | --- |
@@ -8098,7 +8096,7 @@ parent_id: 1244 / image_path: data\upstage_output\main_pdf\final\img\page_466_ta
 
 ## chunk 1250 | child | 차55-4 | page 468
 
-parent_id: 1244 / image_path: data\upstage_output\main_pdf\final\img\page_468_table_1.png
+parent_id: 1244
 
 | 가. | 소방차 |
 | --- | --- |
@@ -8152,7 +8150,7 @@ parent_id: 1251 / image_path: data\upstage_output\main_pdf\final\img\page_470_ta
 
 ## chunk 1257 | child | 차55-5 | page 471
 
-parent_id: 1251 / image_path: data\upstage_output\main_pdf\final\img\page_471_table_1.png
+parent_id: 1251
 
 | 가. | 소방차 |
 | --- | --- |
@@ -8206,7 +8204,7 @@ parent_id: 1258 / image_path: data\upstage_output\main_pdf\final\img\page_474_ta
 
 ## chunk 1264 | child | 차55-6 | page 475
 
-parent_id: 1258 / image_path: data\upstage_output\main_pdf\final\img\page_476_table_1.png
+parent_id: 1258
 
 | 가. | 소방차 |
 | --- | --- |
@@ -8254,7 +8252,7 @@ parent_id: 1265 / image_path: data\upstage_output\main_pdf\final\img\page_478_ta
 
 ## chunk 1271 | child | 차55-7 | page 479
 
-parent_id: 1265 / image_path: data\upstage_output\main_pdf\final\img\page_479_table_1.png
+parent_id: 1265
 
 | 가. | 소방차 |
 | --- | --- |
@@ -11197,8 +11195,6 @@ image_path: data\upstage_output\main_pdf\final\img\page_599_table_1.png
 ---
 
 ## chunk 1681 | preface | - | page 600
-
-image_path: data\upstage_output\main_pdf\final\img\page_600_table_1.png
 
 | 개 정 | :2023년 6월 |
 | --- | --- |

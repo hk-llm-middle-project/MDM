@@ -388,7 +388,7 @@
       "source": "data\\raw\\230630_자동차사고 과실비율 인정기준_최종.pdf",
       "party_type": null,
       "location": null,
-      "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_29_table_1.png"
+      "image_path": null
     }
   },
   {
@@ -17188,7 +17188,7 @@
       "source": "data\\raw\\230630_자동차사고 과실비율 인정기준_최종.pdf",
       "party_type": "자동차",
       "location": "기타",
-      "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_455_table_1.png"
+      "image_path": null
     }
   },
   {
@@ -17300,7 +17300,7 @@
       "source": "data\\raw\\230630_자동차사고 과실비율 인정기준_최종.pdf",
       "party_type": "자동차",
       "location": "기타",
-      "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_459_table_1.png"
+      "image_path": null
     }
   },
   {
@@ -17398,7 +17398,7 @@
       "source": "data\\raw\\230630_자동차사고 과실비율 인정기준_최종.pdf",
       "party_type": "자동차",
       "location": "마주보는 방향 진행차량 상호 간의 사고",
-      "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_464_table_1.png"
+      "image_path": null
     }
   },
   {
@@ -17496,7 +17496,7 @@
       "source": "data\\raw\\230630_자동차사고 과실비율 인정기준_최종.pdf",
       "party_type": "자동차",
       "location": "기타",
-      "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_468_table_1.png"
+      "image_path": null
     }
   },
   {
@@ -17594,7 +17594,7 @@
       "source": "data\\raw\\230630_자동차사고 과실비율 인정기준_최종.pdf",
       "party_type": "자동차",
       "location": "기타",
-      "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_471_table_1.png"
+      "image_path": null
     }
   },
   {
@@ -17692,7 +17692,7 @@
       "source": "data\\raw\\230630_자동차사고 과실비율 인정기준_최종.pdf",
       "party_type": "자동차",
       "location": "같은 방향 진행차량 상호간의 사고",
-      "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_476_table_1.png"
+      "image_path": null
     }
   },
   {
@@ -17790,7 +17790,7 @@
       "source": "data\\raw\\230630_자동차사고 과실비율 인정기준_최종.pdf",
       "party_type": "자동차",
       "location": "같은 방향 진행차량 상호간의 사고",
-      "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_479_table_1.png"
+      "image_path": null
     }
   },
   {
@@ -23530,7 +23530,7 @@
       "source": "data\\raw\\230630_자동차사고 과실비율 인정기준_최종.pdf",
       "party_type": null,
       "location": null,
-      "image_path": "data\\upstage_output\\main_pdf\\final\\img\\page_600_table_1.png"
+      "image_path": null
     }
   }
 ]
