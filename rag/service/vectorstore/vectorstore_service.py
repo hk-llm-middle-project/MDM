@@ -8,11 +8,12 @@ from config import (
     DEFAULT_LOADER_STRATEGY,
     PAGE_METADATA_PATH,
     PDF_PATH,
+    get_chunk_cache_dir,
     get_vectorstore_dir,
 )
-from rag.chunker import split_documents
 from rag.chunkers import (
     CaseBoundaryChunker,
+    FixedSizeChunker,
     MarkdownStructureChunker,
     RecursiveCharacterChunker,
     SemanticChunker,
@@ -22,6 +23,7 @@ from rag.embeddings import create_embeddings
 from rag.indexer import build_vectorstore, load_vectorstore, vectorstore_exists
 from rag.loader import load_pdf
 from rag.metadata import ensure_page_metadata_cache, enrich_documents_with_page_metadata
+from rag.service.chunk_cache import chunk_cache_exists, load_chunk_cache, save_chunk_cache
 from rag.pipeline.retriever import RetrievalComponents, build_retrieval_components
 from scripts.clean_case_boundary_chunk_tables import clean_case_boundary_tables
 
@@ -73,7 +75,9 @@ def _semantic_documents(documents, *, embedding_provider: str):
 
 
 def _standard_chunker_documents(documents, *, chunker_strategy: str):
-    if chunker_strategy == RECURSIVE_CHUNKER_STRATEGY:
+    if chunker_strategy == DEFAULT_CHUNKER_STRATEGY:
+        chunks = FixedSizeChunker().chunk(documents)
+    elif chunker_strategy == RECURSIVE_CHUNKER_STRATEGY:
         chunks = RecursiveCharacterChunker().chunk(documents)
     elif chunker_strategy == MARKDOWN_CHUNKER_STRATEGY:
         chunks = MarkdownStructureChunker().chunk(documents)
@@ -95,14 +99,22 @@ def _chunk_documents_for_vectorstore(
         chunks = _case_boundary_documents(documents)
     elif chunker_strategy == SEMANTIC_CHUNKER_STRATEGY:
         chunks = _semantic_documents(documents, embedding_provider=embedding_provider)
-    elif chunker_strategy in {RECURSIVE_CHUNKER_STRATEGY, MARKDOWN_CHUNKER_STRATEGY}:
+    elif chunker_strategy in {
+        DEFAULT_CHUNKER_STRATEGY,
+        RECURSIVE_CHUNKER_STRATEGY,
+        MARKDOWN_CHUNKER_STRATEGY,
+    }:
         chunks = _standard_chunker_documents(documents, chunker_strategy=chunker_strategy)
     else:
-        chunks = split_documents(documents)
+        raise ValueError(f"Unsupported chunker strategy: {chunker_strategy}")
     return enrich_documents_with_page_metadata(
         chunks,
         cache_path=get_page_metadata_cache_path(loader_strategy),
     )
+
+
+def _get_chunk_cache_dir(loader_strategy: str, chunker_strategy: str):
+    return get_chunk_cache_dir(loader_strategy, chunker_strategy)
 
 
 def _validate_loader_chunker_combination(
@@ -143,6 +155,15 @@ def get_vectorstore(
     if vectorstore_exists(vectorstore_dir):
         return load_vectorstore(vectorstore_dir, embedding_provider=embedding_provider)
 
+    chunk_cache_dir = _get_chunk_cache_dir(loader_strategy, chunker_strategy)
+    if chunk_cache_exists(chunk_cache_dir):
+        chunks = load_chunk_cache(chunk_cache_dir, source_path=PDF_PATH)
+        return build_vectorstore(
+            chunks,
+            vectorstore_dir,
+            embedding_provider=embedding_provider,
+        )
+
     documents = load_pdf(PDF_PATH, strategy=loader_strategy)
     ensure_page_metadata_cache(
         documents,
@@ -154,6 +175,8 @@ def get_vectorstore(
         chunker_strategy=chunker_strategy,
         embedding_provider=embedding_provider,
     )
+    save_chunk_cache(chunks, chunk_cache_dir, source_path=PDF_PATH)
+    chunks = load_chunk_cache(chunk_cache_dir, source_path=PDF_PATH)
     return build_vectorstore(
         chunks,
         vectorstore_dir,

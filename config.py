@@ -7,6 +7,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 PDF_PATH = BASE_DIR / "data" / "raw" / "230630_자동차사고 과실비율 인정기준_최종.pdf"
 VECTORSTORE_DIR = BASE_DIR / "data" / "vectorstore"
+CHUNK_CACHE_DIR = BASE_DIR / "data" / "chunks"
 PAGE_METADATA_DIR = BASE_DIR / "data" / "metadata"
 PAGE_METADATA_PATH = PAGE_METADATA_DIR / "main_pdf_page_metadata.json"
 LLAMA_MD_DIR = BASE_DIR / "data" / "llama_md"
@@ -88,3 +89,10 @@ def get_vectorstore_dir(
         ) from error
 
     return loader_vectorstore_dir / chunker_strategy / embedding_provider
+
+
+def get_chunk_cache_dir(
+    loader_strategy: str = DEFAULT_LOADER_STRATEGY,
+    chunker_strategy: str = DEFAULT_CHUNKER_STRATEGY,
+) -> Path:
+    return CHUNK_CACHE_DIR / loader_strategy / chunker_strategy

@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 
 from langchain_core.documents import Document
 
+from config import PDF_PATH
 from rag.chunker import chunk_text, split_documents
 from rag.chunkers import (
     BaseChunker,
@@ -559,25 +560,47 @@ class BasicRagTest(unittest.TestCase):
 
         vectorstore_service.get_vectorstore.cache_clear()
         loaded_documents = [Document(page_content="doc", metadata={"page": 1})]
-        split_documents = [Document(page_content="chunk", metadata={"page": 1})]
+        fixed_chunks = [
+            Chunk(
+                chunk_id=0,
+                text="chunk",
+                chunk_type="flat",
+                page=1,
+                source=str(PDF_PATH),
+                diagram_id=None,
+                parent_id=None,
+                location=None,
+                party_type=None,
+                image_path=None,
+            )
+        ]
         enriched_documents = [
             Document(
                 page_content="chunk",
-                metadata={"page": 1, "party_type": "pedestrian", "location": "crosswalk"},
+                metadata={
+                    "chunk_id": 0,
+                    "chunk_type": "flat",
+                    "page": 1,
+                    "source": str(PDF_PATH),
+                    "party_type": "pedestrian",
+                    "location": "crosswalk",
+                },
             )
         ]
 
         with (
             patch("rag.service.vectorstore.vectorstore_service.get_vectorstore_dir", return_value=Path("vectorstore/llamaparser/google")) as dir_mock,
             patch("rag.service.vectorstore.vectorstore_service.vectorstore_exists", return_value=False),
+            patch("rag.service.vectorstore.vectorstore_service.chunk_cache_exists", return_value=False),
             patch("rag.service.vectorstore.vectorstore_service.load_pdf", return_value=loaded_documents) as load_mock,
             patch(
                 "rag.service.vectorstore.vectorstore_service.enrich_documents_with_page_metadata",
                 return_value=enriched_documents,
             ) as enrich_mock,
-            patch("rag.service.vectorstore.vectorstore_service.split_documents", return_value=split_documents),
+            patch("rag.service.vectorstore.vectorstore_service.FixedSizeChunker") as fixed_chunker_mock,
             patch("rag.service.vectorstore.vectorstore_service.build_vectorstore", return_value="vectorstore") as build_mock,
         ):
+            fixed_chunker_mock.return_value.chunk.return_value = fixed_chunks
             result = vectorstore_service.get_vectorstore("llamaparser", "google")
 
         self.assertEqual(result, "vectorstore")
@@ -585,7 +608,7 @@ class BasicRagTest(unittest.TestCase):
         load_mock.assert_called_once()
         self.assertEqual(load_mock.call_args.kwargs["strategy"], "llamaparser")
         enrich_mock.assert_called_once_with(
-            split_documents,
+            [chunk_to_document(chunk) for chunk in fixed_chunks],
             cache_path=BASE_DIR / "data" / "metadata" / "main_pdf_page_metadata.json",
         )
         build_mock.assert_called_once()
@@ -600,13 +623,27 @@ class BasicRagTest(unittest.TestCase):
 
         vectorstore_service.get_vectorstore.cache_clear()
         loaded_documents = [Document(page_content="doc", metadata={"page": 147})]
-        split_documents = [Document(page_content="chunk", metadata={"page": 147})]
+        fixed_chunks = [
+            Chunk(
+                chunk_id=0,
+                text="chunk",
+                chunk_type="flat",
+                page=147,
+                source=str(PDF_PATH),
+                diagram_id=None,
+                parent_id=None,
+                location=None,
+                party_type=None,
+                image_path=None,
+            )
+        ]
 
         with (
             patch("rag.service.vectorstore.vectorstore_service.get_vectorstore_dir", return_value=Path("vectorstore/llamaparser/google")),
             patch("rag.service.vectorstore.vectorstore_service.vectorstore_exists", return_value=False),
+            patch("rag.service.vectorstore.vectorstore_service.chunk_cache_exists", return_value=False),
             patch("rag.service.vectorstore.vectorstore_service.load_pdf", return_value=loaded_documents),
-            patch("rag.service.vectorstore.vectorstore_service.split_documents", return_value=split_documents),
+            patch("rag.service.vectorstore.vectorstore_service.FixedSizeChunker") as fixed_chunker_mock,
             patch("rag.service.vectorstore.vectorstore_service.ensure_page_metadata_cache") as ensure_mock,
             patch(
                 "rag.service.vectorstore.vectorstore_service.enrich_documents_with_page_metadata",
@@ -614,6 +651,7 @@ class BasicRagTest(unittest.TestCase):
             ) as enrich_mock,
             patch("rag.service.vectorstore.vectorstore_service.build_vectorstore", return_value="vectorstore"),
         ):
+            fixed_chunker_mock.return_value.chunk.return_value = fixed_chunks
             vectorstore_service.get_vectorstore("llamaparser", "google")
 
         ensure_mock.assert_called_once_with(
@@ -621,7 +659,7 @@ class BasicRagTest(unittest.TestCase):
             BASE_DIR / "data" / "metadata" / "main_pdf_page_metadata.json",
         )
         enrich_mock.assert_called_once_with(
-            split_documents,
+            [chunk_to_document(chunk) for chunk in fixed_chunks],
             cache_path=BASE_DIR / "data" / "metadata" / "main_pdf_page_metadata.json",
         )
 
@@ -647,6 +685,93 @@ class BasicRagTest(unittest.TestCase):
 
         vectorstore_service.get_vectorstore.cache_clear()
 
+    def test_vectorstore_service_uses_chunk_cache_when_available(self):
+        from rag.service.vectorstore import vectorstore_service
+
+        vectorstore_service.get_vectorstore.cache_clear()
+        cached_chunks = [Document(page_content="cached chunk", metadata={"page": 147})]
+
+        with (
+            patch("rag.service.vectorstore.vectorstore_service.get_vectorstore_dir", return_value=Path("vectorstore/llamaparser/google")) as dir_mock,
+            patch("rag.service.vectorstore.vectorstore_service.vectorstore_exists", return_value=False),
+            patch("rag.service.vectorstore.vectorstore_service.chunk_cache_exists", return_value=True),
+            patch(
+                "rag.service.vectorstore.vectorstore_service._get_chunk_cache_dir",
+                return_value=Path("data/chunks/llamaparser/fixed"),
+            ),
+            patch("rag.service.vectorstore.vectorstore_service.load_chunk_cache", return_value=cached_chunks) as load_chunk_cache_mock,
+            patch("rag.service.vectorstore.vectorstore_service.load_pdf") as load_pdf_mock,
+            patch("rag.service.vectorstore.vectorstore_service.build_vectorstore", return_value="vectorstore") as build_mock,
+        ):
+            result = vectorstore_service.get_vectorstore("llamaparser", "google")
+
+        self.assertEqual(result, "vectorstore")
+        dir_mock.assert_called_once_with("llamaparser", "google")
+        load_chunk_cache_mock.assert_called_once_with(
+            Path("data/chunks/llamaparser/fixed"),
+            source_path=PDF_PATH,
+        )
+        load_pdf_mock.assert_not_called()
+        self.assertEqual(build_mock.call_args.args[0], cached_chunks)
+
+        vectorstore_service.get_vectorstore.cache_clear()
+
+    def test_vectorstore_service_saves_chunk_cache_when_missing(self):
+        from rag.service.vectorstore import vectorstore_service
+
+        vectorstore_service.get_vectorstore.cache_clear()
+        loaded_documents = [Document(page_content="doc", metadata={"page": 147})]
+        fixed_chunks = [
+            Chunk(
+                chunk_id=0,
+                text="chunk",
+                chunk_type="flat",
+                page=147,
+                source=str(PDF_PATH),
+                diagram_id=None,
+                parent_id=None,
+                location=None,
+                party_type=None,
+                image_path=None,
+            )
+        ]
+        chunk_documents = [chunk_to_document(chunk) for chunk in fixed_chunks]
+
+        with (
+            patch("rag.service.vectorstore.vectorstore_service.get_vectorstore_dir", return_value=Path("vectorstore/llamaparser/google")),
+            patch("rag.service.vectorstore.vectorstore_service.vectorstore_exists", return_value=False),
+            patch("rag.service.vectorstore.vectorstore_service.chunk_cache_exists", return_value=False),
+            patch("rag.service.vectorstore.vectorstore_service._get_chunk_cache_dir", return_value=Path("data/chunks/llamaparser/fixed")) as chunk_dir_mock,
+            patch("rag.service.vectorstore.vectorstore_service.load_pdf", return_value=loaded_documents),
+            patch("rag.service.vectorstore.vectorstore_service.ensure_page_metadata_cache"),
+            patch("rag.service.vectorstore.vectorstore_service.FixedSizeChunker") as fixed_chunker_mock,
+            patch(
+                "rag.service.vectorstore.vectorstore_service.enrich_documents_with_page_metadata",
+                return_value=chunk_documents,
+            ),
+            patch("rag.service.vectorstore.vectorstore_service.save_chunk_cache") as save_chunk_cache_mock,
+            patch(
+                "rag.service.vectorstore.vectorstore_service.load_chunk_cache",
+                return_value=chunk_documents,
+            ) as load_chunk_cache_mock,
+            patch("rag.service.vectorstore.vectorstore_service.build_vectorstore", return_value="vectorstore"),
+        ):
+            fixed_chunker_mock.return_value.chunk.return_value = fixed_chunks
+            vectorstore_service.get_vectorstore("llamaparser", "google")
+
+        chunk_dir_mock.assert_called_once_with("llamaparser", "fixed")
+        save_chunk_cache_mock.assert_called_once_with(
+            chunk_documents,
+            Path("data/chunks/llamaparser/fixed"),
+            source_path=PDF_PATH,
+        )
+        load_chunk_cache_mock.assert_called_once_with(
+            Path("data/chunks/llamaparser/fixed"),
+            source_path=PDF_PATH,
+        )
+
+        vectorstore_service.get_vectorstore.cache_clear()
+
     def test_vectorstore_service_does_not_split_upstage_final_chunks(self):
         from rag.service.vectorstore import vectorstore_service
 
@@ -656,21 +781,25 @@ class BasicRagTest(unittest.TestCase):
         with (
             patch("rag.service.vectorstore.vectorstore_service.get_vectorstore_dir", return_value=Path("vectorstore/upstage/bge")),
             patch("rag.service.vectorstore.vectorstore_service.vectorstore_exists", return_value=False),
+            patch("rag.service.vectorstore.vectorstore_service.chunk_cache_exists", return_value=False),
             patch("rag.service.vectorstore.vectorstore_service.load_pdf", return_value=upstage_documents),
             patch(
                 "rag.service.vectorstore.vectorstore_service.enrich_documents_with_page_metadata",
                 side_effect=lambda docs, cache_path=None: docs,
             ) as enrich_mock,
-            patch("rag.service.vectorstore.vectorstore_service.split_documents") as split_mock,
+            patch("rag.service.vectorstore.vectorstore_service.FixedSizeChunker") as fixed_chunker_mock,
             patch("rag.service.vectorstore.vectorstore_service.build_vectorstore", return_value="vectorstore") as build_mock,
         ):
             result = vectorstore_service.get_vectorstore("upstage", "bge")
 
         self.assertEqual(result, "vectorstore")
         enrich_mock.assert_called_once()
-        split_mock.assert_not_called()
+        fixed_chunker_mock.assert_not_called()
         build_mock.assert_called_once()
-        self.assertEqual(build_mock.call_args.args[0], upstage_documents)
+        self.assertEqual(
+            build_mock.call_args.args[0],
+            [Document(page_content="already chunked", metadata={"source": str(PDF_PATH)})],
+        )
 
         vectorstore_service.get_vectorstore.cache_clear()
 
@@ -696,12 +825,13 @@ class BasicRagTest(unittest.TestCase):
         with (
             patch("rag.service.vectorstore.vectorstore_service.get_vectorstore_dir", return_value=Path("vectorstore/llamaparser/case-boundary/bge")) as dir_mock,
             patch("rag.service.vectorstore.vectorstore_service.vectorstore_exists", return_value=False),
+            patch("rag.service.vectorstore.vectorstore_service.chunk_cache_exists", return_value=False),
             patch("rag.service.vectorstore.vectorstore_service.load_pdf", return_value=loaded_documents) as load_mock,
             patch(
                 "rag.service.vectorstore.vectorstore_service.enrich_documents_with_page_metadata",
                 side_effect=lambda docs, cache_path=None: docs,
             ) as enrich_mock,
-            patch("rag.service.vectorstore.vectorstore_service.split_documents") as split_mock,
+            patch("rag.service.vectorstore.vectorstore_service.FixedSizeChunker") as fixed_chunker_mock,
             patch("rag.service.vectorstore.vectorstore_service.build_vectorstore", return_value="vectorstore") as build_mock,
         ):
             result = vectorstore_service.get_vectorstore(
@@ -715,7 +845,7 @@ class BasicRagTest(unittest.TestCase):
         load_mock.assert_called_once()
         self.assertEqual(load_mock.call_args.kwargs["strategy"], "llamaparser")
         enrich_mock.assert_called_once()
-        split_mock.assert_not_called()
+        fixed_chunker_mock.assert_not_called()
         build_mock.assert_called_once()
         indexed_documents = build_mock.call_args.args[0]
         self.assertTrue(
@@ -754,13 +884,14 @@ class BasicRagTest(unittest.TestCase):
         with (
             patch("rag.service.vectorstore.vectorstore_service.get_vectorstore_dir", return_value=Path("vectorstore/llamaparser/semantic/bge")) as dir_mock,
             patch("rag.service.vectorstore.vectorstore_service.vectorstore_exists", return_value=False),
+            patch("rag.service.vectorstore.vectorstore_service.chunk_cache_exists", return_value=False),
             patch("rag.service.vectorstore.vectorstore_service.load_pdf", return_value=loaded_documents),
             patch("rag.service.vectorstore.vectorstore_service.create_embeddings", return_value=FakeEmbeddings()) as embeddings_mock,
             patch(
                 "rag.service.vectorstore.vectorstore_service.enrich_documents_with_page_metadata",
                 side_effect=lambda docs, cache_path=None: docs,
             ) as enrich_mock,
-            patch("rag.service.vectorstore.vectorstore_service.split_documents") as split_mock,
+            patch("rag.service.vectorstore.vectorstore_service.FixedSizeChunker") as fixed_chunker_mock,
             patch("rag.service.vectorstore.vectorstore_service.build_vectorstore", return_value="vectorstore") as build_mock,
         ):
             result = vectorstore_service.get_vectorstore(
@@ -773,7 +904,7 @@ class BasicRagTest(unittest.TestCase):
         dir_mock.assert_called_once_with("llamaparser", "bge", chunker_strategy="semantic")
         embeddings_mock.assert_called_once_with("bge")
         enrich_mock.assert_called_once()
-        split_mock.assert_not_called()
+        fixed_chunker_mock.assert_not_called()
         indexed_documents = build_mock.call_args.args[0]
         self.assertEqual([document.metadata["chunk_type"] for document in indexed_documents], ["flat", "flat"])
         self.assertIn("차량 B도 같은 교차로에 진입하면서", indexed_documents[0].page_content)
