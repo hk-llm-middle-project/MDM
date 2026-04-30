@@ -51,7 +51,7 @@ class ChunkCacheTest(unittest.TestCase):
             save_chunk_cache(documents, cache_dir, source_path=PDF_PATH)
             chunks_payload = json.loads((cache_dir / "chunks.json").read_text(encoding="utf-8"))
 
-        self.assertEqual(chunks_payload[0]["metadata"]["source"], str(PDF_PATH))
+        self.assertEqual(chunks_payload[0]["metadata"]["source"], "data/raw/230630_자동차사고 과실비율 인정기준_최종.pdf")
 
     def test_load_chunk_cache_restores_documents(self):
         from rag.service.chunk_cache import load_chunk_cache, save_chunk_cache
@@ -91,7 +91,7 @@ class ChunkCacheTest(unittest.TestCase):
             )
             restored = load_chunk_cache(cache_dir, source_path=PDF_PATH)
 
-        self.assertEqual(restored[0].metadata["source"], str(PDF_PATH))
+        self.assertEqual(restored[0].metadata["source"], "data/raw/230630_자동차사고 과실비율 인정기준_최종.pdf")
 
 
 if __name__ == "__main__":

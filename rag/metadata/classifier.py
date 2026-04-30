@@ -11,7 +11,6 @@ from langchain_core.documents import Document
 from rag.service.intake.values import LOCATIONS, PARTY_TYPES
 
 
-RULE_BASED_CONFIDENCE = 1.0
 SKIP_CHUNK_TYPES = {"general", "preface"}
 
 
@@ -21,23 +20,10 @@ class PageMetadataClassification:
 
     party_type: str | None = None
     location: str | None = None
-    confidence: dict[str, float | None] | None = None
 
 
 def normalize_page_metadata_cache_entry(data: dict[str, object]) -> PageMetadataClassification:
     """Validate cached metadata output against allowed values."""
-    confidence_data = data.get("confidence")
-    if not isinstance(confidence_data, dict):
-        confidence = {
-            "party_type": None,
-            "location": None,
-        }
-    else:
-        confidence = {
-            "party_type": _normalize_confidence(confidence_data.get("party_type")),
-            "location": _normalize_confidence(confidence_data.get("location")),
-        }
-
     party_type = data.get("party_type")
     if party_type not in PARTY_TYPES:
         party_type = None
@@ -49,16 +35,7 @@ def normalize_page_metadata_cache_entry(data: dict[str, object]) -> PageMetadata
     return PageMetadataClassification(
         party_type=party_type,
         location=location,
-        confidence=confidence,
     )
-
-
-def _normalize_confidence(value: object) -> float:
-    try:
-        confidence = float(value)
-    except (TypeError, ValueError):
-        return 0.0
-    return max(0.0, min(1.0, confidence))
 
 
 def classify_page_metadata(page: int | Document | None) -> PageMetadataClassification:
@@ -74,9 +51,7 @@ def classify_page_metadata(page: int | Document | None) -> PageMetadataClassific
 
 def default_page_metadata_classification() -> PageMetadataClassification:
     """Return empty metadata for pages outside the case ranges."""
-    return PageMetadataClassification(
-        confidence={"party_type": 0.0, "location": 0.0}
-    )
+    return PageMetadataClassification()
 
 
 def load_page_metadata_cache(cache_path: Path) -> dict[str, dict[str, object]]:
@@ -127,15 +102,11 @@ def _merge_classification_metadata(
     classification: PageMetadataClassification,
 ) -> Document:
     metadata = dict(document.metadata)
-    confidence = classification.confidence or {}
 
     if classification.party_type is not None:
         metadata["party_type"] = classification.party_type
     if classification.location is not None:
         metadata["location"] = classification.location
-
-    metadata["metadata_confidence_party_type"] = confidence.get("party_type")
-    metadata["metadata_confidence_location"] = confidence.get("location")
 
     return Document(page_content=document.page_content, metadata=metadata)
 
@@ -237,8 +208,4 @@ def _classification_for_page(page: int | None) -> PageMetadataClassification:
     return PageMetadataClassification(
         party_type=party_type,
         location=location,
-        confidence={
-            "party_type": RULE_BASED_CONFIDENCE,
-            "location": RULE_BASED_CONFIDENCE,
-        },
     )

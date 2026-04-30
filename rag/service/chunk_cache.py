@@ -7,6 +7,8 @@ from pathlib import Path
 
 from langchain_core.documents import Document
 
+from config import BASE_DIR
+
 
 CHUNKS_FILENAME = "chunks.json"
 PREVIEW_FILENAME = "preview.md"
@@ -82,7 +84,10 @@ def _normalize_document_sources(
     if source_path is None:
         return documents
 
-    normalized_source = str(source_path)
+    try:
+        normalized_source = str(source_path.relative_to(BASE_DIR))
+    except ValueError:
+        normalized_source = str(source_path)
     normalized_documents: list[Document] = []
     for document in documents:
         metadata = dict(document.metadata)
