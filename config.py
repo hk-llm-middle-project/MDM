@@ -87,6 +87,4 @@ def get_vectorstore_dir(
             f"Unknown loader strategy: {loader_strategy}. Available strategies: {available}"
         ) from error
 
-    if chunker_strategy == DEFAULT_CHUNKER_STRATEGY:
-        return loader_vectorstore_dir / embedding_provider
     return loader_vectorstore_dir / chunker_strategy / embedding_provider
