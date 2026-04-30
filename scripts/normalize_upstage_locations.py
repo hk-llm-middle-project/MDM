@@ -53,22 +53,6 @@ LOCATION_NORMALIZATION_MAP = {
     "자전거 도로 사고": "기타",
 }
 
-LOCATION_GROUP_TO_ALLOWED_MAP = {
-    "기타": "기타 사고유형 [보29~보36]",
-    "교차로 사고": "신호등 없는 교차로",
-    "같은 방향 진행차량 상호간의 사고": "동일차로 통행 중 사고",
-    "마주보는 방향 진행차량 상호 간의 사고": "중앙선 침범 사고",
-}
-
-LOCATION_NORMALIZATION_MAP.update(
-    {
-        source: LOCATION_GROUP_TO_ALLOWED_MAP.get(target, target)
-        for source, target in list(LOCATION_NORMALIZATION_MAP.items())
-    }
-)
-LOCATION_NORMALIZATION_MAP.update(LOCATION_GROUP_TO_ALLOWED_MAP)
-
-
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
