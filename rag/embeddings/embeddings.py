@@ -5,11 +5,24 @@ from __future__ import annotations
 from langchain_core.embeddings import Embeddings
 
 from config import DEFAULT_EMBEDDING_PROVIDER
-from rag.embeddings.strategies import (
-    create_bge_embeddings,
-    create_google_embeddings,
-    create_openai_embeddings,
-)
+
+
+def create_openai_embeddings() -> Embeddings:
+    from rag.embeddings.strategies.openai import create_openai_embeddings as factory
+
+    return factory()
+
+
+def create_bge_embeddings() -> Embeddings:
+    from rag.embeddings.strategies.bge import create_bge_embeddings as factory
+
+    return factory()
+
+
+def create_google_embeddings() -> Embeddings:
+    from rag.embeddings.strategies.google import create_google_embeddings as factory
+
+    return factory()
 
 
 EMBEDDING_STRATEGIES = {
