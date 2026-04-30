@@ -1,6 +1,6 @@
 """대화형 RAG 서비스의 공개 진입점입니다."""
 
-from config import DEFAULT_EMBEDDING_PROVIDER, DEFAULT_LOADER_STRATEGY
+from config import DEFAULT_CHUNKER_STRATEGY, DEFAULT_EMBEDDING_PROVIDER, DEFAULT_LOADER_STRATEGY
 from rag.pipeline.retrieval import RetrievalPipelineConfig
 from rag.service.analysis import analyze_question
 from rag.service.conversation.orchestrator import AnswerResult, answer_conversation_turn
@@ -23,6 +23,7 @@ def answer_question_with_intake(
     pipeline_config: RetrievalPipelineConfig | None = None,
     intake_state: IntakeState | None = None,
     loader_strategy: str = DEFAULT_LOADER_STRATEGY,
+    chunker_strategy: str = DEFAULT_CHUNKER_STRATEGY,
     embedding_provider: str = DEFAULT_EMBEDDING_PROVIDER,
     chat_history: list[ChatMessage] | None = None,
     trace_context: TraceContext | None = None,
@@ -34,6 +35,7 @@ def answer_question_with_intake(
             pipeline_config=pipeline_config,
             intake_state=intake_state,
             loader_strategy=loader_strategy,
+            chunker_strategy=chunker_strategy,
             embedding_provider=embedding_provider,
             chat_history=chat_history,
             trace_context=trace_context,
@@ -53,6 +55,7 @@ def answer_question_with_intake(
         pipeline_config=pipeline_config,
         intake_state=intake_state,
         loader_strategy=loader_strategy,
+        chunker_strategy=chunker_strategy,
         embedding_provider=embedding_provider,
         chat_history=chat_history,
         trace_context=trace_context,
@@ -65,6 +68,7 @@ def answer_question(
     question: str,
     pipeline_config: RetrievalPipelineConfig | None = None,
     loader_strategy: str = DEFAULT_LOADER_STRATEGY,
+    chunker_strategy: str = DEFAULT_CHUNKER_STRATEGY,
     embedding_provider: str = DEFAULT_EMBEDDING_PROVIDER,
     chat_history: list[ChatMessage] | None = None,
     trace_context: TraceContext | None = None,
@@ -74,6 +78,7 @@ def answer_question(
         question,
         pipeline_config=pipeline_config,
         loader_strategy=loader_strategy,
+        chunker_strategy=chunker_strategy,
         embedding_provider=embedding_provider,
         chat_history=chat_history,
         trace_context=trace_context,
