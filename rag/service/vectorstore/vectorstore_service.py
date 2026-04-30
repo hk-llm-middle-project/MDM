@@ -203,8 +203,7 @@ def get_vectorstore(
         chunker_strategy=chunker_strategy,
         embedding_provider=embedding_provider,
     )
-    save_chunk_cache(chunks, chunk_cache_dir, source_path=PDF_PATH)
-    chunks = load_chunk_cache(chunk_cache_dir, source_path=PDF_PATH)
+    chunks = save_chunk_cache(chunks, chunk_cache_dir, source_path=PDF_PATH)
     return build_vectorstore(
         chunks,
         vectorstore_dir,
