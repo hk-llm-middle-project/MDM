@@ -559,9 +559,10 @@ class BasicRagTest(unittest.TestCase):
 
         vectorstore_service.get_vectorstore.cache_clear()
         loaded_documents = [Document(page_content="doc", metadata={"page": 1})]
+        split_documents = [Document(page_content="chunk", metadata={"page": 1})]
         enriched_documents = [
             Document(
-                page_content="doc",
+                page_content="chunk",
                 metadata={"page": 1, "party_type": "pedestrian", "location": "crosswalk"},
             )
         ]
@@ -571,10 +572,10 @@ class BasicRagTest(unittest.TestCase):
             patch("rag.service.vectorstore.vectorstore_service.vectorstore_exists", return_value=False),
             patch("rag.service.vectorstore.vectorstore_service.load_pdf", return_value=loaded_documents) as load_mock,
             patch(
-                "rag.service.vectorstore.vectorstore_service.enrich_documents_with_llm_metadata",
+                "rag.service.vectorstore.vectorstore_service.enrich_documents_with_page_metadata",
                 return_value=enriched_documents,
             ) as enrich_mock,
-            patch("rag.service.vectorstore.vectorstore_service.split_documents", return_value=[Document(page_content="chunk")]),
+            patch("rag.service.vectorstore.vectorstore_service.split_documents", return_value=split_documents),
             patch("rag.service.vectorstore.vectorstore_service.build_vectorstore", return_value="vectorstore") as build_mock,
         ):
             result = vectorstore_service.get_vectorstore("llamaparser", "google")
@@ -584,12 +585,45 @@ class BasicRagTest(unittest.TestCase):
         load_mock.assert_called_once()
         self.assertEqual(load_mock.call_args.kwargs["strategy"], "llamaparser")
         enrich_mock.assert_called_once_with(
-            loaded_documents,
+            split_documents,
             cache_path=BASE_DIR / "data" / "metadata" / "main_pdf_page_metadata.json",
         )
         build_mock.assert_called_once()
         self.assertEqual(build_mock.call_args.args[1], Path("vectorstore/llamaparser/google"))
         self.assertEqual(build_mock.call_args.kwargs["embedding_provider"], "google")
+
+        vectorstore_service.get_vectorstore.cache_clear()
+
+    def test_vectorstore_service_generates_page_metadata_cache_when_missing(self):
+        from config import BASE_DIR
+        from rag.service.vectorstore import vectorstore_service
+
+        vectorstore_service.get_vectorstore.cache_clear()
+        loaded_documents = [Document(page_content="doc", metadata={"page": 147})]
+        split_documents = [Document(page_content="chunk", metadata={"page": 147})]
+
+        with (
+            patch("rag.service.vectorstore.vectorstore_service.get_vectorstore_dir", return_value=Path("vectorstore/llamaparser/google")),
+            patch("rag.service.vectorstore.vectorstore_service.vectorstore_exists", return_value=False),
+            patch("rag.service.vectorstore.vectorstore_service.load_pdf", return_value=loaded_documents),
+            patch("rag.service.vectorstore.vectorstore_service.split_documents", return_value=split_documents),
+            patch("rag.service.vectorstore.vectorstore_service.ensure_page_metadata_cache") as ensure_mock,
+            patch(
+                "rag.service.vectorstore.vectorstore_service.enrich_documents_with_page_metadata",
+                side_effect=lambda docs, cache_path=None: docs,
+            ) as enrich_mock,
+            patch("rag.service.vectorstore.vectorstore_service.build_vectorstore", return_value="vectorstore"),
+        ):
+            vectorstore_service.get_vectorstore("llamaparser", "google")
+
+        ensure_mock.assert_called_once_with(
+            loaded_documents,
+            BASE_DIR / "data" / "metadata" / "main_pdf_page_metadata.json",
+        )
+        enrich_mock.assert_called_once_with(
+            split_documents,
+            cache_path=BASE_DIR / "data" / "metadata" / "main_pdf_page_metadata.json",
+        )
 
         vectorstore_service.get_vectorstore.cache_clear()
 
@@ -623,14 +657,17 @@ class BasicRagTest(unittest.TestCase):
             patch("rag.service.vectorstore.vectorstore_service.get_vectorstore_dir", return_value=Path("vectorstore/upstage/bge")),
             patch("rag.service.vectorstore.vectorstore_service.vectorstore_exists", return_value=False),
             patch("rag.service.vectorstore.vectorstore_service.load_pdf", return_value=upstage_documents),
-            patch("rag.service.vectorstore.vectorstore_service.enrich_documents_with_llm_metadata") as enrich_mock,
+            patch(
+                "rag.service.vectorstore.vectorstore_service.enrich_documents_with_page_metadata",
+                side_effect=lambda docs, cache_path=None: docs,
+            ) as enrich_mock,
             patch("rag.service.vectorstore.vectorstore_service.split_documents") as split_mock,
             patch("rag.service.vectorstore.vectorstore_service.build_vectorstore", return_value="vectorstore") as build_mock,
         ):
             result = vectorstore_service.get_vectorstore("upstage", "bge")
 
         self.assertEqual(result, "vectorstore")
-        enrich_mock.assert_not_called()
+        enrich_mock.assert_called_once()
         split_mock.assert_not_called()
         build_mock.assert_called_once()
         self.assertEqual(build_mock.call_args.args[0], upstage_documents)
@@ -660,7 +697,10 @@ class BasicRagTest(unittest.TestCase):
             patch("rag.service.vectorstore.vectorstore_service.get_vectorstore_dir", return_value=Path("vectorstore/llamaparser/case-boundary/bge")) as dir_mock,
             patch("rag.service.vectorstore.vectorstore_service.vectorstore_exists", return_value=False),
             patch("rag.service.vectorstore.vectorstore_service.load_pdf", return_value=loaded_documents) as load_mock,
-            patch("rag.service.vectorstore.vectorstore_service.enrich_documents_with_llm_metadata") as enrich_mock,
+            patch(
+                "rag.service.vectorstore.vectorstore_service.enrich_documents_with_page_metadata",
+                side_effect=lambda docs, cache_path=None: docs,
+            ) as enrich_mock,
             patch("rag.service.vectorstore.vectorstore_service.split_documents") as split_mock,
             patch("rag.service.vectorstore.vectorstore_service.build_vectorstore", return_value="vectorstore") as build_mock,
         ):
@@ -674,7 +714,7 @@ class BasicRagTest(unittest.TestCase):
         dir_mock.assert_called_once_with("llamaparser", "bge", chunker_strategy="case-boundary")
         load_mock.assert_called_once()
         self.assertEqual(load_mock.call_args.kwargs["strategy"], "llamaparser")
-        enrich_mock.assert_not_called()
+        enrich_mock.assert_called_once()
         split_mock.assert_not_called()
         build_mock.assert_called_once()
         indexed_documents = build_mock.call_args.args[0]
@@ -716,7 +756,10 @@ class BasicRagTest(unittest.TestCase):
             patch("rag.service.vectorstore.vectorstore_service.vectorstore_exists", return_value=False),
             patch("rag.service.vectorstore.vectorstore_service.load_pdf", return_value=loaded_documents),
             patch("rag.service.vectorstore.vectorstore_service.create_embeddings", return_value=FakeEmbeddings()) as embeddings_mock,
-            patch("rag.service.vectorstore.vectorstore_service.enrich_documents_with_llm_metadata") as enrich_mock,
+            patch(
+                "rag.service.vectorstore.vectorstore_service.enrich_documents_with_page_metadata",
+                side_effect=lambda docs, cache_path=None: docs,
+            ) as enrich_mock,
             patch("rag.service.vectorstore.vectorstore_service.split_documents") as split_mock,
             patch("rag.service.vectorstore.vectorstore_service.build_vectorstore", return_value="vectorstore") as build_mock,
         ):
@@ -729,7 +772,7 @@ class BasicRagTest(unittest.TestCase):
         self.assertEqual(result, "vectorstore")
         dir_mock.assert_called_once_with("llamaparser", "bge", chunker_strategy="semantic")
         embeddings_mock.assert_called_once_with("bge")
-        enrich_mock.assert_not_called()
+        enrich_mock.assert_called_once()
         split_mock.assert_not_called()
         indexed_documents = build_mock.call_args.args[0]
         self.assertEqual([document.metadata["chunk_type"] for document in indexed_documents], ["flat", "flat"])
@@ -774,7 +817,7 @@ class BasicRagTest(unittest.TestCase):
         decision = normalize_metadata_response(
             {
                 "party_type": "자동차",
-                "location": "신호등 없는 교차로",
+                "location": "교차로 사고",
                 "confidence": {"party_type": 0.95, "location": 0.9},
                 "missing_fields": [],
                 "follow_up_questions": [],
@@ -783,7 +826,7 @@ class BasicRagTest(unittest.TestCase):
 
         self.assertTrue(decision.is_sufficient)
         self.assertEqual(decision.search_metadata.party_type, "자동차")
-        self.assertEqual(decision.search_metadata.location, "신호등 없는 교차로")
+        self.assertEqual(decision.search_metadata.location, "교차로 사고")
         self.assertEqual(decision.missing_fields, [])
 
     def test_normalize_metadata_response_rejects_invalid_or_low_confidence_values(self):

@@ -21,7 +21,7 @@ from rag.chunkers import (
 from rag.embeddings import create_embeddings
 from rag.indexer import build_vectorstore, load_vectorstore, vectorstore_exists
 from rag.loader import load_pdf
-from rag.metadata import enrich_documents_with_llm_metadata
+from rag.metadata import ensure_page_metadata_cache, enrich_documents_with_page_metadata
 from rag.pipeline.retriever import RetrievalComponents, build_retrieval_components
 from scripts.clean_case_boundary_chunk_tables import clean_case_boundary_tables
 
@@ -90,18 +90,18 @@ def _chunk_documents_for_vectorstore(
     embedding_provider: str,
 ):
     if loader_strategy in PRE_CHUNKED_LOADER_STRATEGIES:
-        return documents
-    if chunker_strategy == CASE_BOUNDARY_CHUNKER_STRATEGY:
-        return _case_boundary_documents(documents)
-    if chunker_strategy == SEMANTIC_CHUNKER_STRATEGY:
-        return _semantic_documents(documents, embedding_provider=embedding_provider)
-    if chunker_strategy in {RECURSIVE_CHUNKER_STRATEGY, MARKDOWN_CHUNKER_STRATEGY}:
-        return _standard_chunker_documents(documents, chunker_strategy=chunker_strategy)
-    return split_documents(
-        enrich_documents_with_llm_metadata(
-            documents,
-            cache_path=get_page_metadata_cache_path(loader_strategy),
-        )
+        chunks = documents
+    elif chunker_strategy == CASE_BOUNDARY_CHUNKER_STRATEGY:
+        chunks = _case_boundary_documents(documents)
+    elif chunker_strategy == SEMANTIC_CHUNKER_STRATEGY:
+        chunks = _semantic_documents(documents, embedding_provider=embedding_provider)
+    elif chunker_strategy in {RECURSIVE_CHUNKER_STRATEGY, MARKDOWN_CHUNKER_STRATEGY}:
+        chunks = _standard_chunker_documents(documents, chunker_strategy=chunker_strategy)
+    else:
+        chunks = split_documents(documents)
+    return enrich_documents_with_page_metadata(
+        chunks,
+        cache_path=get_page_metadata_cache_path(loader_strategy),
     )
 
 
@@ -144,6 +144,10 @@ def get_vectorstore(
         return load_vectorstore(vectorstore_dir, embedding_provider=embedding_provider)
 
     documents = load_pdf(PDF_PATH, strategy=loader_strategy)
+    ensure_page_metadata_cache(
+        documents,
+        get_page_metadata_cache_path(loader_strategy),
+    )
     chunks = _chunk_documents_for_vectorstore(
         documents,
         loader_strategy=loader_strategy,

@@ -1,4802 +1,2402 @@
 {
   "1": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": null,
+    "location": null
   },
   "2": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": null,
+    "location": null
   },
   "3": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": null,
+    "location": null
   },
   "4": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.0
-    },
-    "location": "교차로 사고",
-    "party_type": null
+    "party_type": null,
+    "location": null
   },
   "5": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "6": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.0
-    },
-    "location": "교차로 사고",
-    "party_type": null
+    "party_type": null,
+    "location": null
   },
   "7": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": null,
+    "location": null
   },
   "8": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": null,
+    "location": null
   },
   "9": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": null,
+    "location": null
   },
   "10": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": null,
+    "location": null
   },
   "11": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": null,
+    "location": null
   },
   "12": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": null,
+    "location": null
   },
   "13": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": null,
+    "location": null
   },
   "14": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": null,
+    "location": null
   },
   "15": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": null,
+    "location": null
   },
   "16": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": null,
+    "location": null
   },
   "17": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "18": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "19": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": null,
+    "location": null
   },
   "20": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "21": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": null,
+    "location": null
   },
   "22": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": null,
+    "location": null
   },
   "23": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": null,
+    "location": null
   },
   "24": {
-    "confidence": {
-      "location": 0.6,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "보행자"
+    "party_type": null,
+    "location": null
   },
   "25": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.9
-    },
-    "location": null,
-    "party_type": "보행자"
+    "party_type": null,
+    "location": null
   },
   "26": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": null,
+    "location": null
   },
   "27": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "28": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "29": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": null,
+    "location": null
   },
   "30": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "보행자"
+    "party_type": null,
+    "location": null
   },
   "31": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "32": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": null,
+    "location": null
   },
   "33": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.9
-    },
-    "location": null,
-    "party_type": "보행자"
+    "party_type": null,
+    "location": null
   },
   "34": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.9
-    },
-    "location": null,
-    "party_type": "보행자"
+    "party_type": null,
+    "location": null
   },
   "35": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 부근",
-    "party_type": "보행자"
+    "party_type": null,
+    "location": null
   },
   "36": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": null,
+    "location": null
   },
   "37": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "보행자"
+    "party_type": null,
+    "location": null
   },
   "38": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "39": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "40": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "41": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "42": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "43": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "44": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "45": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "46": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "47": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "48": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "49": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "50": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "51": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "52": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "53": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "54": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "55": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "56": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "57": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "58": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "59": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "60": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "61": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "62": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "63": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "64": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "65": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "66": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "67": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "68": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "횡단보도 부근",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 내"
   },
   "69": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
   },
   "70": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "횡단보도 부근",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
   },
   "71": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "횡단보도 부근",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
   },
   "72": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
   },
   "73": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
   },
   "74": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
   },
   "75": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 부근",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
   },
   "76": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
   },
   "77": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
   },
   "78": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
   },
   "79": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 부근",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
   },
   "80": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
   },
   "81": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
   },
   "82": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "횡단보도 부근",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
   },
   "83": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "횡단보도 부근",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
   },
   "84": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 부근",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
   },
   "85": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 부근",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
   },
   "86": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 부근",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
   },
   "87": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "횡단보도 부근",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
   },
   "88": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 부근",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
   },
   "89": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "횡단보도 부근",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
   },
   "90": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
   },
   "91": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.9
-    },
-    "location": null,
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
   },
   "92": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
   },
   "93": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
   },
   "94": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "횡단보도 없음",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
   },
   "95": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.9
-    },
-    "location": null,
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
   },
   "96": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 없음",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
   },
   "97": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
   },
   "98": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 없음",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
   },
   "99": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
   },
   "100": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 없음",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
   },
   "101": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 없음",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
   },
   "102": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.9
-    },
-    "location": null,
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
   },
   "103": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
   },
   "104": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
   },
   "105": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
   },
   "106": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "기타"
   },
   "107": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "자동차"
+    "party_type": "보행자",
+    "location": "기타"
   },
   "108": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "기타"
   },
   "109": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "기타"
   },
   "110": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "기타"
   },
   "111": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "기타"
   },
   "112": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "기타"
   },
   "113": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "기타"
   },
   "114": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "기타"
   },
   "115": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 없음",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "기타"
   },
   "116": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "보행자",
+    "location": "기타"
   },
   "117": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "기타"
   },
   "118": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "기타"
   },
   "119": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "기타",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "기타"
   },
   "120": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "기타"
   },
   "121": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "기타"
   },
   "122": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 없음",
-    "party_type": "보행자"
+    "party_type": "보행자",
+    "location": "기타"
   },
   "123": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 없음",
-    "party_type": "보행자"
+    "party_type": null,
+    "location": null
   },
   "124": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "125": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "126": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": null,
+    "location": null
   },
   "127": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": null,
+    "location": null
   },
   "128": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": null,
+    "location": null
   },
   "129": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "130": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "131": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "132": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "133": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.9
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "134": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "135": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "136": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "137": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "138": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "139": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "140": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "141": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": null,
+    "location": null
   },
   "142": {
-    "confidence": {
-      "location": 0.6,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "143": {
-    "confidence": {
-      "location": 0.6,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "144": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "145": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "146": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "147": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "148": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "149": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "150": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "151": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "152": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "153": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "154": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "155": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "156": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "157": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "158": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "159": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "160": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "161": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "162": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "163": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "164": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "165": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "166": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "167": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "168": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "169": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "170": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "171": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "172": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "173": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "174": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "175": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "176": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "177": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "178": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "179": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "180": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "181": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "182": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "마주보는 방향 진행차량 상호 간의 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "183": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "184": {
-    "confidence": {
-      "location": 0.5,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "185": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "186": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "187": {
-    "confidence": {
-      "location": 0.5,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "188": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "189": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "190": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "191": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "192": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "193": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "194": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "195": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "196": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "197": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "198": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "199": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "200": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.0
-    },
-    "location": "교차로 사고",
-    "party_type": null
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "201": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "202": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "203": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "204": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "205": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "206": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "207": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "208": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "209": {
-    "confidence": {
-      "location": 0.5,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "210": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "211": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "212": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "213": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "214": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "215": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "216": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "217": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "218": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "219": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "220": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "221": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "222": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "223": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "224": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "225": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "226": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "227": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "228": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "229": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "230": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "231": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "232": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "233": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "234": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "235": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "236": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "237": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "238": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "239": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "240": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "241": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "242": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "243": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "244": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "245": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "246": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "247": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "248": {
-    "confidence": {
-      "location": 0.5,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "249": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "250": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "251": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "252": {
-    "confidence": {
-      "location": 0.6,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "253": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "254": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "255": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "256": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "257": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "258": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "259": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "260": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "261": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "262": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "263": {
-    "confidence": {
-      "location": 0.5,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "264": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "265": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "266": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "267": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "268": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "269": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "270": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "271": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "272": {
-    "confidence": {
-      "location": 0.5,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "273": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "274": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "275": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "276": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "277": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "278": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "279": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "280": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "281": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "282": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "283": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "284": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "285": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "286": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "287": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "288": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "289": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "290": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "291": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "292": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "293": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "294": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "295": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "296": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "297": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "298": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "299": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "300": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "301": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "302": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "303": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "304": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "305": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "306": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "307": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "308": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "309": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "310": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "311": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "312": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "313": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "314": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.0
-    },
-    "location": "교차로 사고",
-    "party_type": null
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "315": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "316": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "317": {
-    "confidence": {
-      "location": 0.6,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "318": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "319": {
-    "confidence": {
-      "location": 0.6,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "320": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "321": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "322": {
-    "confidence": {
-      "location": 0.6,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "323": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "324": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "325": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "326": {
-    "confidence": {
-      "location": 0.5,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "교차로 사고"
   },
   "327": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
   },
   "328": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "마주보는 방향 진행차량 상호 간의 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
   },
   "329": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
   },
   "330": {
-    "confidence": {
-      "location": 0.5,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
   },
   "331": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
   },
   "332": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
   },
   "333": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "횡단보도 없음",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
   },
   "334": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "마주보는 방향 진행차량 상호 간의 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
   },
   "335": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
   },
   "336": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
   },
   "337": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
   },
   "338": {
-    "confidence": {
-      "location": 0.6,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
   },
   "339": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
   },
   "340": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "마주보는 방향 진행차량 상호 간의 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
   },
   "341": {
-    "confidence": {
-      "location": 0.6,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
   },
   "342": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
   },
   "343": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
   },
   "344": {
-    "confidence": {
-      "location": 0.6,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
   },
   "345": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
   },
   "346": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
   },
   "347": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
   },
   "348": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
   },
   "349": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
   },
   "350": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
   },
   "351": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "352": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "같은 방향 진행차량 상호간의 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "353": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "354": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "같은 방향 진행차량 상호간의 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "355": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 부근",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "356": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "357": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "358": {
-    "confidence": {
-      "location": 0.6,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "359": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "360": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "361": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "362": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "363": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "364": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "횡단보도 부근",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "365": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "횡단보도 없음",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "366": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "367": {
-    "confidence": {
-      "location": 0.6,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "368": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "369": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "370": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "371": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "372": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "373": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "같은 방향 진행차량 상호간의 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "374": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "375": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "376": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "377": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "같은 방향 진행차량 상호간의 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "378": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "같은 방향 진행차량 상호간의 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "379": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "380": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "같은 방향 진행차량 상호간의 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "381": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "382": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "383": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "같은 방향 진행차량 상호간의 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "384": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "385": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "386": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "387": {
-    "confidence": {
-      "location": 0.6,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "388": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "389": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "390": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "391": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "392": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "393": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "394": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "395": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "396": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "397": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "398": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "399": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "400": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "같은 방향 진행차량 상호간의 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "401": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "402": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "403": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "404": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "405": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "406": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "같은 방향 진행차량 상호간의 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "407": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "408": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "409": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "같은 방향 진행차량 상호간의 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "410": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.9
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "411": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "412": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "413": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "414": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "415": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "416": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "417": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "418": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "419": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "420": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "421": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "422": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "423": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.0
-    },
-    "location": "기타",
-    "party_type": null
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "424": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "425": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "426": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "427": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "428": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "429": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "430": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.9
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "431": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "432": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "433": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "434": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "435": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.9
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "436": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "437": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "438": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "439": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "440": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "441": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "442": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "443": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "444": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "445": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "446": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "447": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "448": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "449": {
-    "confidence": {
-      "location": 0.6,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "450": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "451": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "452": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "453": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "454": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자동차",
+    "location": "기타"
   },
   "455": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자동차",
+    "location": "기타"
   },
   "456": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "457": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "458": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "459": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "460": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자동차",
+    "location": "기타"
   },
   "461": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "462": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "463": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "464": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자동차",
+    "location": "기타"
   },
   "465": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자동차",
+    "location": "기타"
   },
   "466": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "467": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "468": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자동차",
+    "location": "기타"
   },
   "469": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "470": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "471": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "472": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자동차",
+    "location": "기타"
   },
   "473": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "474": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "475": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "476": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자동차",
+    "location": "기타"
   },
   "477": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "478": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "479": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자동차",
+    "location": "기타"
   },
   "480": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자동차",
+    "location": "기타"
   },
   "481": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "482": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "483": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "484": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "485": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "486": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "487": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "기타",
-    "party_type": "자동차"
+    "party_type": "자동차",
+    "location": "기타"
   },
   "488": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "489": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "490": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자전거"
+    "party_type": null,
+    "location": null
   },
   "491": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "492": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": null,
+    "location": null
   },
   "493": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자전거"
+    "party_type": null,
+    "location": null
   },
   "494": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.0
-    },
-    "location": "교차로 사고",
-    "party_type": null
+    "party_type": null,
+    "location": null
   },
   "495": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "496": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자전거"
+    "party_type": null,
+    "location": null
   },
   "497": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자전거"
+    "party_type": null,
+    "location": null
   },
   "498": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자전거"
+    "party_type": null,
+    "location": null
   },
   "499": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": null,
+    "location": null
   },
   "500": {
-    "confidence": {
-      "location": 0.6,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "501": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "502": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "503": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "504": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "505": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "506": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "507": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "508": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "509": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "510": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "511": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "512": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "513": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "514": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "515": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "516": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 1.0
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "517": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "518": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "519": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "520": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "521": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "522": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "523": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "524": {
-    "confidence": {
-      "location": 0.5,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "525": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "526": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "527": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "528": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "529": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "530": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "531": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "532": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "533": {
-    "confidence": {
-      "location": 0.5,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "534": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "535": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "536": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "537": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "538": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.9
-    },
-    "location": null,
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "539": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "540": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "541": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "542": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "543": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "544": {
-    "confidence": {
-      "location": 0.5,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "545": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "546": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "547": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "548": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "549": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "550": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "551": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "552": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "553": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "554": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "555": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "556": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "557": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "558": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "559": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.8
-    },
-    "location": "교차로 사고",
-    "party_type": "자동차"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "560": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "561": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "562": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "563": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.9
-    },
-    "location": null,
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "564": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "교차로 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "교차로 사고"
   },
   "565": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
   },
   "566": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "마주보는 방향 진행차량 상호 간의 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
   },
   "567": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.9
-    },
-    "location": null,
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
   },
   "568": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "횡단보도 없음",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "569": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "같은 방향 진행차량 상호간의 사고",
-    "party_type": "자동차"
+    "party_type": "자전거",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "570": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "같은 방향 진행차량 상호간의 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "571": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.9
-    },
-    "location": null,
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "572": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자동차"
+    "party_type": "자전거",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "573": {
-    "confidence": {
-      "location": 0.9,
-      "party_type": 0.9
-    },
-    "location": "같은 방향 진행차량 상호간의 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "574": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.9
-    },
-    "location": null,
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "575": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "같은 방향 진행차량 상호간의 사고",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "576": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "기타",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "577": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "기타",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "같은 방향 진행차량 상호간의 사고"
   },
   "578": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 없음",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "기타"
   },
   "579": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "횡단보도 없음",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "기타"
   },
   "580": {
-    "confidence": {
-      "location": 0.5,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "기타"
   },
   "581": {
-    "confidence": {
-      "location": 1.0,
-      "party_type": 1.0
-    },
-    "location": "횡단보도 내",
-    "party_type": "자동차"
+    "party_type": "자전거",
+    "location": "기타"
   },
   "582": {
-    "confidence": {
-      "location": 0.7,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "기타"
   },
   "583": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "기타"
   },
   "584": {
-    "confidence": {
-      "location": 0.5,
-      "party_type": 0.8
-    },
-    "location": null,
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "기타"
   },
   "585": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 1.0
-    },
-    "location": "기타",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "기타"
   },
   "586": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.9
-    },
-    "location": null,
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "기타"
   },
   "587": {
-    "confidence": {
-      "location": 0.8,
-      "party_type": 0.9
-    },
-    "location": "기타",
-    "party_type": "자전거"
+    "party_type": "자전거",
+    "location": "기타"
   },
   "588": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자전거",
+    "location": "기타"
   },
   "589": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자전거",
+    "location": "기타"
   },
   "590": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자전거",
+    "location": "기타"
   },
   "591": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자전거",
+    "location": "기타"
   },
   "592": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자전거",
+    "location": "기타"
   },
   "593": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자전거",
+    "location": "기타"
   },
   "594": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자전거",
+    "location": "기타"
   },
   "595": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자전거",
+    "location": "기타"
   },
   "596": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자전거",
+    "location": "기타"
   },
   "597": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자전거",
+    "location": "기타"
   },
   "598": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자전거",
+    "location": "기타"
   },
   "599": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자전거",
+    "location": "기타"
   },
   "600": {
-    "confidence": {
-      "location": 0.0,
-      "party_type": 0.0
-    },
-    "location": null,
-    "party_type": null
+    "party_type": "자전거",
+    "location": "기타"
   }
 }
