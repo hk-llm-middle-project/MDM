@@ -1,3 +1,4 @@
+import os
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -514,6 +515,44 @@ class BasicRagTest(unittest.TestCase):
         self.assertEqual([len(batch) for batch in vectorstore.batches], [2, 2, 1])
         embeddings_mock.assert_called_once_with("google")
 
+    def test_build_vectorstore_filters_complex_metadata_values(self):
+        class FakeChroma:
+            def __init__(self, persist_directory, embedding_function):
+                self.batches = []
+
+            def add_documents(self, documents):
+                self.batches.append(list(documents))
+
+        documents = [
+            Document(
+                page_content="raw upstage chunk",
+                metadata={
+                    "page": 1,
+                    "source": "data/raw/source.pdf",
+                    "coordinates": [
+                        {"x": 0.1, "y": 0.2},
+                        {"x": 0.3, "y": 0.4},
+                    ],
+                },
+            )
+        ]
+
+        with (
+            patch("pathlib.Path.mkdir"),
+            patch("rag.indexer.Chroma", FakeChroma),
+            patch("rag.indexer.create_embeddings", return_value="embeddings"),
+        ):
+            vectorstore = build_vectorstore(
+                documents,
+                Path("vectorstore"),
+                batch_size=10,
+            )
+
+        added = vectorstore.batches[0][0]
+        self.assertEqual(added.metadata["page"], 1)
+        self.assertEqual(added.metadata["source"], "data/raw/source.pdf")
+        self.assertNotIn("coordinates", added.metadata)
+
     def test_create_embeddings_returns_bge_provider(self):
         with patch.dict(EMBEDDING_STRATEGIES, {"bge": lambda: "bge"}, clear=False):
             self.assertEqual(create_embeddings("bge"), "bge")
@@ -544,6 +583,29 @@ class BasicRagTest(unittest.TestCase):
             timeout=120,
         )
         response.raise_for_status.assert_called_once()
+
+    def test_bge_embeddings_loads_dotenv_before_reading_environment(self):
+        response = MagicMock()
+        response.json.return_value = {"data": [{"dense": [0.1, 0.2]}]}
+
+        def fake_load_dotenv(*args, **kwargs):
+            os.environ["BGE_BASE_URL"] = "https://bge.example"
+            os.environ["BGE_API_KEY"] = "secret"
+            return True
+
+        with (
+            patch.dict("os.environ", {}, clear=True),
+            patch("rag.embeddings.strategies.bge.load_dotenv", side_effect=fake_load_dotenv) as load_dotenv_mock,
+            patch("rag.embeddings.strategies.bge.requests.Session") as session_mock,
+        ):
+            post_mock = session_mock.return_value.post
+            post_mock.return_value = response
+            embeddings = BGEM3Embeddings()
+            result = embeddings.embed_query("one")
+
+        self.assertEqual(result, [0.1, 0.2])
+        load_dotenv_mock.assert_called_once()
+        post_mock.assert_called_once()
 
     def test_bge_embeddings_splits_document_batches(self):
         first_response = MagicMock()
