@@ -5,7 +5,7 @@
       "chunk_id": 0,
       "chunk_type": "flat",
       "page": 10,
-      "source": "/home/nyong/mdm/data/raw/230630_자동차사고 과실비율 인정기준_최종.pdf"
+      "source": "data/raw/230630_자동차사고 과실비율 인정기준_최종.pdf"
     }
   },
   {
@@ -14,7 +14,7 @@
       "chunk_id": 1,
       "chunk_type": "flat",
       "page": 11,
-      "source": "/home/nyong/mdm/data/raw/230630_자동차사고 과실비율 인정기준_최종.pdf"
+      "source": "data/raw/230630_자동차사고 과실비율 인정기준_최종.pdf"
     }
   }
 ]
