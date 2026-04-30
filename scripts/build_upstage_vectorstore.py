@@ -30,9 +30,9 @@ INPUT_PATH = (
 )
 VECTORSTORE_STRATEGY = "upstage"
 DEFAULT_EXCLUDED_CHUNK_TYPES = {"preface"}
-DEFAULT_INCLUDED_CHUNK_TYPES = {"general", "image", "text", "child"}
 IMAGE_CONTENT_METADATA_KEY = "description"
 ALLOWED_METADATA_TYPES = (str, int, float, bool)
+EXCLUDED_METADATA_KEYS = {"section", "subsection"}
 
 
 def parse_args() -> argparse.Namespace:
@@ -59,14 +59,14 @@ def load_chunk_payload(input_path: Path = INPUT_PATH) -> list[dict]:
 
 
 def select_embedding_chunks(chunks: list[dict], include_text: bool = True) -> list[dict]:
-    included_chunk_types = set(DEFAULT_INCLUDED_CHUNK_TYPES)
+    excluded_chunk_types = set(DEFAULT_EXCLUDED_CHUNK_TYPES)
     if not include_text:
-        included_chunk_types.discard("text")
+        excluded_chunk_types.add("text")
 
     return [
         chunk
         for chunk in chunks
-        if chunk.get("metadata", {}).get("chunk_type") in included_chunk_types
+        if chunk.get("metadata", {}).get("chunk_type") not in excluded_chunk_types
     ]
 
 
@@ -88,6 +88,8 @@ def build_document(chunk: dict) -> Document | None:
 def sanitize_metadata(metadata: dict) -> dict:
     sanitized: dict = {}
     for key, value in metadata.items():
+        if key in EXCLUDED_METADATA_KEYS:
+            continue
         if value is None:
             continue
         if isinstance(value, ALLOWED_METADATA_TYPES):
@@ -139,6 +141,7 @@ def main() -> None:
     print(f"[INFO] embedding targets: {len(documents)}")
     print(f"[INFO] chunk_type distribution: {dict(distribution)}")
     print(f"[INFO] excluded chunk_types: {sorted(DEFAULT_EXCLUDED_CHUNK_TYPES)}")
+    print(f"[INFO] excluded metadata keys: {sorted(EXCLUDED_METADATA_KEYS)}")
     print(f"[INFO] include_text: {include_text}")
     print(f"[INFO] embedding_provider: {embedding_provider}")
     print(f"[INFO] output_dir: {output_dir}")

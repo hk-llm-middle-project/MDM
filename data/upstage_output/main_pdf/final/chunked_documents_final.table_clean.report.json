@@ -1,0 +1,10 @@
+{
+  "source_chunks": 1681,
+  "output_chunks": 1681,
+  "changed_chunks": 379,
+  "cleaned_table_blocks": 695,
+  "removed_markdown_images": 6390,
+  "flattened_html_tables": 136,
+  "markdown_output": "data\\upstage_output\\main_pdf\\final\\chunked_documents_final.table_clean.tables.md",
+  "markdown_table_blocks": 695
+}
