@@ -38,7 +38,9 @@ CHILD_HEADING_TITLE_PATTERN = re.compile(
     r")",
     re.IGNORECASE,
 )
-GENERAL_SUBSECTION_PATTERN = re.compile(r"^#{2,6}\s+\(?\s*\d+\s*\)")
+GENERAL_SUBSECTION_PATTERN = re.compile(
+    r"^#{2,6}\s+(?:\*\*|<u>|<mark>|`|_)?\s*\(?\s*\d+\s*\)"
+)
 RUNNING_TEXT_PATTERN = re.compile(
     r"^(?:자동차사고 과실비율 인정기준 \| |제[123]장\. )"
 )
@@ -95,6 +97,11 @@ class CaseBoundaryChunker(BaseChunker):
         idle_buffer: list[_Block] = []
         pending_case_ids: list[str] = []
         pending_context_blocks: list[_Block] = []
+        # True only while pending_context_blocks holds an unconsumed (= no table
+        # has used it yet) category heading. Set to False after a table consumes
+        # the context, so the residual ancestor breadcrumbs are not flushed back
+        # into idle (they're already represented in the parent chunk).
+        pending_context_unconsumed = False
         for block in blocks:
             if block.kind == "table":
                 effective_ids = list(block.case_ids)
@@ -113,6 +120,7 @@ class CaseBoundaryChunker(BaseChunker):
                     pending_context_blocks = self._ancestor_context_blocks(
                         context_blocks_for_table
                     )
+                    pending_context_unconsumed = False
                     case_block = _Block(
                         kind=block.kind,
                         text=table_text,
@@ -145,6 +153,7 @@ class CaseBoundaryChunker(BaseChunker):
                         pending_context_blocks, block
                     )
                     pending_case_ids = self._pending_ids_for_context_heading(block.text)
+                    pending_context_unconsumed = True
                     continue
                 active.section_blocks.append(block)
                 continue
@@ -155,13 +164,26 @@ class CaseBoundaryChunker(BaseChunker):
                     pending_context_blocks, block
                 )
                 pending_case_ids = self._pending_ids_for_context_heading(block.text)
+                pending_context_unconsumed = True
                 continue
             if block.kind == "heading" and self._is_top_level_heading(block.text):
+                # Unconsumed category context never reached a table — recover its
+                # content back into idle so it isn't silently dropped.
+                if pending_context_unconsumed and pending_context_blocks:
+                    idle_buffer.extend(pending_context_blocks)
+                    pending_context_blocks = []
+                    pending_case_ids = []
+                    pending_context_unconsumed = False
                 self._finalize_idle(idle_buffer, chunks)
                 idle_buffer = [block]
                 continue
             idle_buffer.append(block)
 
+        if pending_context_unconsumed and pending_context_blocks:
+            idle_buffer.extend(pending_context_blocks)
+            pending_context_blocks = []
+            pending_case_ids = []
+            pending_context_unconsumed = False
         self._finalize_idle(idle_buffer, chunks)
         self._finalize_case(active, chunks)
         return chunks
@@ -231,6 +253,8 @@ class CaseBoundaryChunker(BaseChunker):
             return False
         level = len(match.group(1))
         title = match.group(2).strip()
+        # Strip leading markdown emphasis so `**(1)…**` is treated like `(1)…`
+        title = re.sub(r"^(?:\*\*|<u>|<mark>|`|_)\s*", "", title)
         return level <= 2 and re.match(r"^\(\s*\d+\s*\)", title) is not None
 
     def _context_blocks_after_heading(
@@ -336,7 +360,32 @@ class CaseBoundaryChunker(BaseChunker):
                 and GENERAL_SUBSECTION_PATTERN.match(block.text.splitlines()[0].strip())
                 for block in group
             ):
-                # First group: pre-subsection content (e.g. main heading only).
+                # Pre-subsection group: usually just the main heading line, but
+                # _split_blocks may glue trailing prose under an H1 into the same
+                # heading block. Emit as a standalone general chunk if it carries
+                # substantive prose beyond the heading line itself.
+                pre_text = "\n\n".join(block.text for block in group if block.text).strip()
+                if not pre_text:
+                    continue
+                pre_body = "\n".join(pre_text.splitlines()[1:]).strip()
+                if not pre_body:
+                    continue
+                pre_page = next((block.page for block in group if block.text), page)
+                pre_source = next((block.source for block in group if block.text), source)
+                chunks.append(
+                    Chunk(
+                        chunk_id=len(chunks),
+                        text=pre_text,
+                        chunk_type="general",
+                        page=pre_page,
+                        source=pre_source,
+                        diagram_id=None,
+                        parent_id=None,
+                        location=None,
+                        party_type=None,
+                        image_path=None,
+                    )
+                )
                 continue
             group_text = "\n\n".join(block.text for block in group if block.text).strip()
             if not group_text:
