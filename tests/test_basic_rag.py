@@ -18,6 +18,7 @@ from rag.embeddings.strategies.bge import BGEM3Embeddings
 from rag.embeddings.strategies.google import GoogleGeminiEmbeddings
 from rag.indexer import build_vectorstore, vectorstore_exists
 from rag.pipeline.retriever import build_retrieval_components
+from rag.pipeline.retriever.filters import filter_documents_by_metadata, metadata_matches_filter
 from rag.pipeline.retrieval import RetrievalPipelineConfig, run_retrieval_pipeline
 from rag.pipeline.reranker import (
     RERANKER_STRATEGIES,
@@ -439,6 +440,104 @@ class BasicRagTest(unittest.TestCase):
     def test_selfquery_strategy_placeholder_raises(self):
         with self.assertRaises(NotImplementedError):
             retrieve(build_retrieval_components(MagicMock()), "query", strategy="selfquery")
+
+    def test_metadata_matches_filter_supports_single_condition_and_and(self):
+        metadata = {"party_type": "자동차", "location": "교차로 사고"}
+
+        self.assertTrue(metadata_matches_filter(metadata, {"party_type": "자동차"}))
+        self.assertTrue(
+            metadata_matches_filter(
+                metadata,
+                {"$and": [{"party_type": "자동차"}, {"location": "교차로 사고"}]},
+            )
+        )
+        self.assertFalse(
+            metadata_matches_filter(
+                metadata,
+                {"$and": [{"party_type": "자동차"}, {"location": "횡단보도 내"}]},
+            )
+        )
+
+    def test_filter_documents_by_metadata_applies_and_filter(self):
+        documents = [
+            Document(page_content="match", metadata={"party_type": "자동차", "location": "교차로 사고"}),
+            Document(page_content="wrong-party", metadata={"party_type": "보행자", "location": "교차로 사고"}),
+            Document(page_content="wrong-location", metadata={"party_type": "자동차", "location": "횡단보도 내"}),
+        ]
+
+        filtered = filter_documents_by_metadata(
+            documents,
+            {"$and": [{"party_type": "자동차"}, {"location": "교차로 사고"}]},
+        )
+
+        self.assertEqual([document.page_content for document in filtered], ["match"])
+
+    def test_parent_retriever_applies_and_metadata_filter(self):
+        from rag.pipeline.retriever.strategies.parent import retrieve_with_parent_documents
+
+        matching = Document(page_content="match", metadata={"party_type": "자동차", "location": "교차로 사고"})
+        wrong_location = Document(
+            page_content="wrong-location",
+            metadata={"party_type": "자동차", "location": "횡단보도 내"},
+        )
+        components = build_retrieval_components(
+            MagicMock(),
+            source_documents=[matching, wrong_location],
+        )
+        fake_parent_retriever = MagicMock()
+        fake_parent_retriever.invoke.return_value = [matching, wrong_location]
+
+        with patch(
+            "rag.pipeline.retriever.strategies.parent.get_or_create_parent_retriever",
+            return_value=fake_parent_retriever,
+        ):
+            results = retrieve_with_parent_documents(
+                components,
+                "query",
+                k=3,
+                filters={"$and": [{"party_type": "자동차"}, {"location": "교차로 사고"}]},
+            )
+
+        self.assertEqual(results, [matching])
+
+    def test_ensemble_filters_bm25_input_and_final_results(self):
+        from rag.pipeline.retriever.strategies.ensemble import retrieve_with_ensemble
+
+        matching = Document(page_content="match", metadata={"party_type": "자동차", "location": "교차로 사고"})
+        wrong_location = Document(
+            page_content="wrong-location",
+            metadata={"party_type": "자동차", "location": "횡단보도 내"},
+        )
+        vectorstore = MagicMock()
+        vectorstore.as_retriever.return_value = MagicMock()
+        components = build_retrieval_components(
+            vectorstore,
+            source_documents=[matching, wrong_location],
+        )
+        fake_bm25 = MagicMock()
+        fake_ensemble = MagicMock()
+        fake_ensemble.invoke.return_value = [wrong_location, matching]
+
+        with (
+            patch(
+                "rag.pipeline.retriever.strategies.ensemble.BM25Retriever.from_documents",
+                return_value=fake_bm25,
+            ) as bm25_mock,
+            patch(
+                "rag.pipeline.retriever.strategies.ensemble.EnsembleRetriever",
+                return_value=fake_ensemble,
+            ),
+        ):
+            results = retrieve_with_ensemble(
+                components,
+                "query",
+                k=3,
+                filters={"$and": [{"party_type": "자동차"}, {"location": "교차로 사고"}]},
+            )
+
+        self.assertEqual(results, [matching])
+        bm25_mock.assert_called_once()
+        self.assertEqual(bm25_mock.call_args.args[0], [matching])
 
     def test_build_retrieval_components_reuses_bm25_retriever(self):
         vectorstore = MagicMock()

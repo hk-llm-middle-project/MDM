@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from langchain_core.documents import Document
 
 from rag.pipeline.retriever.components import RetrievalComponents, get_or_create_parent_retriever
+from rag.pipeline.retriever.filters import filter_documents_by_metadata
 from rag.service.tracing import TraceContext
 
 
@@ -39,12 +40,4 @@ def retrieve_with_parent_documents(
     retriever.search_kwargs = {"k": k}
     config_dict = trace_context.langchain_config("mdm.retrieve.parent") if trace_context else None
     results = list(retriever.invoke(query, config=config_dict) if config_dict else retriever.invoke(query))
-    if not filters:
-        return results[:k]
-
-    filtered = [
-        document
-        for document in results
-        if all(document.metadata.get(key) == value for key, value in filters.items())
-    ]
-    return filtered[:k]
+    return filter_documents_by_metadata(results, filters)[:k]

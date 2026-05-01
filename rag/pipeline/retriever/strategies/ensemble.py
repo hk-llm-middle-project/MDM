@@ -5,9 +5,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from langchain.retrievers import EnsembleRetriever
+from langchain_community.retrievers import BM25Retriever
 from langchain_core.documents import Document
 
+from rag.pipeline.retriever.common import kiwi_tokenize
 from rag.pipeline.retriever.components import RetrievalComponents, get_or_create_bm25_retriever
+from rag.pipeline.retriever.filters import filter_documents_by_metadata
 from rag.service.tracing import TraceContext
 
 
@@ -35,7 +38,17 @@ def retrieve_with_ensemble(
     if not source_documents:
         return []
 
-    bm25_retriever = get_or_create_bm25_retriever(components)
+    bm25_documents = filter_documents_by_metadata(source_documents, filters)
+    if filters and not bm25_documents:
+        return []
+
+    if filters:
+        bm25_retriever = BM25Retriever.from_documents(
+            bm25_documents,
+            preprocess_func=kiwi_tokenize,
+        )
+    else:
+        bm25_retriever = get_or_create_bm25_retriever(components)
     bm25_retriever.k = config.bm25_k or k
 
     dense_search_kwargs: dict[str, object] = {"k": config.dense_k or k}
@@ -53,4 +66,4 @@ def retrieve_with_ensemble(
     )
     config_dict = trace_context.langchain_config("mdm.retrieve.ensemble") if trace_context else None
     results = ensemble.invoke(query, config=config_dict) if config_dict else ensemble.invoke(query)
-    return list(results)[:k]
+    return filter_documents_by_metadata(list(results), filters)[:k]
