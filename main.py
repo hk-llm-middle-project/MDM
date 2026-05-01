@@ -31,7 +31,7 @@ EMBEDDING_PROVIDER_OPTIONS = tuple(EMBEDDING_STRATEGIES)
 RETRIEVER_STRATEGY_OPTIONS = tuple(
     strategy
     for strategy in RETRIEVAL_STRATEGIES
-    if strategy not in {"selfquery", "vectorstore"}
+    if strategy != "vectorstore"
 )
 RERANKER_STRATEGY_OPTIONS = ("none", "cross-encoder", "flashrank")
 USER_ID = "local"

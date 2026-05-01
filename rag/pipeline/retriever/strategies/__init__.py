@@ -12,10 +12,6 @@ from rag.pipeline.retriever.strategies.parent import (
     ParentDocumentRetrieverConfig,
     retrieve_with_parent_documents,
 )
-from rag.pipeline.retriever.strategies.self_query import (
-    SelfQueryRetrieverConfig,
-    retrieve_with_self_query,
-)
 from rag.pipeline.retriever.strategies.vector import (
     VectorStoreRetrieverConfig,
     retrieve_with_vectorstore,
@@ -26,10 +22,8 @@ __all__ = [
     "EnsembleRetrieverConfig",
     "ParentDocumentRetrieverConfig",
     "MultiQueryRetrieverConfig",
-    "SelfQueryRetrieverConfig",
     "retrieve_with_vectorstore",
     "retrieve_with_ensemble",
     "retrieve_with_parent_documents",
     "retrieve_with_multiquery",
-    "retrieve_with_self_query",
 ]
