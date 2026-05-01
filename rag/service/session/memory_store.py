@@ -58,9 +58,18 @@ class MemoryConversationStore:
         del user_id
         return list(self._messages.get(session_id, []))
 
-    def append_message(self, user_id: str, session_id: str, role: str, content: str) -> None:
+    def append_message(
+        self,
+        user_id: str,
+        session_id: str,
+        role: str,
+        content: str,
+        metadata: dict[str, object] | None = None,
+    ) -> None:
         del user_id
-        self._messages.setdefault(session_id, []).append(ChatMessage(role=role, content=content))
+        self._messages.setdefault(session_id, []).append(
+            ChatMessage(role=role, content=content, metadata=metadata or {})
+        )
         self._touch_session(session_id)
 
     def get_intake_state(self, user_id: str, session_id: str) -> IntakeState:

@@ -77,8 +77,15 @@ class RedisConversationStore:
             messages.append(message_from_dict(json_loads(value)))
         return messages
 
-    def append_message(self, user_id: str, session_id: str, role: str, content: str) -> None:
-        message = ChatMessage(role=role, content=content)
+    def append_message(
+        self,
+        user_id: str,
+        session_id: str,
+        role: str,
+        content: str,
+        metadata: dict[str, object] | None = None,
+    ) -> None:
+        message = ChatMessage(role=role, content=content, metadata=metadata or {})
         self._client.rpush(self._messages_key(session_id), json_dumps(message_to_dict(message)))
         self._touch_session(session_id)
         self._expire_session(user_id, session_id)

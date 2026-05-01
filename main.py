@@ -1,6 +1,7 @@
 """기본 RAG 앱의 Streamlit 채팅 UI입니다."""
 
 from dotenv import load_dotenv
+from pathlib import Path
 import streamlit as st
 
 from config import (
@@ -11,8 +12,9 @@ from config import (
 from rag.embeddings import EMBEDDING_STRATEGIES
 from rag.pipeline.retrieval import RetrievalPipelineConfig
 from rag.pipeline.retriever import EnsembleRetrieverConfig, RETRIEVAL_STRATEGIES
+from rag.service.analysis.answer_schema import RetrievedContext
 from rag.service.conversation.app_service import answer_question_with_intake
-from rag.service.presentation.result_service import format_context_preview
+from rag.service.presentation.result_service import truncate_context
 from rag.service.session import ConversationStore, get_conversation_store
 from rag.service.tracing import TraceContext
 
@@ -32,6 +34,7 @@ RETRIEVER_STRATEGY_OPTIONS = tuple(
 )
 USER_ID = "local"
 DEFAULT_ENSEMBLE_BM25_WEIGHT = 0.5
+PROJECT_ROOT = Path(__file__).resolve().parent
 
 
 def ensure_active_session(store: ConversationStore) -> str:
@@ -274,6 +277,142 @@ def build_pipeline_config(
     )
 
 
+def build_fault_ratio_metadata(
+    fault_ratio_a: int | None,
+    fault_ratio_b: int | None,
+) -> dict[str, object]:
+    """저장 가능한 과실비율 metadata를 만듭니다."""
+    if fault_ratio_a is None or fault_ratio_b is None:
+        return {}
+    return {
+        "fault_ratio_a": fault_ratio_a,
+        "fault_ratio_b": fault_ratio_b,
+    }
+
+
+def build_retrieved_context_metadata(
+    retrieved_contexts: list[RetrievedContext],
+) -> list[dict[str, object]]:
+    """새로고침 후 근거 조각과 이미지를 다시 보여줄 최소 metadata를 만듭니다."""
+    rendered_contexts: list[dict[str, object]] = []
+    for context in retrieved_contexts:
+        rendered_context: dict[str, object] = {
+            "content": truncate_context(context.content),
+        }
+        for key in ("image_path", "source", "page", "diagram_id"):
+            value = context.metadata.get(key)
+            if isinstance(value, str | int):
+                rendered_context[key] = value
+        rendered_contexts.append(rendered_context)
+    return rendered_contexts
+
+
+def build_assistant_metadata(result) -> dict[str, object]:
+    """assistant 메시지 렌더링에 필요한 부가 정보를 저장합니다."""
+    metadata = build_fault_ratio_metadata(result.fault_ratio_a, result.fault_ratio_b)
+    retrieved_contexts = build_retrieved_context_metadata(result.retrieved_contexts)
+    if retrieved_contexts:
+        metadata["retrieved_contexts"] = retrieved_contexts
+    return metadata
+
+
+def read_fault_ratio_metadata(metadata: dict[str, object]) -> tuple[int | None, int | None]:
+    """메시지 metadata에서 검증된 과실비율을 읽습니다."""
+    fault_ratio_a = metadata.get("fault_ratio_a")
+    fault_ratio_b = metadata.get("fault_ratio_b")
+    if not isinstance(fault_ratio_a, int) or not isinstance(fault_ratio_b, int):
+        return None, None
+    if not 0 <= fault_ratio_a <= 100 or not 0 <= fault_ratio_b <= 100:
+        return None, None
+    if fault_ratio_a + fault_ratio_b != 100:
+        return None, None
+    return fault_ratio_a, fault_ratio_b
+
+
+def read_retrieved_context_metadata(metadata: dict[str, object]) -> list[dict[str, object]]:
+    """메시지 metadata에서 저장된 검색 문서 조각을 읽습니다."""
+    contexts = metadata.get("retrieved_contexts")
+    if not isinstance(contexts, list):
+        return []
+    return [context for context in contexts if isinstance(context, dict)]
+
+
+def resolve_image_path(image_path: str, source: object = None) -> Path | None:
+    """metadata의 이미지 경로를 실제 로컬 파일 경로로 해석합니다."""
+    raw_path = Path(image_path.replace("\\", "/"))
+    candidates: list[Path] = []
+    if raw_path.is_absolute():
+        candidates.append(raw_path)
+    else:
+        candidates.append(PROJECT_ROOT / raw_path)
+
+        parts = raw_path.parts
+        if "data" in parts:
+            data_index = parts.index("data")
+            candidates.append(PROJECT_ROOT / Path(*parts[data_index:]))
+        if "upstage_output" in parts:
+            upstage_index = parts.index("upstage_output")
+            candidates.append(PROJECT_ROOT / "data" / Path(*parts[upstage_index:]))
+
+    if isinstance(source, str) and source:
+        source_path = Path(source.replace("\\", "/"))
+        if not source_path.is_absolute():
+            source_path = PROJECT_ROOT / source_path
+        candidates.append(source_path.parent / raw_path)
+
+    for candidate in candidates:
+        resolved = candidate.resolve()
+        if resolved.exists() and resolved.is_file():
+            return resolved
+    return None
+
+
+def render_retrieved_contexts(metadata: dict[str, object]) -> None:
+    """저장된 검색 문서 조각과 연결 이미지를 표시합니다."""
+    contexts = read_retrieved_context_metadata(metadata)
+    if not contexts:
+        return
+
+    with st.expander("검색된 문서 조각"):
+        for index, context in enumerate(contexts, start=1):
+            content = context.get("content")
+            if isinstance(content, str) and content:
+                st.markdown(f"[{index}] {content}")
+
+            image_path = context.get("image_path")
+            if isinstance(image_path, str) and image_path:
+                resolved_image_path = resolve_image_path(image_path, context.get("source"))
+                if resolved_image_path is not None:
+                    st.image(str(resolved_image_path), caption=f"[{index}] 참고 이미지")
+
+            if index < len(contexts):
+                st.markdown("---")
+
+
+def render_fault_ratio(fault_ratio_a: int | None, fault_ratio_b: int | None) -> None:
+    """과실비율을 채팅 답변 상단에 누적 막대로 표시합니다."""
+    if fault_ratio_a is None or fault_ratio_b is None:
+        return
+
+    st.markdown(
+        f"""
+<div style="margin: 0 0 0.85rem 0;">
+  <div style="display: flex; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.35rem; font-size: 0.92rem; font-weight: 700;">
+    <span>A 측 {fault_ratio_a}%</span>
+    <span>B 측 {fault_ratio_b}%</span>
+  </div>
+  <div style="height: 14px; width: 100%; overflow: hidden; border-radius: 7px; background: #e5e7eb;">
+    <div style="display: flex; height: 100%; width: 100%;">
+      <div style="width: {fault_ratio_a}%; background: #2563eb;"></div>
+      <div style="width: {fault_ratio_b}%; background: #f97316;"></div>
+    </div>
+  </div>
+</div>
+""".strip(),
+        unsafe_allow_html=True,
+    )
+
+
 def render_chat(
     store: ConversationStore,
     loader_strategy: str = DEFAULT_LOADER_STRATEGY,
@@ -312,7 +451,11 @@ def render_chat(
     )
     for message in messages:
         with st.chat_message(message.role):
+            if message.role == "assistant":
+                render_fault_ratio(*read_fault_ratio_metadata(message.metadata))
             st.markdown(message.content)
+            if message.role == "assistant":
+                render_retrieved_contexts(message.metadata)
 
     question = st.chat_input("사고 내용을 입력하세요")
     if not question:
@@ -323,6 +466,7 @@ def render_chat(
         st.markdown(question)
 
     with st.chat_message("assistant"):
+        assistant_metadata: dict[str, object] = {}
         with st.spinner("검색하고 답변 중..."):
             try:
                 result = answer_question_with_intake(
@@ -342,18 +486,23 @@ def render_chat(
                     trace_context=trace_context,
                 )
                 answer = result.answer
-                contexts = result.contexts
+                assistant_metadata = build_assistant_metadata(result)
                 store.set_intake_state(USER_ID, active_session, result.intake_state)
+                render_fault_ratio(result.fault_ratio_a, result.fault_ratio_b)
                 st.markdown(answer)
-                context_preview = format_context_preview(contexts)
-                if SHOW_RETRIEVED_CONTEXTS and context_preview:
-                    with st.expander("검색된 문서 조각"):
-                        st.markdown(context_preview)
+                if SHOW_RETRIEVED_CONTEXTS:
+                    render_retrieved_contexts(assistant_metadata)
             except Exception as exc:
                 answer = f"오류가 발생했습니다: {exc}"
                 st.markdown(answer)
 
-    store.append_message(USER_ID, active_session, "assistant", answer)
+    store.append_message(
+        USER_ID,
+        active_session,
+        "assistant",
+        answer,
+        metadata=assistant_metadata,
+    )
 
 
 def main():

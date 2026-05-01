@@ -21,6 +21,17 @@ class SessionSerializationTest(unittest.TestCase):
 
         self.assertEqual(restored, message)
 
+    def test_chat_message_round_trips_metadata(self):
+        message = ChatMessage(
+            role="assistant",
+            content="답변",
+            metadata={"fault_ratio_a": 30, "fault_ratio_b": 70},
+        )
+
+        restored = message_from_dict(json_loads(json_dumps(message_to_dict(message))))
+
+        self.assertEqual(restored, message)
+
     def test_intake_state_round_trips_nested_metadata(self):
         state = IntakeState(
             attempt_count=2,
@@ -54,13 +65,23 @@ class MemoryConversationStoreTest(unittest.TestCase):
         session = store.create_session("local")
 
         store.append_message("local", session.session_id, "user", "질문")
-        store.append_message("local", session.session_id, "assistant", "답변")
+        store.append_message(
+            "local",
+            session.session_id,
+            "assistant",
+            "답변",
+            metadata={"fault_ratio_a": 30, "fault_ratio_b": 70},
+        )
 
         self.assertEqual(
             store.get_messages("local", session.session_id),
             [
                 ChatMessage(role="user", content="질문"),
-                ChatMessage(role="assistant", content="답변"),
+                ChatMessage(
+                    role="assistant",
+                    content="답변",
+                    metadata={"fault_ratio_a": 30, "fault_ratio_b": 70},
+                ),
             ],
         )
 

@@ -9,7 +9,7 @@ from config import (
     LLM_MODEL,
 )
 from rag.pipeline.retrieval import RetrievalPipelineConfig, run_retrieval_pipeline
-from rag.service.analysis.answer_schema import parse_structured_answer
+from rag.service.analysis.answer_schema import AnalysisResult, RetrievedContext, parse_structured_answer
 from rag.service.analysis.prompt import build_prompt
 from rag.service.intake.filter_service import build_metadata_filters
 from rag.service.intake.schema import UserSearchMetadata
@@ -27,7 +27,7 @@ def analyze_question(
     embedding_provider: str = DEFAULT_EMBEDDING_PROVIDER,
     chunker_strategy: str = DEFAULT_CHUNKER_STRATEGY,
     trace_context: TraceContext | None = None,
-) -> tuple[str, list[str]]:
+) -> AnalysisResult:
     """질문을 검색하고 LLM 답변과 검색 컨텍스트를 반환합니다."""
     components = get_retrieval_components(
         loader_strategy,
@@ -42,7 +42,14 @@ def analyze_question(
     if trace_context is not None:
         retrieval_kwargs["trace_context"] = trace_context
     documents = run_retrieval_pipeline(components, question, **retrieval_kwargs)
-    contexts = [document.page_content for document in documents]
+    retrieved_contexts = [
+        RetrievedContext(
+            content=document.page_content,
+            metadata=dict(document.metadata),
+        )
+        for document in documents
+    ]
+    contexts = [context.content for context in retrieved_contexts]
     import logging
 
     logger = logging.getLogger(__name__)
@@ -56,4 +63,10 @@ def analyze_question(
     response = llm.invoke(prompt, config=config) if config else llm.invoke(prompt)
     content = response.content
     structured_answer = parse_structured_answer(str(content))
-    return structured_answer.response, contexts
+    return AnalysisResult(
+        response=structured_answer.response,
+        contexts=contexts,
+        retrieved_contexts=retrieved_contexts,
+        fault_ratio_a=structured_answer.fault_ratio_a,
+        fault_ratio_b=structured_answer.fault_ratio_b,
+    )

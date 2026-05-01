@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from rag.service.common.json_utils import extract_json_object
 
@@ -14,6 +14,38 @@ class StructuredAnswer:
     fault_ratio_a: int | None
     fault_ratio_b: int | None
     response: str
+
+
+@dataclass(frozen=True)
+class RetrievedContext:
+    """검색된 문서 조각과 원본 metadata입니다."""
+
+    content: str
+    metadata: dict[str, object] = field(default_factory=dict)
+
+    @property
+    def image_path(self) -> str | None:
+        value = self.metadata.get("image_path")
+        return value if isinstance(value, str) and value else None
+
+
+@dataclass(frozen=True)
+class AnalysisResult:
+    """검증된 분석 답변과 검색 문맥입니다.
+
+    기존 호출부의 ``answer, contexts = analyze_question(...)`` 형태를 유지하기
+    위해 반복 시에는 답변 문자열과 문맥만 반환합니다.
+    """
+
+    response: str
+    contexts: list[str] = field(default_factory=list)
+    retrieved_contexts: list[RetrievedContext] = field(default_factory=list)
+    fault_ratio_a: int | None = None
+    fault_ratio_b: int | None = None
+
+    def __iter__(self):
+        yield self.response
+        yield self.contexts
 
 
 def parse_fault_ratio(value: object) -> int | None:

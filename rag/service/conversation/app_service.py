@@ -30,7 +30,7 @@ def answer_question_with_intake(
 ) -> AnswerResult:
     """intake, 일반 대화, RAG 분석을 조율해 답변을 반환합니다."""
     if chat_history is None:
-        answer, contexts, needs_more_input, next_state, result_type = answer_accident_analysis(
+        pipeline_result = answer_accident_analysis(
             question,
             pipeline_config=pipeline_config,
             intake_state=intake_state,
@@ -43,11 +43,14 @@ def answer_question_with_intake(
             analyzer=analyze_question,
         )
         return AnswerResult(
-            answer=answer,
-            contexts=contexts,
-            needs_more_input=needs_more_input,
-            intake_state=next_state,
-            result_type=result_type,
+            answer=pipeline_result.answer,
+            contexts=pipeline_result.contexts,
+            needs_more_input=pipeline_result.needs_more_input,
+            intake_state=pipeline_result.intake_state,
+            result_type=pipeline_result.result_type,
+            fault_ratio_a=pipeline_result.fault_ratio_a,
+            fault_ratio_b=pipeline_result.fault_ratio_b,
+            retrieved_contexts=pipeline_result.retrieved_contexts,
         )
 
     return answer_conversation_turn(

@@ -1,9 +1,11 @@
 """사고 분석 파이프라인: intake, follow-up, RAG 답변을 처리합니다."""
 
 from collections.abc import Callable, Sequence
+from dataclasses import dataclass, field
 
 from config import DEFAULT_CHUNKER_STRATEGY, DEFAULT_EMBEDDING_PROVIDER, DEFAULT_LOADER_STRATEGY
 from rag.pipeline.retrieval import RetrievalPipelineConfig
+from rag.service.analysis.answer_schema import AnalysisResult, RetrievedContext
 from rag.service.conversation.schema import TurnResultType
 from rag.service.intake.intake_service import build_default_follow_up_questions
 from rag.service.intake.schema import IntakeDecision, IntakeState, UserSearchMetadata
@@ -14,7 +16,40 @@ from rag.service.tracing import TraceContext
 MAX_FOLLOW_UP_ATTEMPTS = 2
 
 IntakeEvaluator = Callable[..., IntakeDecision]
-Analyzer = Callable[..., tuple[str, list[str]]]
+Analyzer = Callable[..., AnalysisResult | tuple[str, list[str]]]
+
+
+@dataclass(frozen=True)
+class AccidentAnalysisResult:
+    """사고 분석 파이프라인 결과입니다.
+
+    기존 호출부의 5개 값 언패킹을 유지하기 위해 반복 시에는 기존 순서만
+    노출하고, 새 UI는 fault_ratio_a/b 속성을 읽습니다.
+    """
+
+    answer: str
+    contexts: list[str] = field(default_factory=list)
+    needs_more_input: bool = False
+    intake_state: IntakeState = field(default_factory=IntakeState)
+    result_type: TurnResultType = TurnResultType.ACCIDENT_RAG
+    fault_ratio_a: int | None = None
+    fault_ratio_b: int | None = None
+    retrieved_contexts: list[RetrievedContext] = field(default_factory=list)
+
+    def __iter__(self):
+        yield self.answer
+        yield self.contexts
+        yield self.needs_more_input
+        yield self.intake_state
+        yield self.result_type
+
+
+def normalize_analysis_result(result: AnalysisResult | tuple[str, list[str]]) -> AnalysisResult:
+    """테스트 대역처럼 튜플을 반환하는 analyzer도 동일하게 다룹니다."""
+    if isinstance(result, AnalysisResult):
+        return result
+    answer, contexts = result
+    return AnalysisResult(response=answer, contexts=contexts)
 
 
 def merge_search_metadata(
@@ -89,7 +124,7 @@ def answer_accident_analysis(
     trace_context: TraceContext | None = None,
     intake_evaluator: IntakeEvaluator,
     analyzer: Analyzer,
-) -> tuple[str, list[str], bool, IntakeState, TurnResultType]:
+) -> AccidentAnalysisResult:
     """사고 분석 흐름을 처리하고 답변, context, 상태, 결과 타입을 반환합니다."""
     current_state = intake_state or IntakeState()
     intake_decision = evaluate_with_optional_context(
@@ -117,12 +152,12 @@ def answer_accident_analysis(
                 last_missing_fields=missing_field_names,
                 last_follow_up_questions=follow_up_questions,
             )
-            return (
-                build_follow_up_answer(follow_up_questions),
-                [],
-                True,
-                next_state,
-                TurnResultType.ACCIDENT_FOLLOW_UP,
+            return AccidentAnalysisResult(
+                answer=build_follow_up_answer(follow_up_questions),
+                contexts=[],
+                needs_more_input=True,
+                intake_state=next_state,
+                result_type=TurnResultType.ACCIDENT_FOLLOW_UP,
             )
 
         analysis_kwargs = {
@@ -137,21 +172,26 @@ def answer_accident_analysis(
             analysis_kwargs["chat_history"] = chat_history
         if trace_context is not None:
             analysis_kwargs["trace_context"] = trace_context
-        answer, contexts = analyzer(
-            intake_decision.normalized_description or question,
-            **analysis_kwargs,
+        analysis_result = normalize_analysis_result(
+            analyzer(
+                intake_decision.normalized_description or question,
+                **analysis_kwargs,
+            )
         )
         next_state = (
             reset_intake_progress(merged_metadata)
             if chat_history is not None
             else IntakeState()
         )
-        return (
-            build_fallback_notice(answer),
-            contexts,
-            False,
-            next_state,
-            TurnResultType.ACCIDENT_RAG,
+        return AccidentAnalysisResult(
+            answer=build_fallback_notice(analysis_result.response),
+            contexts=analysis_result.contexts,
+            needs_more_input=False,
+            intake_state=next_state,
+            result_type=TurnResultType.ACCIDENT_RAG,
+            fault_ratio_a=analysis_result.fault_ratio_a,
+            fault_ratio_b=analysis_result.fault_ratio_b,
+            retrieved_contexts=analysis_result.retrieved_contexts,
         )
 
     analysis_kwargs = {
@@ -166,13 +206,24 @@ def answer_accident_analysis(
         analysis_kwargs["chat_history"] = chat_history
     if trace_context is not None:
         analysis_kwargs["trace_context"] = trace_context
-    answer, contexts = analyzer(
-        intake_decision.normalized_description,
-        **analysis_kwargs,
+    analysis_result = normalize_analysis_result(
+        analyzer(
+            intake_decision.normalized_description,
+            **analysis_kwargs,
+        )
     )
     next_state = (
         reset_intake_progress(merged_metadata)
         if chat_history is not None
         else IntakeState()
     )
-    return answer, contexts, False, next_state, TurnResultType.ACCIDENT_RAG
+    return AccidentAnalysisResult(
+        answer=analysis_result.response,
+        contexts=analysis_result.contexts,
+        needs_more_input=False,
+        intake_state=next_state,
+        result_type=TurnResultType.ACCIDENT_RAG,
+        fault_ratio_a=analysis_result.fault_ratio_a,
+        fault_ratio_b=analysis_result.fault_ratio_b,
+        retrieved_contexts=analysis_result.retrieved_contexts,
+    )

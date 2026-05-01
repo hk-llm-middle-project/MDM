@@ -21,8 +21,11 @@ def json_loads(value: str) -> dict[str, Any]:
     return data
 
 
-def message_to_dict(message: ChatMessage) -> dict[str, str]:
-    return {"role": message.role, "content": message.content}
+def message_to_dict(message: ChatMessage) -> dict[str, Any]:
+    data: dict[str, Any] = {"role": message.role, "content": message.content}
+    if message.metadata:
+        data["metadata"] = message.metadata
+    return data
 
 
 def message_from_dict(data: dict[str, Any]) -> ChatMessage:
@@ -30,7 +33,10 @@ def message_from_dict(data: dict[str, Any]) -> ChatMessage:
     content = data.get("content")
     if not isinstance(role, str) or not isinstance(content, str):
         raise ValueError("채팅 메시지에는 문자열 role과 content가 필요합니다.")
-    return ChatMessage(role=role, content=content)
+    metadata = data.get("metadata")
+    if not isinstance(metadata, dict):
+        metadata = {}
+    return ChatMessage(role=role, content=content, metadata=metadata)
 
 
 def session_meta_to_dict(meta: SessionMeta) -> dict[str, str]:

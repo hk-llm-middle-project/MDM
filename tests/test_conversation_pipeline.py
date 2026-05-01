@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import MagicMock
 
+from rag.service.analysis.answer_schema import AnalysisResult
 from rag.service.conversation.orchestrator import answer_conversation_turn
 from rag.service.conversation.router import route_conversation_turn
 from rag.service.conversation.schema import RouteType, TurnResultType
@@ -128,6 +129,42 @@ class ConversationPipelineTest(unittest.TestCase):
             analyzer.call_args.kwargs["search_metadata"],
             UserSearchMetadata(party_type="자동차", location="횡단보도 내"),
         )
+
+    def test_accident_analysis_preserves_fault_ratios(self):
+        router_llm = FakeLLM(
+            '{"route_type":"accident_analysis","confidence":0.97,"reason":"사고 분석"}'
+        )
+        intake = MagicMock(
+            return_value=IntakeDecision(
+                is_sufficient=True,
+                normalized_description="주차장 사고",
+                search_metadata=UserSearchMetadata(
+                    party_type="자동차",
+                    location="주차장",
+                ),
+            )
+        )
+        analyzer = MagicMock(
+            return_value=AnalysisResult(
+                response="answer",
+                contexts=["context"],
+                fault_ratio_a=30,
+                fault_ratio_b=70,
+            )
+        )
+
+        result = answer_conversation_turn(
+            "주차장에서 부딪혔어",
+            chat_history=[],
+            intake_evaluator=intake,
+            analyzer=analyzer,
+            router_llm=router_llm,
+        )
+
+        self.assertEqual(result.answer, "answer")
+        self.assertEqual(result.contexts, ["context"])
+        self.assertEqual(result.fault_ratio_a, 30)
+        self.assertEqual(result.fault_ratio_b, 70)
 
 
 if __name__ == "__main__":
