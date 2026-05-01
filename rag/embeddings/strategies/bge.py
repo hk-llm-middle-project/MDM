@@ -3,6 +3,7 @@
 import os
 
 import requests
+from dotenv import load_dotenv
 from langchain_core.embeddings import Embeddings
 
 
@@ -13,6 +14,7 @@ class BGEM3Embeddings(Embeddings):
     """LangChain embeddings adapter for the BGE-M3 embedding API."""
 
     def __init__(self):
+        load_dotenv()
         self.url = os.environ.get("BGE_BASE_URL")
         self.key = os.environ.get("BGE_API_KEY")
         if not self.url or not self.key:

@@ -1,25 +1,17 @@
-"""LLM-based page metadata classification."""
+"""Rule-based page metadata cache and merge helpers."""
 
 from __future__ import annotations
 
 import json
-from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
 from langchain_core.documents import Document
-from langchain_openai import ChatOpenAI
 
-from config import LLM_MODEL
-from rag.service.common.json_utils import extract_json_object
-from rag.service.intake.intake_service import clamp_confidence
 from rag.service.intake.values import LOCATIONS, PARTY_TYPES
 
 
-CONFIDENCE_THRESHOLD = 0.75
-MAX_PROMPT_CHARS = 6000
-MAX_CLASSIFICATION_WORKERS = 8
+SKIP_CHUNK_TYPES = {"general", "preface"}
 
 
 @dataclass(frozen=True)
@@ -28,101 +20,41 @@ class PageMetadataClassification:
 
     party_type: str | None = None
     location: str | None = None
-    confidence: dict[str, float] | None = None
 
 
-def normalize_page_metadata_response(data: dict[str, Any]) -> PageMetadataClassification:
-    """Validate LLM metadata output against allowed values and confidence."""
-    confidence_data = data.get("confidence")
-    if not isinstance(confidence_data, dict):
-        confidence_data = {}
-
-    confidence = {
-        "party_type": clamp_confidence(confidence_data.get("party_type")),
-        "location": clamp_confidence(confidence_data.get("location")),
-    }
-
+def normalize_page_metadata_cache_entry(data: dict[str, object]) -> PageMetadataClassification:
+    """Validate cached metadata output against allowed values."""
     party_type = data.get("party_type")
-    if party_type not in PARTY_TYPES or confidence["party_type"] < CONFIDENCE_THRESHOLD:
+    if party_type not in PARTY_TYPES:
         party_type = None
 
     location = data.get("location")
-    if location not in LOCATIONS or confidence["location"] < CONFIDENCE_THRESHOLD:
+    if location not in LOCATIONS:
         location = None
 
     return PageMetadataClassification(
         party_type=party_type,
         location=location,
-        confidence=confidence,
     )
 
 
-def build_page_metadata_prompt(page_content: str) -> str:
-    """Build a constrained classification prompt for one page."""
-    content = page_content.strip()[:MAX_PROMPT_CHARS]
-    party_values = "\n".join(f"- {value}" for value in PARTY_TYPES)
-    location_values = "\n".join(f"- {value}" for value in LOCATIONS)
-    party_schema_values = " | ".join(f'"{value}"' for value in PARTY_TYPES)
-    location_schema_values = " | ".join(f'"{value}"' for value in LOCATIONS)
-    return f"""다음 자동차 사고 과실비율 문서 페이지를 읽고 검색용 metadata를 분류하세요.
-
-party_type은 반드시 다음 중 하나 또는 null이어야 합니다:
-{party_values}
-
-location은 반드시 다음 중 하나 또는 null이어야 합니다:
-{location_values}
-
-확실하지 않으면 null을 사용하세요.
-JSON 객체만 반환하세요.
-
-반환 형식:
-{{
-  "party_type": {party_schema_values} | null,
-  "location": {location_schema_values} | null,
-  "confidence": {{
-    "party_type": 0.0,
-    "location": 0.0
-  }}
-}}
-
-페이지 내용:
-{content}
-"""
-
-
-def classify_page_metadata(page_content: str, llm: Any | None = None) -> PageMetadataClassification:
-    """Classify one page into allowed search metadata values."""
-    if not page_content.strip():
-        return PageMetadataClassification(confidence={"party_type": 0.0, "location": 0.0})
-
-    classifier_llm = llm or ChatOpenAI(model=LLM_MODEL, temperature=0)
-    response = classifier_llm.invoke(build_page_metadata_prompt(page_content))
-    content = getattr(response, "content", response)
-    return normalize_page_metadata_response(extract_json_object(str(content)))
+def classify_page_metadata(page: int | Document | None) -> PageMetadataClassification:
+    """Classify a page number into rule-based metadata."""
+    if isinstance(page, Document):
+        page = page.metadata.get("page")
+    try:
+        page_number = int(page) if page is not None else None
+    except (TypeError, ValueError):
+        page_number = None
+    return _classification_for_page(page_number)
 
 
 def default_page_metadata_classification() -> PageMetadataClassification:
-    """Return empty metadata for pages that cannot be classified."""
-    return PageMetadataClassification(confidence={"party_type": 0.0, "location": 0.0})
+    """Return empty metadata for pages outside the case ranges."""
+    return PageMetadataClassification()
 
 
-def classify_page_metadata_safely(
-    document: Document,
-    llm: Any | None = None,
-) -> tuple[PageMetadataClassification, bool]:
-    """Classify one page, falling back to empty metadata if classification fails."""
-    try:
-        return classify_page_metadata(document.page_content, llm=llm), False
-    except Exception as exc:
-        page = document.metadata.get("page", "unknown")
-        print(
-            "[WARN] page metadata classification failed "
-            f"- page={page}, error_type={type(exc).__name__}, error={exc}"
-        )
-        return default_page_metadata_classification(), True
-
-
-def load_page_metadata_cache(cache_path: Path) -> dict[str, dict[str, Any]]:
+def load_page_metadata_cache(cache_path: Path) -> dict[str, dict[str, object]]:
     """Load page metadata classifications keyed by page number."""
     if not cache_path.exists():
         return {}
@@ -138,7 +70,7 @@ def load_page_metadata_cache(cache_path: Path) -> dict[str, dict[str, Any]]:
     }
 
 
-def save_page_metadata_cache(cache_path: Path, cache: dict[str, dict[str, Any]]) -> None:
+def save_page_metadata_cache(cache_path: Path, cache: dict[str, dict[str, object]]) -> None:
     """Persist page metadata classifications keyed by page number."""
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     ordered_cache = dict(sorted(cache.items(), key=lambda item: _cache_sort_key(item[0])))
@@ -151,14 +83,10 @@ def _cache_sort_key(key: str) -> tuple[int, int | str]:
     return (0, int(key)) if key.isdigit() else (1, key)
 
 
-def _classification_to_cache_entry(classification: PageMetadataClassification) -> dict[str, Any]:
+def _classification_to_cache_entry(classification: PageMetadataClassification) -> dict[str, object]:
     return {
         "party_type": classification.party_type,
         "location": classification.location,
-        "confidence": classification.confidence or {
-            "party_type": 0.0,
-            "location": 0.0,
-        },
     }
 
 
@@ -172,81 +100,112 @@ def _page_cache_key(document: Document, fallback_index: int) -> str:
 def _merge_classification_metadata(
     document: Document,
     classification: PageMetadataClassification,
-    metadata_source: str,
 ) -> Document:
     metadata = dict(document.metadata)
-    confidence = classification.confidence or {}
 
     if classification.party_type is not None:
         metadata["party_type"] = classification.party_type
     if classification.location is not None:
         metadata["location"] = classification.location
 
-    metadata["metadata_source"] = metadata_source
-    metadata["metadata_confidence_party_type"] = confidence.get("party_type", 0.0)
-    metadata["metadata_confidence_location"] = confidence.get("location", 0.0)
-
     return Document(page_content=document.page_content, metadata=metadata)
 
 
-def enrich_document_with_llm_metadata(document: Document, llm: Any | None = None) -> Document:
-    """Return a copy of a page document with classified metadata merged in."""
-    classification = classify_page_metadata(document.page_content, llm=llm)
-    return _merge_classification_metadata(document, classification, metadata_source="llm")
+def _should_merge_metadata(document: Document) -> bool:
+    return document.metadata.get("chunk_type") not in SKIP_CHUNK_TYPES
 
 
-def enrich_documents_with_llm_metadata(
+def build_rule_based_page_metadata_cache(
     documents: list[Document],
-    llm: Any | None = None,
-    cache_path: Path | None = None,
-) -> list[Document]:
-    """Classify and enrich each page document before chunking, reusing a cache if provided."""
-    cache = load_page_metadata_cache(cache_path) if cache_path is not None else {}
-    cache_changed = False
-    enriched_documents: list[Document | None] = [None] * len(documents)
-    cache_misses: list[tuple[int, str, Document]] = []
-    classifier_llm = llm
-
+) -> dict[str, dict[str, object]]:
+    """Build a page-number keyed metadata cache from deterministic rules."""
+    cache: dict[str, dict[str, object]] = {}
     for index, document in enumerate(documents, start=1):
         cache_key = _page_cache_key(document, index)
-        cached_entry = cache.get(cache_key)
-        if cached_entry is not None:
-            classification = normalize_page_metadata_response(cached_entry)
-            enriched_documents[index - 1] = _merge_classification_metadata(
-                document,
-                classification,
-                metadata_source="llm_cache",
+        cache[cache_key] = _classification_to_cache_entry(classify_page_metadata(document))
+    return cache
+
+
+def write_rule_based_page_metadata_cache(
+    documents: list[Document],
+    cache_path: Path,
+) -> dict[str, dict[str, object]]:
+    """Generate and persist the deterministic page metadata cache."""
+    cache = build_rule_based_page_metadata_cache(documents)
+    save_page_metadata_cache(cache_path, cache)
+    return cache
+
+
+def enrich_documents_with_page_metadata(
+    documents: list[Document],
+    cache_path: Path | None = None,
+) -> list[Document]:
+    """Merge rule-based page metadata into chunk documents using a cache when provided."""
+    cache = load_page_metadata_cache(cache_path) if cache_path is not None else {}
+    enriched_documents: list[Document] = []
+
+    for index, document in enumerate(documents, start=1):
+        if not _should_merge_metadata(document):
+            enriched_documents.append(
+                Document(page_content=document.page_content, metadata=dict(document.metadata))
             )
             continue
 
-        cache_misses.append((index - 1, cache_key, document))
-
-    if classifier_llm is None and any(document.page_content.strip() for _, _, document in cache_misses):
-        classifier_llm = ChatOpenAI(model=LLM_MODEL, temperature=0)
-
-    worker_count = min(MAX_CLASSIFICATION_WORKERS, len(cache_misses))
-    if worker_count:
-        with ThreadPoolExecutor(max_workers=worker_count) as executor:
-            classification_results = executor.map(
-                lambda item: classify_page_metadata_safely(item[2], llm=classifier_llm),
-                cache_misses,
+        cache_key = _page_cache_key(document, index)
+        cached_entry = cache.get(cache_key)
+        if cached_entry is None:
+            enriched_documents.append(
+                Document(page_content=document.page_content, metadata=dict(document.metadata))
             )
+            continue
 
-            for (document_index, cache_key, document), (classification, had_error) in zip(
-                cache_misses,
-                classification_results,
-                strict=True,
-            ):
-                if cache_path is not None:
-                    cache[cache_key] = _classification_to_cache_entry(classification)
-                    cache_changed = True
-                enriched_documents[document_index] = _merge_classification_metadata(
-                    document,
-                    classification,
-                    metadata_source="llm_error" if had_error else "llm",
-                )
+        classification = normalize_page_metadata_cache_entry(cached_entry)
+        enriched_documents.append(
+            _merge_classification_metadata(
+                document,
+                classification,
+            )
+        )
 
-    if cache_path is not None and cache_changed:
-        save_page_metadata_cache(cache_path, cache)
+    return enriched_documents
 
-    return [document for document in enriched_documents if document is not None]
+
+def _classification_for_page(page: int | None) -> PageMetadataClassification:
+    if page is None:
+        return default_page_metadata_classification()
+
+    party_type: str | None = None
+    location: str | None = None
+
+    if 39 <= page <= 69:
+        party_type, location = "보행자", "횡단보도 내"
+    elif 70 <= page <= 89:
+        party_type, location = "보행자", "횡단보도 부근"
+    elif 90 <= page <= 106:
+        party_type, location = "보행자", "횡단보도 없음"
+    elif 107 <= page <= 123:
+        party_type, location = "보행자", "기타"
+    elif 148 <= page <= 327:
+        party_type, location = "자동차", "교차로 사고"
+    elif 328 <= page <= 351:
+        party_type, location = "자동차", "마주보는 방향 진행차량 상호 간의 사고"
+    elif 352 <= page <= 425:
+        party_type, location = "자동차", "같은 방향 진행차량 상호간의 사고"
+    elif 426 <= page <= 488:
+        party_type, location = "자동차", "기타"
+    elif 501 <= page <= 565:
+        party_type, location = "자전거", "교차로 사고"
+    elif 566 <= page <= 568:
+        party_type, location = "자전거", "마주보는 방향 진행차량 상호 간의 사고"
+    elif 569 <= page <= 578:
+        party_type, location = "자전거", "같은 방향 진행차량 상호간의 사고"
+    elif 579 <= page <= 587:
+        party_type, location = "자전거", "기타"
+
+    if party_type is None or location is None:
+        return default_page_metadata_classification()
+
+    return PageMetadataClassification(
+        party_type=party_type,
+        location=location,
+    )

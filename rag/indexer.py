@@ -4,6 +4,7 @@ import sqlite3
 from pathlib import Path
 
 from langchain_chroma import Chroma
+from langchain_community.vectorstores.utils import filter_complex_metadata
 from langchain_core.documents import Document
 
 from config import DEFAULT_EMBEDDING_PROVIDER, INDEX_BATCH_SIZE, VECTORSTORE_DIR
@@ -20,6 +21,7 @@ def build_vectorstore(
     if batch_size <= 0:
         raise ValueError("batch_size must be greater than 0")
 
+    documents = filter_complex_metadata(documents)
     persist_directory.mkdir(parents=True, exist_ok=True)
     vectorstore = Chroma(
         persist_directory=str(persist_directory),
