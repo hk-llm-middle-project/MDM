@@ -2,7 +2,7 @@ import json
 import unittest
 from collections import Counter
 
-from config import UPSTAGE_FINAL_DOCUMENTS_PATH
+from config import UPSTAGE_CUSTOM_DOCUMENTS_PATH
 from rag.service.intake.values import LOCATIONS, PARTY_TYPES
 
 
@@ -22,7 +22,7 @@ class UpstageJsonMetadataTest(unittest.TestCase):
         self._assert_no_invalid_values("location", invalid_values)
 
     def _load_chunks(self):
-        with UPSTAGE_FINAL_DOCUMENTS_PATH.open("r", encoding="utf-8") as fp:
+        with UPSTAGE_CUSTOM_DOCUMENTS_PATH.open("r", encoding="utf-8") as fp:
             return json.load(fp)
 
     def _invalid_metadata_values(

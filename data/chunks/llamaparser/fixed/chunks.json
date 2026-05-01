@@ -1,0 +1,13 @@
+[
+  {
+    "page_content": "chunk",
+    "metadata": {
+      "chunk_id": 0,
+      "chunk_type": "flat",
+      "page": 1,
+      "source": "data/raw/230630_자동차사고 과실비율 인정기준_최종.pdf",
+      "party_type": "pedestrian",
+      "location": "crosswalk"
+    }
+  }
+]

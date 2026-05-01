@@ -1,0 +1,48 @@
+[
+  {
+    "page_content": "## 차43-7 안전지대 통과 직진 대 선행 진로변경\n\n### 기본 과실비율\n\n| 유형 | A 과실 | B 과실 |\n| --- | --- | --- |\n| (가) | A100 | B0 |\n| (나) | A70 | B30 |\n\n### 과실비율 조정예시\n\n| 대상 | 수정요소 | A 조정 | B 조정 |\n| --- | --- | --- | --- |\n| A | 현저한 과실 | +10 |  |\n| B | 중대한 과실 |  | +20 |\n![page_389_table_1](../../upstage_output/main_pdf/final/img/page_389_table_1.png)",
+    "metadata": {
+      "chunk_id": 0,
+      "chunk_type": "parent",
+      "page": 389,
+      "source": "data/raw/230630_자동차사고 과실비율 인정기준_최종.pdf",
+      "diagram_id": "차43-7(가)",
+      "image_path": "../../upstage_output/main_pdf/final/img/page_389_table_1.png"
+    }
+  },
+  {
+    "page_content": "## 차43-7 안전지대 통과 직진 대 선행 진로변경\n\n### 기본 과실비율\n\n| 유형 | A 과실 | B 과실 |\n| --- | --- | --- |\n| (가) | A100 | B0 |\n| (나) | A70 | B30 |\n\n### 과실비율 조정예시\n\n| 대상 | 수정요소 | A 조정 | B 조정 |\n| --- | --- | --- | --- |\n| A | 현저한 과실 | +10 |  |\n| B | 중대한 과실 |  | +20 |\n![page_389_table_1](../../upstage_output/main_pdf/final/img/page_389_table_1.png)",
+    "metadata": {
+      "chunk_id": 1,
+      "chunk_type": "child",
+      "page": 389,
+      "source": "data/raw/230630_자동차사고 과실비율 인정기준_최종.pdf",
+      "diagram_id": "차43-7(가)",
+      "parent_id": 0,
+      "image_path": "../../upstage_output/main_pdf/final/img/page_389_table_1.png"
+    }
+  },
+  {
+    "page_content": "## 차43-7 안전지대 통과 직진 대 선행 진로변경\n\n### 기본 과실비율\n\n| 유형 | A 과실 | B 과실 |\n| --- | --- | --- |\n| (가) | A100 | B0 |\n| (나) | A70 | B30 |\n\n### 과실비율 조정예시\n\n| 대상 | 수정요소 | A 조정 | B 조정 |\n| --- | --- | --- | --- |\n| A | 현저한 과실 | +10 |  |\n| B | 중대한 과실 |  | +20 |\n![page_389_table_1](../../upstage_output/main_pdf/final/img/page_389_table_1.png)",
+    "metadata": {
+      "chunk_id": 2,
+      "chunk_type": "parent",
+      "page": 389,
+      "source": "data/raw/230630_자동차사고 과실비율 인정기준_최종.pdf",
+      "diagram_id": "차43-7(나)",
+      "image_path": "../../upstage_output/main_pdf/final/img/page_389_table_1.png"
+    }
+  },
+  {
+    "page_content": "## 차43-7 안전지대 통과 직진 대 선행 진로변경\n\n### 기본 과실비율\n\n| 유형 | A 과실 | B 과실 |\n| --- | --- | --- |\n| (가) | A100 | B0 |\n| (나) | A70 | B30 |\n\n### 과실비율 조정예시\n\n| 대상 | 수정요소 | A 조정 | B 조정 |\n| --- | --- | --- | --- |\n| A | 현저한 과실 | +10 |  |\n| B | 중대한 과실 |  | +20 |\n![page_389_table_1](../../upstage_output/main_pdf/final/img/page_389_table_1.png)",
+    "metadata": {
+      "chunk_id": 3,
+      "chunk_type": "child",
+      "page": 389,
+      "source": "data/raw/230630_자동차사고 과실비율 인정기준_최종.pdf",
+      "diagram_id": "차43-7(나)",
+      "parent_id": 2,
+      "image_path": "../../upstage_output/main_pdf/final/img/page_389_table_1.png"
+    }
+  }
+]
