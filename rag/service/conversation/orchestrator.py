@@ -3,7 +3,7 @@
 from dataclasses import dataclass, field
 from typing import Any
 
-from config import DEFAULT_EMBEDDING_PROVIDER, DEFAULT_LOADER_STRATEGY
+from config import DEFAULT_CHUNKER_STRATEGY, DEFAULT_EMBEDDING_PROVIDER, DEFAULT_LOADER_STRATEGY
 from rag.pipeline.retrieval import RetrievalPipelineConfig
 from rag.service.conversation.pipelines.accident_analysis import answer_accident_analysis
 from rag.service.conversation.pipelines.general_chat import answer_general_chat
@@ -31,6 +31,7 @@ def answer_conversation_turn(
     pipeline_config: RetrievalPipelineConfig | None = None,
     intake_state: IntakeState | None = None,
     loader_strategy: str = DEFAULT_LOADER_STRATEGY,
+    chunker_strategy: str = DEFAULT_CHUNKER_STRATEGY,
     embedding_provider: str = DEFAULT_EMBEDDING_PROVIDER,
     chat_history: list[ChatMessage] | None = None,
     trace_context: TraceContext | None = None,
@@ -68,6 +69,7 @@ def answer_conversation_turn(
         pipeline_config=pipeline_config,
         intake_state=current_state,
         loader_strategy=loader_strategy,
+        chunker_strategy=chunker_strategy,
         embedding_provider=embedding_provider,
         chat_history=chat_history,
         trace_context=trace_context,

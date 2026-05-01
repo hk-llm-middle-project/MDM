@@ -10,6 +10,7 @@ VECTORSTORE_DIR = BASE_DIR / "data" / "vectorstore"
 PAGE_METADATA_DIR = BASE_DIR / "data" / "metadata"
 PAGE_METADATA_PATH = PAGE_METADATA_DIR / "main_pdf_page_metadata.json"
 LLAMA_MD_DIR = BASE_DIR / "data" / "llama_md"
+PDFPLUMBER_OUT_DIR = BASE_DIR / "data" / "pdfplumber_output"
 UPSTAGE_OUTPUT_DIR = BASE_DIR / "data" / "upstage_output"
 UPSTAGE_MAIN_PDF_OUTPUT_DIR = UPSTAGE_OUTPUT_DIR / "main_pdf"
 UPSTAGE_FINAL_DOCUMENTS_PATH = (
@@ -19,6 +20,7 @@ UPSTAGE_RAW_DOCUMENTS_PATH = (
     UPSTAGE_MAIN_PDF_OUTPUT_DIR / "raw" / "parsed_documents_raw.json"
 )
 DEFAULT_LOADER_STRATEGY = "pdfplumber"
+DEFAULT_CHUNKER_STRATEGY = "fixed"
 LOADER_VECTORSTORE_DIRS = {
     "pdfplumber": VECTORSTORE_DIR / "pdfplumber",
     "llamaparser": VECTORSTORE_DIR / "llamaparser",
@@ -75,6 +77,7 @@ def get_session_ttl_seconds() -> int | None:
 def get_vectorstore_dir(
     loader_strategy: str = DEFAULT_LOADER_STRATEGY,
     embedding_provider: str = DEFAULT_EMBEDDING_PROVIDER,
+    chunker_strategy: str = DEFAULT_CHUNKER_STRATEGY,
 ) -> Path:
     try:
         loader_vectorstore_dir = LOADER_VECTORSTORE_DIRS[loader_strategy]
@@ -84,4 +87,4 @@ def get_vectorstore_dir(
             f"Unknown loader strategy: {loader_strategy}. Available strategies: {available}"
         ) from error
 
-    return loader_vectorstore_dir / embedding_provider
+    return loader_vectorstore_dir / chunker_strategy / embedding_provider

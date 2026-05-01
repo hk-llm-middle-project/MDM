@@ -1,0 +1,30 @@
+{"question": "보행자가 신호등이 있는 횡단보도 안에서 차량과 부딪힌 사고 기준을 찾아줘", "expected_filters": {"party_type": "보행자", "location": "횡단보도 내"}}
+{"question": "횡단보도 내부에서 길을 건너던 보행자와 자동차가 충돌한 경우를 검색해줘", "expected_filters": {"party_type": "보행자", "location": "횡단보도 내"}}
+{"question": "보행자가 횡단보도 위를 건너는 중 발생한 자동차 사고 기준이 필요해", "expected_filters": {"party_type": "보행자", "location": "횡단보도 내"}}
+{"question": "횡단보도 안에서 보행자 신호와 차량 신호가 관련된 보행자 사고를 보여줘", "expected_filters": {"party_type": "보행자", "location": "횡단보도 내"}}
+{"question": "보행자가 횡단보도 부근을 건너다 자동차와 충돌한 사고 기준을 찾아줘", "expected_filters": {"party_type": "보행자", "location": "횡단보도 부근"}}
+{"question": "횡단시설 근처에서 보행자와 차량이 사고 난 경우를 검색해줘", "expected_filters": {"party_type": "보행자", "location": "횡단보도 부근"}}
+{"question": "보행자가 횡단보도가 아닌 도로를 건너다 차량과 부딪힌 사고 기준을 알려줘", "expected_filters": {"party_type": "보행자", "location": "횡단보도 없음"}}
+{"question": "무단횡단처럼 횡단보도 없는 곳에서 발생한 보행자 사고를 찾아줘", "expected_filters": {"party_type": "보행자", "location": "횡단보도 없음"}}
+{"question": "차도와 보도 구분이 있는 도로에서 횡단보도 없이 보행자가 사고 난 기준을 검색해줘", "expected_filters": {"party_type": "보행자", "location": "횡단보도 없음"}}
+{"question": "고속도로에서 보행자가 차량과 충돌한 기타 보행자 사고 기준을 보여줘", "expected_filters": {"party_type": "보행자", "location": "기타"}}
+{"question": "도로 위에 누워 있거나 머물던 보행자와 자동차 사고 같은 기타 유형을 찾아줘", "expected_filters": {"party_type": "보행자", "location": "기타"}}
+{"question": "교차로에서 자동차 두 대가 직진이나 좌회전 중 충돌한 사고 기준을 찾아줘", "expected_filters": {"party_type": "자동차", "location": "교차로 사고"}}
+{"question": "신호등 있는 교차로에서 차량끼리 부딪힌 사고 유형을 검색해줘", "expected_filters": {"party_type": "자동차", "location": "교차로 사고"}}
+{"question": "신호등 없는 교차로에서 자동차와 자동차가 서로 진행하다 충돌한 기준을 보여줘", "expected_filters": {"party_type": "자동차", "location": "교차로 사고"}}
+{"question": "교차로 부근에서 자동차들이 동시에 우회전하거나 좌회전하다 사고 난 기준을 찾아줘", "expected_filters": {"party_type": "자동차", "location": "교차로 사고"}}
+{"question": "마주 오는 자동차 사이에서 중앙선 침범으로 발생한 사고 기준을 알려줘", "expected_filters": {"party_type": "자동차", "location": "마주보는 방향 진행차량 상호 간의 사고"}}
+{"question": "서로 반대 방향으로 진행하던 차량끼리 교행 중 충돌한 사고를 검색해줘", "expected_filters": {"party_type": "자동차", "location": "마주보는 방향 진행차량 상호 간의 사고"}}
+{"question": "맞은편에서 오는 차와 유턴 차량 사이에 발생한 자동차 사고 기준을 찾아줘", "expected_filters": {"party_type": "자동차", "location": "마주보는 방향 진행차량 상호 간의 사고"}}
+{"question": "같은 방향으로 달리던 자동차 사이의 추돌 사고 기준을 보여줘", "expected_filters": {"party_type": "자동차", "location": "같은 방향 진행차량 상호간의 사고"}}
+{"question": "동일 방향 진행 중 앞차와 뒷차 사이에서 안전거리 미확보로 발생한 사고를 찾아줘", "expected_filters": {"party_type": "자동차", "location": "같은 방향 진행차량 상호간의 사고"}}
+{"question": "같은 방향 차로에서 자동차가 진로변경하다 다른 자동차와 충돌한 기준을 검색해줘", "expected_filters": {"party_type": "자동차", "location": "같은 방향 진행차량 상호간의 사고"}}
+{"question": "정차 후 출발하는 자동차와 직진 차량 사이의 사고 기준을 찾아줘", "expected_filters": {"party_type": "자동차", "location": "같은 방향 진행차량 상호간의 사고"}}
+{"question": "주차장에서 자동차끼리 부딪힌 기타 사고 유형을 보여줘", "expected_filters": {"party_type": "자동차", "location": "기타"}}
+{"question": "자동차 문이 열리면서 다른 차량과 충돌한 기타 사고 기준을 찾아줘", "expected_filters": {"party_type": "자동차", "location": "기타"}}
+{"question": "회전교차로에서 자동차끼리 발생한 기타 유형 사고를 검색해줘", "expected_filters": {"party_type": "자동차", "location": "기타"}}
+{"question": "자동차와 이륜차 사이의 특수 유형 사고 기준을 찾아줘", "expected_filters": {"party_type": "자동차", "location": "자동차 대 이륜차 특수유형"}}
+{"question": "이륜차가 끼어든 자동차 사고처럼 자동차 대 이륜차 특수유형을 보여줘", "expected_filters": {"party_type": "자동차", "location": "자동차 대 이륜차 특수유형"}}
+{"question": "교차로에서 자전거와 자동차가 직진이나 좌회전 중 충돌한 사고 기준을 찾아줘", "expected_filters": {"party_type": "자전거", "location": "교차로 사고"}}
+{"question": "자전거가 교차로에서 자동차와 우회전 또는 직진 중 부딪힌 사고를 검색해줘", "expected_filters": {"party_type": "자전거", "location": "교차로 사고"}}
+{"question": "자전거 도로횡단이나 자전거횡단도로에서 자동차와 충돌한 기타 사고 기준을 보여줘", "expected_filters": {"party_type": "자전거", "location": "기타"}}

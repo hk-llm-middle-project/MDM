@@ -5,6 +5,14 @@ from unittest.mock import MagicMock, patch
 from langchain_core.documents import Document
 
 from rag.chunker import chunk_text, split_documents
+from rag.chunkers import (
+    BaseChunker,
+    Chunk,
+    FixedSizeChunker,
+    MarkdownStructureChunker,
+    RecursiveCharacterChunker,
+    chunk_to_document,
+)
 from rag.embeddings import EMBEDDING_STRATEGIES, create_embeddings
 from rag.embeddings.strategies.bge import BGEM3Embeddings
 from rag.embeddings.strategies.google import GoogleGeminiEmbeddings
@@ -46,6 +54,210 @@ class BasicRagTest(unittest.TestCase):
         self.assertEqual([chunk.page_content for chunk in chunks], ["abc", "def"])
         self.assertEqual([chunk.metadata for chunk in chunks], [{"page": 1}, {"page": 1}])
         self.assertIsNot(chunks[0].metadata, documents[0].metadata)
+
+    def test_chunk_to_document_maps_standard_metadata_and_drops_none_values(self):
+        chunk = Chunk(
+            chunk_id=7,
+            text="사고 본문",
+            chunk_type="child",
+            page=39,
+            source="data/llama_md/main_pdf/039.md",
+            diagram_id="보1",
+            parent_id=3,
+            location=None,
+            party_type="자동차-보행자",
+            image_path=None,
+        )
+
+        document = chunk_to_document(chunk)
+
+        self.assertEqual(document.page_content, "사고 본문")
+        self.assertEqual(
+            document.metadata,
+            {
+                "chunk_id": 7,
+                "chunk_type": "child",
+                "page": 39,
+                "source": "data/llama_md/main_pdf/039.md",
+                "diagram_id": "보1",
+                "parent_id": 3,
+                "party_type": "자동차-보행자",
+            },
+        )
+
+    def test_base_chunker_requires_chunk_implementation(self):
+        class MissingChunker(BaseChunker):
+            pass
+
+        with self.assertRaises(TypeError):
+            MissingChunker()
+
+    def test_base_chunker_concrete_implementation_returns_standard_chunks(self):
+        class EchoChunker(BaseChunker):
+            def chunk(self, parsed_input):
+                return [
+                    Chunk(
+                        chunk_id=0,
+                        text=str(parsed_input),
+                        chunk_type="flat",
+                        page=1,
+                        source="test",
+                        diagram_id=None,
+                        parent_id=None,
+                        location=None,
+                        party_type=None,
+                        image_path=None,
+                    )
+                ]
+
+        chunks = EchoChunker().chunk("parsed")
+
+        self.assertEqual(len(chunks), 1)
+        self.assertIsInstance(chunks[0], Chunk)
+        self.assertEqual(chunks[0].text, "parsed")
+
+    def test_fixed_size_chunker_returns_flat_chunks_with_document_metadata(self):
+        document = Document(
+            page_content="abcdef",
+            metadata={"page": 39, "source": "data/llama_md/main_pdf/039.md"},
+        )
+        chunker = FixedSizeChunker(chunk_size=3, overlap=1)
+
+        chunks = chunker.chunk(document)
+
+        self.assertEqual([chunk.chunk_id for chunk in chunks], [0, 1, 2])
+        self.assertEqual([chunk.text for chunk in chunks], ["abc", "cde", "ef"])
+        self.assertEqual([chunk.chunk_type for chunk in chunks], ["flat", "flat", "flat"])
+        self.assertEqual([chunk.page for chunk in chunks], [39, 39, 39])
+        self.assertEqual(
+            [chunk.source for chunk in chunks],
+            ["data/llama_md/main_pdf/039.md"] * 3,
+        )
+        self.assertTrue(all(chunk.diagram_id is None for chunk in chunks))
+        self.assertTrue(all(chunk.parent_id is None for chunk in chunks))
+
+    def test_fixed_size_chunker_assigns_sequential_ids_across_documents(self):
+        documents = [
+            Document(page_content="abcd", metadata={"page": 1, "source": "a.md"}),
+            Document(page_content="wxyz", metadata={"page": 2, "source": "b.md"}),
+        ]
+        chunker = FixedSizeChunker(chunk_size=2, overlap=0)
+
+        chunks = chunker.chunk(documents)
+
+        self.assertEqual([chunk.chunk_id for chunk in chunks], [0, 1, 2, 3])
+        self.assertEqual([chunk.text for chunk in chunks], ["ab", "cd", "wx", "yz"])
+        self.assertEqual([chunk.page for chunk in chunks], [1, 1, 2, 2])
+
+    def test_recursive_character_chunker_splits_by_larger_separators_first(self):
+        document = Document(
+            page_content="첫 문단입니다.\n\n둘째 문단입니다.\n셋째 줄입니다.",
+            metadata={"page": "7", "source": "llama.md"},
+        )
+        chunker = RecursiveCharacterChunker(chunk_size=16, overlap=0)
+
+        chunks = chunker.chunk(document)
+
+        self.assertEqual([chunk.chunk_id for chunk in chunks], list(range(len(chunks))))
+        self.assertEqual([chunk.chunk_type for chunk in chunks], ["flat"] * len(chunks))
+        self.assertEqual([chunk.page for chunk in chunks], [7] * len(chunks))
+        self.assertEqual([chunk.source for chunk in chunks], ["llama.md"] * len(chunks))
+        self.assertIn("첫 문단입니다.", [chunk.text for chunk in chunks])
+        self.assertIn("둘째 문단입니다.", [chunk.text for chunk in chunks])
+        self.assertIn("셋째 줄입니다.", [chunk.text for chunk in chunks])
+
+    def test_recursive_character_chunker_assigns_sequential_ids_across_documents(self):
+        documents = [
+            Document(page_content="alpha beta", metadata={"page": 1, "source": "a.md"}),
+            Document(page_content="gamma delta", metadata={"page": 2, "source": "b.md"}),
+        ]
+        chunker = RecursiveCharacterChunker(chunk_size=5, overlap=0, separators=[" "])
+
+        chunks = chunker.chunk(documents)
+
+        self.assertEqual([chunk.chunk_id for chunk in chunks], list(range(len(chunks))))
+        self.assertEqual([chunk.page for chunk in chunks], [1, 1, 2, 2])
+        self.assertEqual([chunk.source for chunk in chunks], ["a.md", "a.md", "b.md", "b.md"])
+
+    def test_markdown_structure_chunker_builds_text_parent_and_child_chunks(self):
+        document = Document(
+            page_content=(
+                "# 제1장\n\n"
+                "## 차1-1 교차로 직진 대 직진\n\n"
+                "사례 개요입니다.\n\n"
+                "#### 사고 상황\n"
+                "A와 B가 충돌했다.\n\n"
+                "#### 기본 과실비율 해설\n"
+                "기본 비율 설명입니다.\n"
+            ),
+            metadata={"page": "175", "source": "data/llama_md/main_pdf/175.md"},
+        )
+        chunker = MarkdownStructureChunker()
+
+        chunks = chunker.chunk(document)
+
+        self.assertEqual([chunk.chunk_id for chunk in chunks], [0, 1, 2])
+        self.assertEqual([chunk.chunk_type for chunk in chunks], ["parent", "child", "child"])
+        self.assertEqual([chunk.diagram_id for chunk in chunks], ["차1-1", "차1-1", "차1-1"])
+        self.assertEqual([chunk.parent_id for chunk in chunks], [None, 0, 0])
+        self.assertEqual([chunk.page for chunk in chunks], [175, 175, 175])
+        self.assertEqual(
+            [chunk.source for chunk in chunks],
+            ["data/llama_md/main_pdf/175.md"] * 3,
+        )
+        self.assertIn("## 차1-1 교차로 직진 대 직진", chunks[0].text)
+        self.assertIn("#### 사고 상황", chunks[1].text)
+        self.assertIn("#### 기본 과실비율 해설", chunks[2].text)
+
+    def test_markdown_structure_chunker_starts_new_parent_for_next_case_heading(self):
+        document = Document(
+            page_content=(
+                "## 보1 횡단보도 사고\n\n"
+                "첫 사례입니다.\n\n"
+                "### 사고 상황\n"
+                "첫 사고 상황입니다.\n\n"
+                "## 보2 다른 횡단보도 사고\n\n"
+                "둘째 사례입니다.\n\n"
+                "### 사고 상황\n"
+                "둘째 사고 상황입니다.\n"
+            ),
+            metadata={"page": 39, "source": "039.md"},
+        )
+        chunker = MarkdownStructureChunker()
+
+        chunks = chunker.chunk(document)
+
+        self.assertEqual([chunk.chunk_id for chunk in chunks], [0, 1, 2, 3])
+        self.assertEqual([chunk.chunk_type for chunk in chunks], ["parent", "child", "parent", "child"])
+        self.assertEqual([chunk.diagram_id for chunk in chunks], ["보1", "보1", "보2", "보2"])
+        self.assertEqual([chunk.parent_id for chunk in chunks], [None, 0, None, 2])
+
+    def test_markdown_structure_chunker_continues_parent_across_pages(self):
+        documents = [
+            Document(
+                page_content="## 차2-5 신호 교차로 사고\n\n첫 페이지 사례 개요입니다.\n",
+                metadata={"page": 175, "source": "175.md"},
+            ),
+            Document(
+                page_content=(
+                    "#### 기본 과실비율 해설\n"
+                    "다음 페이지에 이어진 해설입니다.\n\n"
+                    "#### 수정요소 해설\n"
+                    "추가 해설입니다.\n"
+                ),
+                metadata={"page": 176, "source": "176.md"},
+            ),
+        ]
+        chunker = MarkdownStructureChunker()
+
+        chunks = chunker.chunk(documents)
+
+        self.assertEqual([chunk.chunk_id for chunk in chunks], [0, 1, 2])
+        self.assertEqual([chunk.chunk_type for chunk in chunks], ["parent", "child", "child"])
+        self.assertEqual([chunk.diagram_id for chunk in chunks], ["차2-5", "차2-5", "차2-5"])
+        self.assertEqual([chunk.parent_id for chunk in chunks], [None, 0, 0])
+        self.assertEqual([chunk.page for chunk in chunks], [175, 176, 176])
+        self.assertEqual([chunk.source for chunk in chunks], ["175.md", "176.md", "176.md"])
 
     def test_retrieve_uses_vectorstore_strategy_by_default(self):
         fake_retriever = MagicMock()
@@ -425,6 +637,125 @@ class BasicRagTest(unittest.TestCase):
 
         vectorstore_service.get_vectorstore.cache_clear()
 
+    def test_vectorstore_service_applies_case_boundary_chunker_strategy(self):
+        from rag.service.vectorstore import vectorstore_service
+
+        vectorstore_service.get_vectorstore.cache_clear()
+        loaded_documents = [
+            Document(
+                page_content=(
+                    "## 차43-7 안전지대 통과 직진 대 선행 진로변경\n"
+                    "|     | 기본 과실비율 | 기본 과실비율 | 기본 과실비율 | 기본 과실비율 | "
+                    "(가) A100<br/>(나) A70 | B0<br/>B30 | B0<br/>B30 |\n"
+                    "| --- | --- | --- | --- | --- | --- | --- | --- |\n"
+                    "| (가) | 과실비율 조정예시 | A 현저한 과실 | | +10 | | | |\n"
+                    "|     | | B 중대한 과실 | | | +20 | | |\n"
+                    "![page_389_table_1](../../upstage_output/main_pdf/final/img/page_389_table_1.png)\n"
+                ),
+                metadata={"page": 389, "source": "389.md"},
+            )
+        ]
+
+        with (
+            patch("rag.service.vectorstore.vectorstore_service.get_vectorstore_dir", return_value=Path("vectorstore/llamaparser/case-boundary/bge")) as dir_mock,
+            patch("rag.service.vectorstore.vectorstore_service.vectorstore_exists", return_value=False),
+            patch("rag.service.vectorstore.vectorstore_service.load_pdf", return_value=loaded_documents) as load_mock,
+            patch("rag.service.vectorstore.vectorstore_service.enrich_documents_with_llm_metadata") as enrich_mock,
+            patch("rag.service.vectorstore.vectorstore_service.split_documents") as split_mock,
+            patch("rag.service.vectorstore.vectorstore_service.build_vectorstore", return_value="vectorstore") as build_mock,
+        ):
+            result = vectorstore_service.get_vectorstore(
+                "llamaparser",
+                "bge",
+                chunker_strategy="case-boundary",
+            )
+
+        self.assertEqual(result, "vectorstore")
+        dir_mock.assert_called_once_with("llamaparser", "bge", chunker_strategy="case-boundary")
+        load_mock.assert_called_once()
+        self.assertEqual(load_mock.call_args.kwargs["strategy"], "llamaparser")
+        enrich_mock.assert_not_called()
+        split_mock.assert_not_called()
+        build_mock.assert_called_once()
+        indexed_documents = build_mock.call_args.args[0]
+        self.assertTrue(
+            any(
+                document.metadata.get("chunk_type") == "child"
+                and document.metadata.get("diagram_id") == "차43-7(가)"
+                and "| 대상 | 수정요소 | A 조정 | B 조정 |" in document.page_content
+                for document in indexed_documents
+            )
+        )
+
+        vectorstore_service.get_vectorstore.cache_clear()
+
+    def test_vectorstore_service_applies_semantic_chunker_strategy(self):
+        from rag.service.vectorstore import vectorstore_service
+
+        class FakeEmbeddings:
+            def embed_documents(self, texts):
+                return [[1.0, 0.0], [0.99, 0.01], [0.0, 1.0]][: len(texts)]
+
+        vectorstore_service.get_vectorstore.cache_clear()
+        loaded_documents = [
+            Document(
+                page_content=(
+                    "교차로에서 차량 A가 직진했고 신호와 차로를 유지한 상태였습니다. "
+                    "차량 B도 같은 교차로에 진입하면서 같은 사고 상황 설명이 이어집니다."
+                ),
+                metadata={"page": 10, "source": "010.md"},
+            ),
+            Document(
+                page_content="주차장 관리 규정은 별도입니다.",
+                metadata={"page": 11, "source": "011.md"},
+            ),
+        ]
+
+        with (
+            patch("rag.service.vectorstore.vectorstore_service.get_vectorstore_dir", return_value=Path("vectorstore/llamaparser/semantic/bge")) as dir_mock,
+            patch("rag.service.vectorstore.vectorstore_service.vectorstore_exists", return_value=False),
+            patch("rag.service.vectorstore.vectorstore_service.load_pdf", return_value=loaded_documents),
+            patch("rag.service.vectorstore.vectorstore_service.create_embeddings", return_value=FakeEmbeddings()) as embeddings_mock,
+            patch("rag.service.vectorstore.vectorstore_service.enrich_documents_with_llm_metadata") as enrich_mock,
+            patch("rag.service.vectorstore.vectorstore_service.split_documents") as split_mock,
+            patch("rag.service.vectorstore.vectorstore_service.build_vectorstore", return_value="vectorstore") as build_mock,
+        ):
+            result = vectorstore_service.get_vectorstore(
+                "llamaparser",
+                "bge",
+                chunker_strategy="semantic",
+            )
+
+        self.assertEqual(result, "vectorstore")
+        dir_mock.assert_called_once_with("llamaparser", "bge", chunker_strategy="semantic")
+        embeddings_mock.assert_called_once_with("bge")
+        enrich_mock.assert_not_called()
+        split_mock.assert_not_called()
+        indexed_documents = build_mock.call_args.args[0]
+        self.assertEqual([document.metadata["chunk_type"] for document in indexed_documents], ["flat", "flat"])
+        self.assertIn("차량 B도 같은 교차로에 진입하면서", indexed_documents[0].page_content)
+        self.assertEqual(indexed_documents[0].metadata["page"], 10)
+        self.assertEqual(indexed_documents[1].metadata["page"], 11)
+
+        vectorstore_service.get_vectorstore.cache_clear()
+
+    def test_vectorstore_service_rejects_case_boundary_for_non_llamaparser_loader(self):
+        from rag.service.vectorstore import vectorstore_service
+
+        vectorstore_service.get_vectorstore.cache_clear()
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "case-boundary chunker requires llamaparser loader",
+        ):
+            vectorstore_service.get_vectorstore(
+                "pdfplumber",
+                "bge",
+                chunker_strategy="case-boundary",
+            )
+
+        vectorstore_service.get_vectorstore.cache_clear()
+
     def test_format_context_preview_returns_empty_without_contexts(self):
         self.assertEqual(format_context_preview([]), "")
 
@@ -697,6 +1028,37 @@ class BasicRagTest(unittest.TestCase):
             embedding_provider="google",
         )
 
+    def test_answer_question_passes_chunker_strategy_to_analysis(self):
+        metadata = UserSearchMetadata(party_type="자동차", location="교차로 사고")
+        with (
+            patch(
+                "rag.service.conversation.app_service.evaluate_input_sufficiency",
+                return_value=IntakeDecision(
+                    is_sufficient=True,
+                    normalized_description="정규화된 설명",
+                    search_metadata=metadata,
+                ),
+            ),
+            patch("rag.service.conversation.app_service.analyze_question", return_value=("answer", ["context"])) as analyze_mock,
+        ):
+            answer, contexts = answer_question(
+                "원문 입력",
+                loader_strategy="llamaparser",
+                embedding_provider="google",
+                chunker_strategy="semantic",
+            )
+
+        self.assertEqual(answer, "answer")
+        self.assertEqual(contexts, ["context"])
+        analyze_mock.assert_called_once_with(
+            "정규화된 설명",
+            search_metadata=metadata,
+            pipeline_config=None,
+            loader_strategy="llamaparser",
+            embedding_provider="google",
+            chunker_strategy="semantic",
+        )
+
     def test_answer_question_without_intake_bypasses_intake(self):
         with (
             patch("rag.service.conversation.app_service.evaluate_input_sufficiency") as intake_mock,
@@ -763,7 +1125,32 @@ class BasicRagTest(unittest.TestCase):
 
         self.assertEqual(answer, "answer")
         self.assertEqual(contexts, ["context"])
-        components_mock.assert_called_once_with("llamaparser", "google")
+        components_mock.assert_called_once_with("llamaparser", "google", "fixed")
+
+    def test_analyze_question_uses_chunker_strategy_for_retrieval_components(self):
+        from rag.service.analysis.analysis_service import analyze_question
+
+        fake_document = Document(page_content="context")
+        fake_llm = MagicMock()
+        fake_llm.invoke.return_value = MagicMock(
+            content='{"fault_ratio_a":70,"fault_ratio_b":30,"response":"answer"}'
+        )
+
+        with (
+            patch("rag.service.analysis.analysis_service.get_retrieval_components", return_value="components") as components_mock,
+            patch("rag.service.analysis.analysis_service.run_retrieval_pipeline", return_value=[fake_document]),
+            patch("rag.service.analysis.analysis_service.ChatOpenAI", return_value=fake_llm),
+        ):
+            answer, contexts = analyze_question(
+                "query",
+                loader_strategy="llamaparser",
+                embedding_provider="google",
+                chunker_strategy="semantic",
+            )
+
+        self.assertEqual(answer, "answer")
+        self.assertEqual(contexts, ["context"])
+        components_mock.assert_called_once_with("llamaparser", "google", "semantic")
 
     def test_analyze_question_passes_trace_context_to_langchain_runs(self):
         from rag.service.analysis.analysis_service import analyze_question

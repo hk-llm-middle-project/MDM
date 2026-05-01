@@ -1,0 +1,42 @@
+{
+  "total_chunks": 1681,
+  "chunk_type_distribution": {
+    "preface": 17,
+    "general": 88,
+    "parent": 225,
+    "child": 1351
+  },
+  "diagram_id_count": 225,
+  "parent_count": 225,
+  "child_count": 1351,
+  "child_image_path_count": 320,
+  "broken_parent_refs": [],
+  "invalid_locations": [],
+  "invalid_party_types": [],
+  "known_checks": {
+    "bo1_does_not_include_application_scope": true,
+    "geo2_1_exists": true,
+    "geo2_2_exists": true,
+    "geo2_1_not_under_geo2_2": true,
+    "geo5_1_exists": true,
+    "geo5_2_exists": true,
+    "cha43_7_ga_exists": true,
+    "cha43_7_na_exists": true,
+    "child_parent_refs_valid": true,
+    "locations_valid": true,
+    "party_types_valid": true
+  },
+  "warnings": [
+    "table without diagram_id at raw index 43, page 11",
+    "table without diagram_id at raw index 149, page 23",
+    "table without diagram_id at raw index 224, page 29",
+    "table without diagram_id at raw index 1413, page 133",
+    "table without diagram_id at raw index 1417, page 134",
+    "table without diagram_id at raw index 1509, page 141",
+    "table without diagram_id at raw index 1520, page 142",
+    "table without diagram_id at raw index 1562, page 145",
+    "table without diagram_id at raw index 1566, page 146",
+    "table without diagram_id at raw index 1570, page 147"
+  ],
+  "chunk_id_unique": true
+}
