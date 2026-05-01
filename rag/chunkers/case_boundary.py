@@ -169,24 +169,42 @@ class CaseBoundaryChunker(BaseChunker):
             if block.kind == "heading" and self._is_top_level_heading(block.text):
                 # Unconsumed category context never reached a table — recover its
                 # content back into idle so it isn't silently dropped.
-                if pending_context_unconsumed and pending_context_blocks:
-                    idle_buffer.extend(pending_context_blocks)
-                    pending_context_blocks = []
-                    pending_case_ids = []
-                    pending_context_unconsumed = False
+                pending_context_blocks, pending_case_ids, pending_context_unconsumed = (
+                    self._restore_unconsumed_context_to_idle(
+                        idle_buffer,
+                        pending_context_blocks,
+                        pending_case_ids,
+                        pending_context_unconsumed,
+                    )
+                )
                 self._finalize_idle(idle_buffer, chunks)
                 idle_buffer = [block]
                 continue
             idle_buffer.append(block)
 
-        if pending_context_unconsumed and pending_context_blocks:
-            idle_buffer.extend(pending_context_blocks)
-            pending_context_blocks = []
-            pending_case_ids = []
-            pending_context_unconsumed = False
+        pending_context_blocks, pending_case_ids, pending_context_unconsumed = (
+            self._restore_unconsumed_context_to_idle(
+                idle_buffer,
+                pending_context_blocks,
+                pending_case_ids,
+                pending_context_unconsumed,
+            )
+        )
         self._finalize_idle(idle_buffer, chunks)
         self._finalize_case(active, chunks)
         return chunks
+
+    def _restore_unconsumed_context_to_idle(
+        self,
+        idle_buffer: list[_Block],
+        pending_context_blocks: list[_Block],
+        pending_case_ids: list[str],
+        pending_context_unconsumed: bool,
+    ) -> tuple[list[_Block], list[str], bool]:
+        if not pending_context_unconsumed or not pending_context_blocks:
+            return pending_context_blocks, pending_case_ids, pending_context_unconsumed
+        idle_buffer.extend(pending_context_blocks)
+        return [], [], False
 
     def _text_with_pending_context(
         self, pending_context_blocks: list[_Block], text: str
