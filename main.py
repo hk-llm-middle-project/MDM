@@ -28,7 +28,7 @@ EMBEDDING_PROVIDER_OPTIONS = tuple(EMBEDDING_STRATEGIES)
 RETRIEVER_STRATEGY_OPTIONS = tuple(
     strategy
     for strategy in RETRIEVAL_STRATEGIES
-    if strategy not in {"selfquery", "vectorstore"}
+    if strategy != "vectorstore"
 )
 USER_ID = "local"
 DEFAULT_ENSEMBLE_BM25_WEIGHT = 0.5

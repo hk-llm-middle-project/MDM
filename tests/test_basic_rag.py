@@ -464,8 +464,8 @@ class BasicRagTest(unittest.TestCase):
             strategy_config=None,
         )
 
-    def test_selfquery_strategy_placeholder_raises(self):
-        with self.assertRaises(NotImplementedError):
+    def test_unknown_retrieval_strategy_raises(self):
+        with self.assertRaises(ValueError):
             retrieve(build_retrieval_components(MagicMock()), "query", strategy="selfquery")
 
     def test_build_retrieval_components_reuses_bm25_retriever(self):
