@@ -686,6 +686,10 @@ class BasicRagTest(unittest.TestCase):
                 return_value=enriched_documents,
             ) as enrich_mock,
             patch("rag.service.vectorstore.vectorstore_service.FixedSizeChunker") as fixed_chunker_mock,
+            patch(
+                "rag.service.vectorstore.vectorstore_service.save_chunk_cache",
+                side_effect=lambda docs, cache_dir, source_path=None: docs,
+            ),
             patch("rag.service.vectorstore.vectorstore_service.build_vectorstore", return_value="vectorstore") as build_mock,
         ):
             fixed_chunker_mock.return_value.chunk.return_value = fixed_chunks
@@ -737,6 +741,10 @@ class BasicRagTest(unittest.TestCase):
                 "rag.service.vectorstore.vectorstore_service.enrich_documents_with_page_metadata",
                 side_effect=lambda docs, cache_path=None: docs,
             ) as enrich_mock,
+            patch(
+                "rag.service.vectorstore.vectorstore_service.save_chunk_cache",
+                side_effect=lambda docs, cache_dir, source_path=None: docs,
+            ),
             patch("rag.service.vectorstore.vectorstore_service.build_vectorstore", return_value="vectorstore"),
         ):
             fixed_chunker_mock.return_value.chunk.return_value = fixed_chunks
@@ -926,6 +934,10 @@ class BasicRagTest(unittest.TestCase):
                 side_effect=lambda docs, cache_path=None: docs,
             ) as enrich_mock,
             patch("rag.service.vectorstore.vectorstore_service.FixedSizeChunker") as fixed_chunker_mock,
+            patch(
+                "rag.service.vectorstore.vectorstore_service.save_chunk_cache",
+                side_effect=lambda docs, cache_dir, source_path=None: docs,
+            ),
             patch("rag.service.vectorstore.vectorstore_service.build_vectorstore", return_value="vectorstore") as build_mock,
         ):
             result = vectorstore_service.get_vectorstore(
@@ -986,6 +998,10 @@ class BasicRagTest(unittest.TestCase):
                 side_effect=lambda docs, cache_path=None: docs,
             ) as enrich_mock,
             patch("rag.service.vectorstore.vectorstore_service.FixedSizeChunker") as fixed_chunker_mock,
+            patch(
+                "rag.service.vectorstore.vectorstore_service.save_chunk_cache",
+                side_effect=lambda docs, cache_dir, source_path=None: docs,
+            ),
             patch("rag.service.vectorstore.vectorstore_service.build_vectorstore", return_value="vectorstore") as build_mock,
         ):
             result = vectorstore_service.get_vectorstore(
