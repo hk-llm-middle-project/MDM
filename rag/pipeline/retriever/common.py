@@ -24,6 +24,35 @@ def kiwi_tokenize(text: str) -> list[str]:
     return [token.form for token in get_kiwi().tokenize(text)]
 
 
+def metadata_matches_filter(metadata: dict[str, Any], filters: dict[str, object] | None) -> bool:
+    """현재 사용하는 Chroma equality/$and metadata filter를 로컬 문서에도 적용합니다."""
+    if not filters:
+        return True
+
+    and_conditions = filters.get("$and")
+    if isinstance(and_conditions, list):
+        return all(
+            isinstance(condition, dict) and metadata_matches_filter(metadata, condition)
+            for condition in and_conditions
+        )
+
+    return all(metadata.get(key) == value for key, value in filters.items())
+
+
+def filter_documents_by_metadata(
+    documents: list[Document],
+    filters: dict[str, object] | None,
+) -> list[Document]:
+    """문서 목록에 metadata filter를 적용합니다."""
+    if not filters:
+        return documents
+    return [
+        document
+        for document in documents
+        if metadata_matches_filter(document.metadata, filters)
+    ]
+
+
 def get_vectorstore_documents(vectorstore: Any) -> list[Document]:
     """벡터스토어에 저장된 문서와 메타데이터를 추출합니다."""
     if not hasattr(vectorstore, "get"):

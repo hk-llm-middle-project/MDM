@@ -8,6 +8,7 @@ from langchain.retrievers import EnsembleRetriever
 from langchain_core.documents import Document
 
 from rag.pipeline.retriever.components import RetrievalComponents, get_or_create_bm25_retriever
+from rag.pipeline.retriever.common import filter_documents_by_metadata
 from rag.service.tracing import TraceContext
 
 
@@ -31,11 +32,19 @@ def retrieve_with_ensemble(
 ) -> list[Document]:
     """Kiwi BM25와 dense 벡터 검색 결과를 결합합니다."""
     config = strategy_config or EnsembleRetrieverConfig()
-    source_documents = components.get_source_documents()
+    source_documents = filter_documents_by_metadata(
+        components.get_source_documents(),
+        filters,
+    )
     if not source_documents:
         return []
 
-    bm25_retriever = get_or_create_bm25_retriever(components)
+    bm25_retriever = get_or_create_bm25_retriever(
+        RetrievalComponents(
+            vectorstore=components.vectorstore,
+            source_documents=source_documents,
+        )
+    )
     bm25_retriever.k = config.bm25_k or k
 
     dense_search_kwargs: dict[str, object] = {"k": config.dense_k or k}

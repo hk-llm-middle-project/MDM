@@ -20,6 +20,7 @@ from rag.embeddings.strategies.bge import BGEM3Embeddings
 from rag.embeddings.strategies.google import GoogleGeminiEmbeddings
 from rag.indexer import build_vectorstore, vectorstore_exists
 from rag.pipeline.retriever import build_retrieval_components
+from rag.pipeline.retriever.common import filter_documents_by_metadata, metadata_matches_filter
 from rag.pipeline.retrieval import RetrievalPipelineConfig, run_retrieval_pipeline
 from rag.pipeline.reranker import (
     RERANKER_STRATEGIES,
@@ -330,6 +331,82 @@ class BasicRagTest(unittest.TestCase):
     def test_retrieve_raises_for_unknown_strategy(self):
         with self.assertRaises(ValueError):
             retrieve(build_retrieval_components(MagicMock()), "query", strategy="unknown")
+
+    def test_metadata_matches_filter_supports_single_condition_and_and(self):
+        metadata = {"party_type": "자동차", "location": "교차로 사고"}
+
+        self.assertTrue(metadata_matches_filter(metadata, {"party_type": "자동차"}))
+        self.assertTrue(
+            metadata_matches_filter(
+                metadata,
+                {"$and": [{"party_type": "자동차"}, {"location": "교차로 사고"}]},
+            )
+        )
+        self.assertFalse(
+            metadata_matches_filter(
+                metadata,
+                {"$and": [{"party_type": "보행자"}, {"location": "교차로 사고"}]},
+            )
+        )
+
+    def test_filter_documents_by_metadata_applies_and_filter(self):
+        documents = [
+            Document(page_content="car intersection", metadata={"party_type": "자동차", "location": "교차로 사고"}),
+            Document(page_content="pedestrian", metadata={"party_type": "보행자", "location": "교차로 사고"}),
+        ]
+
+        results = filter_documents_by_metadata(
+            documents,
+            {"$and": [{"party_type": "자동차"}, {"location": "교차로 사고"}]},
+        )
+
+        self.assertEqual([document.page_content for document in results], ["car intersection"])
+
+    def test_ensemble_filters_bm25_source_documents(self):
+        from rag.pipeline.retriever.strategies.ensemble import retrieve_with_ensemble
+
+        car_document = Document(
+            page_content="자동차 교차로",
+            metadata={"party_type": "자동차", "location": "교차로 사고"},
+        )
+        pedestrian_document = Document(
+            page_content="보행자 교차로",
+            metadata={"party_type": "보행자", "location": "교차로 사고"},
+        )
+        components = build_retrieval_components(
+            MagicMock(),
+            source_documents=[car_document, pedestrian_document],
+        )
+        fake_bm25 = MagicMock()
+        fake_dense = MagicMock()
+        components.vectorstore.as_retriever.return_value = fake_dense
+
+        class FakeEnsemble:
+            def __init__(self, retrievers, weights):
+                self.retrievers = retrievers
+                self.weights = weights
+
+            def invoke(self, query):
+                del query
+                return [car_document]
+
+        with (
+            patch(
+                "rag.pipeline.retriever.strategies.ensemble.get_or_create_bm25_retriever",
+                return_value=fake_bm25,
+            ) as bm25_mock,
+            patch("rag.pipeline.retriever.strategies.ensemble.EnsembleRetriever", FakeEnsemble),
+        ):
+            results = retrieve_with_ensemble(
+                components,
+                "query",
+                k=3,
+                filters={"$and": [{"party_type": "자동차"}, {"location": "교차로 사고"}]},
+            )
+
+        self.assertEqual(results, [car_document])
+        filtered_components = bm25_mock.call_args.args[0]
+        self.assertEqual(filtered_components.get_source_documents(), [car_document])
 
     def test_rerank_with_none_preserves_order(self):
         documents = [
