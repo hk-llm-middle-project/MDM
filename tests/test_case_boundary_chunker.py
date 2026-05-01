@@ -3,6 +3,33 @@ import unittest
 from langchain_core.documents import Document
 
 from rag.chunkers import CaseBoundaryChunker
+from rag.chunkers.case_boundary import _Block
+
+
+class CaseBoundaryChunkerPendingContextTest(unittest.TestCase):
+    def test_restores_unconsumed_context_to_idle_and_resets_pending_state(self):
+        chunker = CaseBoundaryChunker(mode="B")
+        idle_buffer: list[_Block] = []
+        pending_block = _Block(
+            kind="heading",
+            text="## (1) 신뢰의 원칙 - 예견가능성",
+            page=17,
+            source="017.md",
+        )
+
+        pending_blocks, pending_case_ids, pending_context_unconsumed = (
+            chunker._restore_unconsumed_context_to_idle(
+                idle_buffer,
+                [pending_block],
+                ["차1"],
+                True,
+            )
+        )
+
+        self.assertEqual(idle_buffer, [pending_block])
+        self.assertEqual(pending_blocks, [])
+        self.assertEqual(pending_case_ids, [])
+        self.assertFalse(pending_context_unconsumed)
 
 
 class CaseBoundaryChunkerBasicCaseTest(unittest.TestCase):
