@@ -27,11 +27,11 @@ from ragas.embeddings import LangchainEmbeddingsWrapper
 from ragas.llms import LangchainLLMWrapper
 from ragas.metrics import answer_relevancy, context_precision, context_recall, faithfulness
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from config import BASE_DIR, EMBEDDING_MODEL, LLM_MODEL
+from config import BASE_DIR, LLM_MODEL, OPENAI_EMBEDDING_MODEL
 from rag.service.conversation.app_service import answer_question_without_intake
 
 
@@ -69,7 +69,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--embedding-model",
-        default=EMBEDDING_MODEL,
+        default=OPENAI_EMBEDDING_MODEL,
         help="answer_relevancy 평가에 사용할 임베딩 모델입니다.",
     )
     parser.add_argument(
