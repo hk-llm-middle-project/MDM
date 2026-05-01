@@ -6,10 +6,12 @@ from langchain_core.documents import Document
 
 from rag.pipeline.reranker.strategies import (
     CohereRerankerConfig,
+    CrossEncoderRerankerConfig,
     FlashrankRerankerConfig,
     LLMScoreRerankerConfig,
     NoOpRerankerConfig,
     rerank_with_cohere,
+    rerank_with_cross_encoder,
     rerank_with_flashrank,
     rerank_with_llm_score,
     rerank_with_none,
@@ -21,6 +23,7 @@ RERANKER_STRATEGIES = {
     "none": rerank_with_none,
     "flashrank": rerank_with_flashrank,
     "cohere": rerank_with_cohere,
+    "cross-encoder": rerank_with_cross_encoder,
     "llm-score": rerank_with_llm_score,
 }
 
@@ -28,6 +31,7 @@ RerankerConfig = (
     NoOpRerankerConfig
     | FlashrankRerankerConfig
     | CohereRerankerConfig
+    | CrossEncoderRerankerConfig
     | LLMScoreRerankerConfig
 )
 

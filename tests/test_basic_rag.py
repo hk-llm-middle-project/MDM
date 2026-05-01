@@ -25,6 +25,7 @@ from rag.pipeline.retrieval import RetrievalPipelineConfig, run_retrieval_pipeli
 from rag.pipeline.reranker import (
     RERANKER_STRATEGIES,
     CohereRerankerConfig,
+    CrossEncoderRerankerConfig,
     FlashrankRerankerConfig,
     LLMScoreRerankerConfig,
     rerank,
@@ -442,6 +443,7 @@ class BasicRagTest(unittest.TestCase):
 
     def test_reranker_registry_includes_new_strategies(self):
         self.assertIn("cohere", RERANKER_STRATEGIES)
+        self.assertIn("cross-encoder", RERANKER_STRATEGIES)
         self.assertIn("llm-score", RERANKER_STRATEGIES)
 
     def test_pipeline_accepts_cohere_reranker_config(self):
@@ -452,6 +454,60 @@ class BasicRagTest(unittest.TestCase):
 
         self.assertEqual(pipeline_config.reranker_strategy, "cohere")
         self.assertIsInstance(pipeline_config.reranker_config, CohereRerankerConfig)
+
+    def test_pipeline_accepts_cross_encoder_reranker_config(self):
+        pipeline_config = RetrievalPipelineConfig(
+            reranker_strategy="cross-encoder",
+            reranker_config=CrossEncoderRerankerConfig(model_name="BAAI/bge-reranker-v2-m3"),
+        )
+
+        self.assertEqual(pipeline_config.reranker_strategy, "cross-encoder")
+        self.assertIsInstance(pipeline_config.reranker_config, CrossEncoderRerankerConfig)
+
+    def test_cross_encoder_reranker_uses_injected_model_without_loading_cache(self):
+        from rag.pipeline.reranker.strategies.cross_encoder import rerank_with_cross_encoder
+
+        documents = [
+            Document(page_content="low", metadata={"id": "1"}),
+            Document(page_content="high", metadata={"id": "2"}),
+        ]
+        fake_model = object()
+
+        class FakeCrossEncoderReranker:
+            def __init__(self, model, top_n):
+                self.model = model
+                self.top_n = top_n
+
+            def compress_documents(self, documents, query):
+                del query
+                return [
+                    Document(
+                        page_content=documents[1].page_content,
+                        metadata={**documents[1].metadata, "relevance_score": 0.9},
+                    ),
+                    Document(
+                        page_content=documents[0].page_content,
+                        metadata={**documents[0].metadata, "relevance_score": 0.1},
+                    ),
+                ]
+
+        with (
+            patch("rag.pipeline.reranker.strategies.cross_encoder.get_cross_encoder_model") as loader_mock,
+            patch(
+                "langchain.retrievers.document_compressors.CrossEncoderReranker",
+                FakeCrossEncoderReranker,
+            ),
+        ):
+            results = rerank_with_cross_encoder(
+                "query",
+                documents,
+                k=1,
+                strategy_config=CrossEncoderRerankerConfig(model=fake_model),
+            )
+
+        loader_mock.assert_not_called()
+        self.assertEqual([document.page_content for document in results], ["high"])
+        self.assertEqual(results[0].metadata["rerank_score"], 0.9)
 
     def test_pipeline_accepts_llm_score_reranker_config(self):
         pipeline_config = RetrievalPipelineConfig(

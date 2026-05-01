@@ -11,6 +11,7 @@ from config import (
 )
 from rag.embeddings import EMBEDDING_STRATEGIES
 from rag.pipeline.retrieval import RetrievalPipelineConfig
+from rag.pipeline.reranker import CrossEncoderRerankerConfig, FlashrankRerankerConfig
 from rag.pipeline.retriever import EnsembleRetrieverConfig, RETRIEVAL_STRATEGIES
 from rag.service.analysis.answer_schema import RetrievedContext
 from rag.service.conversation.app_service import answer_question_with_intake
@@ -32,8 +33,12 @@ RETRIEVER_STRATEGY_OPTIONS = tuple(
     for strategy in RETRIEVAL_STRATEGIES
     if strategy not in {"selfquery", "vectorstore"}
 )
+RERANKER_STRATEGY_OPTIONS = ("none", "cross-encoder", "flashrank")
 USER_ID = "local"
 DEFAULT_ENSEMBLE_BM25_WEIGHT = 0.5
+DEFAULT_RERANKER_STRATEGY = "none"
+DEFAULT_RERANKER_CANDIDATE_K = 10
+DEFAULT_RERANKER_FINAL_K = 3
 PROJECT_ROOT = Path(__file__).resolve().parent
 
 
@@ -72,6 +77,8 @@ def init_state(store: ConversationStore) -> None:
         )
     if "retriever_strategy" not in st.session_state:
         st.session_state.retriever_strategy = "similarity"
+    if "reranker_strategy" not in st.session_state:
+        st.session_state.reranker_strategy = DEFAULT_RERANKER_STRATEGY
     if "ensemble_bm25_weight" not in st.session_state:
         st.session_state.ensemble_bm25_weight = DEFAULT_ENSEMBLE_BM25_WEIGHT
     st.session_state.active_session = ensure_active_session(store)
@@ -91,7 +98,7 @@ def normalize_chunker_strategy(chunker_strategy: str, loader_strategy: str) -> s
     return options[0]
 
 
-def render_sidebar(store: ConversationStore) -> tuple[str, str, str, str, float]:
+def render_sidebar(store: ConversationStore) -> tuple[str, str, str, str, float, str]:
     st.sidebar.title("세션 목록")
     if st.sidebar.button("새 세션", use_container_width=True):
         session_count = len(store.list_sessions(USER_ID))
@@ -154,6 +161,19 @@ def render_sidebar(store: ConversationStore) -> tuple[str, str, str, str, float]
         RETRIEVER_STRATEGY_OPTIONS,
         index=RETRIEVER_STRATEGY_OPTIONS.index(current_retriever_strategy),
     )
+
+    current_reranker_strategy = st.session_state.get(
+        "reranker_strategy",
+        DEFAULT_RERANKER_STRATEGY,
+    )
+    if current_reranker_strategy not in RERANKER_STRATEGY_OPTIONS:
+        current_reranker_strategy = DEFAULT_RERANKER_STRATEGY
+    st.session_state.reranker_strategy = st.sidebar.selectbox(
+        "리랭커",
+        RERANKER_STRATEGY_OPTIONS,
+        index=RERANKER_STRATEGY_OPTIONS.index(current_reranker_strategy),
+    )
+
     current_ensemble_bm25_weight = float(
         st.session_state.get("ensemble_bm25_weight", DEFAULT_ENSEMBLE_BM25_WEIGHT)
     )
@@ -193,6 +213,7 @@ def render_sidebar(store: ConversationStore) -> tuple[str, str, str, str, float]
         st.session_state.embedding_provider,
         st.session_state.retriever_strategy,
         st.session_state.ensemble_bm25_weight,
+        st.session_state.reranker_strategy,
     )
 
 
@@ -264,16 +285,37 @@ def build_ensemble_slider_css(bm25_weight: float) -> str:
 def build_pipeline_config(
     retriever_strategy: str,
     ensemble_bm25_weight: float = DEFAULT_ENSEMBLE_BM25_WEIGHT,
+    reranker_strategy: str = DEFAULT_RERANKER_STRATEGY,
 ) -> RetrievalPipelineConfig:
     """Streamlit 선택값을 retrieval pipeline 설정으로 변환합니다."""
+    reranker_kwargs: dict[str, object] = {}
+    if reranker_strategy == "cross-encoder":
+        reranker_kwargs = {
+            "candidate_k": DEFAULT_RERANKER_CANDIDATE_K,
+            "final_k": DEFAULT_RERANKER_FINAL_K,
+            "reranker_strategy": "cross-encoder",
+            "reranker_config": CrossEncoderRerankerConfig(),
+        }
+    elif reranker_strategy == "flashrank":
+        reranker_kwargs = {
+            "candidate_k": DEFAULT_RERANKER_CANDIDATE_K,
+            "final_k": DEFAULT_RERANKER_FINAL_K,
+            "reranker_strategy": "flashrank",
+            "reranker_config": FlashrankRerankerConfig(),
+        }
+
     if retriever_strategy != "ensemble":
-        return RetrievalPipelineConfig(retriever_strategy=retriever_strategy)
+        return RetrievalPipelineConfig(
+            retriever_strategy=retriever_strategy,
+            **reranker_kwargs,
+        )
 
     bm25_weight = round(ensemble_bm25_weight, 2)
     dense_weight = round(1.0 - bm25_weight, 2)
     return RetrievalPipelineConfig(
         retriever_strategy=retriever_strategy,
         retriever_config=EnsembleRetrieverConfig(weights=(bm25_weight, dense_weight)),
+        **reranker_kwargs,
     )
 
 
@@ -420,6 +462,7 @@ def render_chat(
     embedding_provider: str = DEFAULT_EMBEDDING_PROVIDER,
     retriever_strategy: str = "similarity",
     ensemble_bm25_weight: float = DEFAULT_ENSEMBLE_BM25_WEIGHT,
+    reranker_strategy: str = DEFAULT_RERANKER_STRATEGY,
 ) -> None:
     active_session = st.session_state.active_session
     messages = store.get_messages(USER_ID, active_session)
@@ -434,6 +477,7 @@ def render_chat(
             chunker_strategy,
             embedding_provider,
             retriever_strategy,
+            reranker_strategy,
         ),
         metadata={
             "loader_strategy": loader_strategy,
@@ -441,6 +485,7 @@ def render_chat(
             "embedding_provider": embedding_provider,
             "retriever_strategy": retriever_strategy,
             "ensemble_bm25_weight": ensemble_bm25_weight,
+            "reranker_strategy": reranker_strategy,
         },
     )
 
@@ -482,6 +527,7 @@ def render_chat(
                     pipeline_config=build_pipeline_config(
                         retriever_strategy,
                         ensemble_bm25_weight,
+                        reranker_strategy,
                     ),
                     trace_context=trace_context,
                 )
@@ -516,6 +562,7 @@ def main():
         embedding_provider,
         retriever_strategy,
         ensemble_bm25_weight,
+        reranker_strategy,
     ) = render_sidebar(store)
     render_chat(
         store,
@@ -524,6 +571,7 @@ def main():
         embedding_provider,
         retriever_strategy,
         ensemble_bm25_weight,
+        reranker_strategy,
     )
 
 

@@ -2,6 +2,9 @@ import unittest
 
 from main import (
     CHUNKER_STRATEGY_OPTIONS_BY_LOADER,
+    DEFAULT_RERANKER_CANDIDATE_K,
+    DEFAULT_RERANKER_FINAL_K,
+    RERANKER_STRATEGY_OPTIONS,
     RETRIEVER_STRATEGY_OPTIONS,
     build_ensemble_slider_css,
     build_ensemble_weight_caption_html,
@@ -10,6 +13,7 @@ from main import (
     get_chunker_strategy_options,
     normalize_chunker_strategy,
 )
+from rag.pipeline.reranker import CrossEncoderRerankerConfig, FlashrankRerankerConfig
 from rag.pipeline.retriever import EnsembleRetrieverConfig
 
 
@@ -22,6 +26,9 @@ class StreamlitUiTest(unittest.TestCase):
     def test_retriever_strategy_options_expose_similarity_instead_of_vectorstore(self):
         self.assertIn("similarity", RETRIEVER_STRATEGY_OPTIONS)
         self.assertNotIn("vectorstore", RETRIEVER_STRATEGY_OPTIONS)
+
+    def test_reranker_strategy_options_expose_supported_app_choices(self):
+        self.assertEqual(RERANKER_STRATEGY_OPTIONS, ("none", "cross-encoder", "flashrank"))
 
     def test_chunker_strategy_options_are_filtered_by_loader(self):
         self.assertEqual(
@@ -50,6 +57,28 @@ class StreamlitUiTest(unittest.TestCase):
         config = build_pipeline_config("similarity", ensemble_bm25_weight=0.7)
 
         self.assertIsNone(config.retriever_config)
+
+    def test_build_pipeline_config_uses_cross_encoder_reranker(self):
+        config = build_pipeline_config("similarity", reranker_strategy="cross-encoder")
+
+        self.assertEqual(config.reranker_strategy, "cross-encoder")
+        self.assertIsInstance(config.reranker_config, CrossEncoderRerankerConfig)
+        self.assertEqual(config.candidate_k, DEFAULT_RERANKER_CANDIDATE_K)
+        self.assertEqual(config.final_k, DEFAULT_RERANKER_FINAL_K)
+
+    def test_build_pipeline_config_uses_flashrank_reranker_with_ensemble(self):
+        config = build_pipeline_config(
+            "ensemble",
+            ensemble_bm25_weight=0.7,
+            reranker_strategy="flashrank",
+        )
+
+        self.assertEqual(config.retriever_strategy, "ensemble")
+        self.assertIsInstance(config.retriever_config, EnsembleRetrieverConfig)
+        self.assertEqual(config.reranker_strategy, "flashrank")
+        self.assertIsInstance(config.reranker_config, FlashrankRerankerConfig)
+        self.assertEqual(config.candidate_k, DEFAULT_RERANKER_CANDIDATE_K)
+        self.assertEqual(config.final_k, DEFAULT_RERANKER_FINAL_K)
 
     def test_build_ensemble_weight_label_is_short(self):
         label = build_ensemble_weight_label(0.65)
