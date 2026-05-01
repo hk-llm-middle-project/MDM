@@ -6,7 +6,6 @@ from rag.pipeline.retriever.strategies import (
     EnsembleRetrieverConfig,
     MultiQueryRetrieverConfig,
     ParentDocumentRetrieverConfig,
-    SelfQueryRetrieverConfig,
     VectorStoreRetrieverConfig,
 )
 
@@ -20,5 +19,4 @@ __all__ = [
     "EnsembleRetrieverConfig",
     "ParentDocumentRetrieverConfig",
     "MultiQueryRetrieverConfig",
-    "SelfQueryRetrieverConfig",
 ]
