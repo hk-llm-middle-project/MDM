@@ -10,6 +10,7 @@ from langchain_openai import ChatOpenAI
 from config import LLM_MODEL
 from rag.service.common.json_utils import extract_json_object
 from rag.service.intake.prompts import build_intake_prompt
+from rag.service.intake.query_normalizer import enrich_intake_decision
 from rag.service.intake.schema import IntakeDecision, IntakeState, MissingField, UserSearchMetadata
 from rag.service.intake.values import LOCATIONS, PARTY_TYPES
 from rag.service.session.schema import ChatMessage
@@ -146,6 +147,7 @@ def evaluate_input_sufficiency(
     response = intake_llm.invoke(prompt, config=config) if config else intake_llm.invoke(prompt)
     content = getattr(response, "content", response)
     decision = normalize_metadata_response(extract_json_object(str(content)))
+    decision = enrich_intake_decision(normalized_description, decision)
     return IntakeDecision(
         is_sufficient=decision.is_sufficient,
         normalized_description=normalized_description,

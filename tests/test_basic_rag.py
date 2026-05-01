@@ -37,6 +37,7 @@ from rag.service.intake.intake_service import (
     evaluate_input_sufficiency,
     normalize_metadata_response,
 )
+from rag.service.intake.query_normalizer import normalize_retrieval_query_terms
 from rag.service.intake.schema import IntakeDecision, IntakeState, UserSearchMetadata
 from rag.service.presentation.result_service import format_context_preview, truncate_context
 from rag.service.tracing import TraceContext
@@ -1124,6 +1125,81 @@ class BasicRagTest(unittest.TestCase):
         self.assertEqual(decision.search_metadata.location, "횡단보도 내")
         self.assertEqual(decision.search_metadata.retrieval_query, "보행자 횡단보도 사고")
         fake_llm.invoke.assert_called_once()
+
+    def test_normalize_retrieval_query_terms_adds_intersection_taxonomy(self):
+        query = normalize_retrieval_query_terms(
+            "양쪽 신호등이 있는 교차로에서 A차량은 녹색신호에 직진하고 B차량은 적색신호에 측면에서 직진하다 충돌",
+            UserSearchMetadata(
+                party_type="자동차",
+                location="교차로 사고",
+                retrieval_query="자동차 대 자동차, A 녹색신호 직진, B 적색신호 직진",
+            ),
+        )
+
+        self.assertIn("양쪽 신호등 있는 교차로", query)
+        self.assertIn("직진 대 직진 사고", query)
+        self.assertIn("상대차량이 측면에서 진입", query)
+        self.assertIn("녹색직진 대 적색직진", query)
+
+    def test_normalize_retrieval_query_terms_preserves_flashing_signals(self):
+        query = normalize_retrieval_query_terms(
+            "양쪽 신호등이 있는 교차로에서 A차량은 적색점멸 신호에 직진하고 B차량은 황색점멸 신호에 직진하다 충돌",
+            UserSearchMetadata(
+                party_type="자동차",
+                location="교차로 사고",
+                retrieval_query="자동차 대 자동차, A 적색신호 직진, B 황색신호 직진",
+            ),
+        )
+
+        self.assertIn("A 적색점멸직진", query)
+        self.assertIn("B 황색점멸직진", query)
+        self.assertIn("적색점멸직진 대 황색점멸직진", query)
+
+    def test_normalize_retrieval_query_terms_replaces_wrong_side_approach(self):
+        query = normalize_retrieval_query_terms(
+            "양쪽 신호등이 있는 교차로에서 A차량은 녹색신호에 직진하고 맞은편 B차량은 적색 신호를 위반해 좌회전하다 충돌",
+            UserSearchMetadata(
+                party_type="자동차",
+                location="교차로 사고",
+                retrieval_query="자동차 대 자동차, 직진 대 좌회전 사고, 상대차량이 측면에서 진입",
+            ),
+        )
+
+        self.assertIn("상대차량이 맞은편에서 진입", query)
+        self.assertNotIn("상대차량이 측면에서 진입", query)
+        self.assertIn("직진 대 좌회전 사고", query)
+
+    def test_normalize_retrieval_query_terms_adds_road_and_special_terms(self):
+        same_width_query = normalize_retrieval_query_terms(
+            "신호등이 없는 동일 폭 교차로에서 오른쪽 도로의 A차량과 왼쪽 도로의 B차량이 서로 직진하다 충돌",
+            UserSearchMetadata(
+                party_type="자동차",
+                location="교차로 사고",
+                retrieval_query="자동차 대 자동차, 신호등 없는 교차로",
+            ),
+        )
+        priority_query = normalize_retrieval_query_terms(
+            "신호등이 없는 교차로에서 대로를 직진하는 A차량과 소로를 직진하는 B차량이 충돌",
+            UserSearchMetadata(
+                party_type="자동차",
+                location="교차로 사고",
+                retrieval_query="자동차 대 자동차, 신호등 없는 교차로",
+            ),
+        )
+        centerline_query = normalize_retrieval_query_terms(
+            "도로에서 A차량은 정상 직진하고 맞은편 B차량은 중앙선을 침범해 역주행하다 충돌",
+            UserSearchMetadata(
+                party_type="자동차",
+                location="교차로 사고",
+                retrieval_query="자동차 대 자동차",
+            ),
+        )
+
+        self.assertIn("동일 폭 교차로", same_width_query)
+        self.assertIn("오른쪽 도로", same_width_query)
+        self.assertIn("왼쪽 도로", same_width_query)
+        self.assertIn("대로 소로 교차로", priority_query)
+        self.assertIn("중앙선 침범 사고", centerline_query)
 
     def test_evaluate_input_sufficiency_rejects_empty_input_without_llm_call(self):
         fake_llm = MagicMock()
