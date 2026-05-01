@@ -14,6 +14,7 @@ from rag.chunkers.schema import Chunk
 
 DIAGRAM_ID_PATTERN = r"[차보거]\d+(?:-\d+)?"
 HEADING_PATTERN = re.compile(r"^(#{1,6})\s+(.+?)\s*$")
+IMAGE_RE = re.compile(r"!\[[^\]]*\]\(([^)]+)\)")
 
 
 @dataclass(frozen=True)
@@ -117,7 +118,7 @@ class MarkdownStructureChunker(BaseChunker):
             parent_id=parent_id,
             location=None,
             party_type=None,
-            image_path=None,
+            image_path=self._extract_image_path(text),
         )
 
     def _documents_for(self, parsed_input: str | Document | Iterable[Document]) -> list[Document]:
@@ -138,3 +139,7 @@ class MarkdownStructureChunker(BaseChunker):
     def _extract_diagram_id(self, text: str) -> str | None:
         match = re.search(DIAGRAM_ID_PATTERN, text)
         return match.group(0) if match else None
+
+    def _extract_image_path(self, text: str) -> str | None:
+        match = IMAGE_RE.search(text)
+        return match.group(1) if match else None
