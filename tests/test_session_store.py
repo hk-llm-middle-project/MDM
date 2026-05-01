@@ -98,6 +98,24 @@ class MemoryConversationStoreTest(unittest.TestCase):
 
         self.assertEqual(store.get_intake_state("local", session.session_id), state)
 
+    def test_delete_session_removes_messages_state_and_active_session(self):
+        store = MemoryConversationStore()
+        session = store.create_session("local", title="삭제할 세션")
+        store.set_active_session("local", session.session_id)
+        store.append_message("local", session.session_id, "user", "질문")
+        store.set_intake_state(
+            "local",
+            session.session_id,
+            IntakeState(search_metadata=UserSearchMetadata(party_type="자동차")),
+        )
+
+        store.delete_session("local", session.session_id)
+
+        self.assertEqual(store.list_sessions("local"), [])
+        self.assertIsNone(store.get_active_session("local"))
+        self.assertEqual(store.get_messages("local", session.session_id), [])
+        self.assertEqual(store.get_intake_state("local", session.session_id), IntakeState())
+
     def test_loader_strategy_defaults_and_updates(self):
         store = MemoryConversationStore()
 

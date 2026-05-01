@@ -60,6 +60,25 @@ def ensure_active_session(store: ConversationStore) -> str:
     return fallback_session
 
 
+def delete_session_and_select_fallback(store: ConversationStore, session_id: str) -> str:
+    """세션을 삭제하고 남은 세션 또는 새 세션을 활성화합니다."""
+    store.delete_session(USER_ID, session_id)
+    sessions = store.list_sessions(USER_ID)
+    if not sessions:
+        session = store.create_session(USER_ID, title="세션 1")
+        store.set_active_session(USER_ID, session.session_id)
+        return session.session_id
+
+    active_session = store.get_active_session(USER_ID)
+    session_ids = {session.session_id for session in sessions}
+    if active_session in session_ids:
+        return active_session
+
+    fallback_session_id = sessions[0].session_id
+    store.set_active_session(USER_ID, fallback_session_id)
+    return fallback_session_id
+
+
 def init_state(store: ConversationStore) -> None:
     if "active_session" not in st.session_state:
         st.session_state.active_session = ensure_active_session(store)
@@ -109,13 +128,27 @@ def render_sidebar(store: ConversationStore) -> tuple[str, str, str, str, float,
     st.sidebar.divider()
 
     for session in store.list_sessions(USER_ID):
-        if st.sidebar.button(
-            session.title,
-            key=f"session-{session.session_id}",
-            use_container_width=True,
-        ):
-            store.set_active_session(USER_ID, session.session_id)
-            st.session_state.active_session = session.session_id
+        session_column, delete_column = st.sidebar.columns([0.82, 0.18])
+        with session_column:
+            if st.button(
+                session.title,
+                key=f"session-{session.session_id}",
+                use_container_width=True,
+            ):
+                store.set_active_session(USER_ID, session.session_id)
+                st.session_state.active_session = session.session_id
+        with delete_column:
+            if st.button(
+                "×",
+                key=f"delete-session-{session.session_id}",
+                help=f"{session.title} 삭제",
+                use_container_width=True,
+            ):
+                st.session_state.active_session = delete_session_and_select_fallback(
+                    store,
+                    session.session_id,
+                )
+                st.rerun()
 
     st.sidebar.divider()
     current_loader_strategy = st.session_state.get("loader_strategy", DEFAULT_LOADER_STRATEGY)

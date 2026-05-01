@@ -10,11 +10,13 @@ from main import (
     build_ensemble_weight_caption_html,
     build_ensemble_weight_label,
     build_pipeline_config,
+    delete_session_and_select_fallback,
     get_chunker_strategy_options,
     normalize_chunker_strategy,
 )
 from rag.pipeline.reranker import CrossEncoderRerankerConfig, FlashrankRerankerConfig
 from rag.pipeline.retriever import EnsembleRetrieverConfig
+from rag.service.session.memory_store import MemoryConversationStore
 
 
 class StreamlitUiTest(unittest.TestCase):
@@ -22,6 +24,30 @@ class StreamlitUiTest(unittest.TestCase):
         config = build_pipeline_config("ensemble")
 
         self.assertEqual(config.retriever_strategy, "ensemble")
+
+    def test_delete_session_and_select_fallback_uses_remaining_session(self):
+        store = MemoryConversationStore()
+        first = store.create_session("local", title="첫 세션")
+        second = store.create_session("local", title="둘째 세션")
+        store.set_active_session("local", first.session_id)
+
+        active_session = delete_session_and_select_fallback(store, first.session_id)
+
+        self.assertEqual(active_session, second.session_id)
+        self.assertEqual(store.get_active_session("local"), second.session_id)
+        self.assertEqual(store.list_sessions("local"), [second])
+
+    def test_delete_session_and_select_fallback_creates_session_when_empty(self):
+        store = MemoryConversationStore()
+        session = store.create_session("local", title="마지막 세션")
+        store.set_active_session("local", session.session_id)
+
+        active_session = delete_session_and_select_fallback(store, session.session_id)
+
+        sessions = store.list_sessions("local")
+        self.assertEqual(len(sessions), 1)
+        self.assertEqual(active_session, sessions[0].session_id)
+        self.assertEqual(store.get_active_session("local"), sessions[0].session_id)
 
     def test_retriever_strategy_options_expose_similarity_instead_of_vectorstore(self):
         self.assertIn("similarity", RETRIEVER_STRATEGY_OPTIONS)
