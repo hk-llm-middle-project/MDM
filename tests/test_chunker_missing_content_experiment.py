@@ -118,7 +118,7 @@ class MultiPage_RealCorpus_Pages_129_to_132(unittest.TestCase):
     """실제 chunks.json 환경처럼 다중 페이지 입력에서 누락이 없어졌는지 확인."""
 
     def test_pages_129_130_131_132_full_recovery(self):
-        md_dir = Path("/home/nyong/mdm/data/llama_md/main_pdf")
+        md_dir = Path("data/llama_md/main_pdf")
         documents = [
             Document(
                 page_content=(md_dir / f"{p:03d}.md").read_text(encoding="utf-8"),
