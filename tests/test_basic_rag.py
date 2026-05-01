@@ -1059,7 +1059,8 @@ class BasicRagTest(unittest.TestCase):
             {
                 "party_type": "자동차",
                 "location": "교차로 사고",
-                "confidence": {"party_type": 0.95, "location": 0.9},
+                "retrieval_query": "자동차 대 자동차 황색 직진 대 적색 직진",
+                "confidence": {"party_type": 0.95, "location": 0.9, "retrieval_query": 0.9},
                 "missing_fields": [],
                 "follow_up_questions": [],
             }
@@ -1068,6 +1069,10 @@ class BasicRagTest(unittest.TestCase):
         self.assertTrue(decision.is_sufficient)
         self.assertEqual(decision.search_metadata.party_type, "자동차")
         self.assertEqual(decision.search_metadata.location, "교차로 사고")
+        self.assertEqual(
+            decision.search_metadata.retrieval_query,
+            "자동차 대 자동차 황색 직진 대 적색 직진",
+        )
         self.assertEqual(decision.missing_fields, [])
 
     def test_normalize_metadata_response_rejects_invalid_or_low_confidence_values(self):
@@ -1075,7 +1080,8 @@ class BasicRagTest(unittest.TestCase):
             {
                 "party_type": "오토바이",
                 "location": "교차로 사고",
-                "confidence": {"party_type": 0.95, "location": 0.3},
+                "retrieval_query": "낮은 신뢰도 검색 질의",
+                "confidence": {"party_type": 0.95, "location": 0.3, "retrieval_query": 0.3},
                 "follow_up_questions": [],
             }
         )
@@ -1083,13 +1089,31 @@ class BasicRagTest(unittest.TestCase):
         self.assertFalse(decision.is_sufficient)
         self.assertIsNone(decision.search_metadata.party_type)
         self.assertIsNone(decision.search_metadata.location)
+        self.assertIsNone(decision.search_metadata.retrieval_query)
         self.assertEqual([field.name for field in decision.missing_fields], ["party_type", "location"])
         self.assertTrue(decision.follow_up_questions)
+
+    def test_normalize_metadata_response_keeps_retrieval_query_without_confidence(self):
+        decision = normalize_metadata_response(
+            {
+                "party_type": "자동차",
+                "location": "교차로 사고",
+                "retrieval_query": "자동차 대 자동차 황색 직진 대 적색 직진",
+                "confidence": {"party_type": 0.95, "location": 0.95},
+                "follow_up_questions": [],
+            }
+        )
+
+        self.assertTrue(decision.is_sufficient)
+        self.assertEqual(
+            decision.search_metadata.retrieval_query,
+            "자동차 대 자동차 황색 직진 대 적색 직진",
+        )
 
     def test_evaluate_input_sufficiency_uses_llm_metadata_response(self):
         fake_llm = MagicMock()
         fake_llm.invoke.return_value = MagicMock(
-            content='{"party_type":"보행자","location":"횡단보도 내","confidence":{"party_type":0.9,"location":0.9},"missing_fields":[],"follow_up_questions":[]}'
+            content='{"party_type":"보행자","location":"횡단보도 내","retrieval_query":"보행자 횡단보도 사고","confidence":{"party_type":0.9,"location":0.9,"retrieval_query":0.9},"missing_fields":[],"follow_up_questions":[]}'
         )
 
         decision = evaluate_input_sufficiency("횡단보도에서 보행자와 사고가 났어요.", llm=fake_llm)
@@ -1098,6 +1122,7 @@ class BasicRagTest(unittest.TestCase):
         self.assertEqual(decision.normalized_description, "횡단보도에서 보행자와 사고가 났어요.")
         self.assertEqual(decision.search_metadata.party_type, "보행자")
         self.assertEqual(decision.search_metadata.location, "횡단보도 내")
+        self.assertEqual(decision.search_metadata.retrieval_query, "보행자 횡단보도 사고")
         fake_llm.invoke.assert_called_once()
 
     def test_evaluate_input_sufficiency_rejects_empty_input_without_llm_call(self):
@@ -1114,6 +1139,7 @@ class BasicRagTest(unittest.TestCase):
             UserSearchMetadata(
                 party_type="자동차",
                 location="교차로 사고",
+                retrieval_query="필터에 들어가면 안 되는 검색 질의",
             )
         )
 
@@ -1227,7 +1253,10 @@ class BasicRagTest(unittest.TestCase):
     def test_answer_question_with_intake_accumulates_metadata_across_turns(self):
         previous_state = IntakeState(
             attempt_count=1,
-            search_metadata=UserSearchMetadata(party_type="자동차"),
+            search_metadata=UserSearchMetadata(
+                party_type="자동차",
+                retrieval_query="자동차 사고 기존 검색 질의",
+            ),
             last_missing_fields=["location"],
             last_follow_up_questions=["사고 상황은 어디에 가까운가요?"],
         )
@@ -1252,7 +1281,11 @@ class BasicRagTest(unittest.TestCase):
         self.assertEqual(result.intake_state, IntakeState())
         analyze_mock.assert_called_once_with(
             "교차로였어요",
-            search_metadata=UserSearchMetadata(party_type="자동차", location="교차로 사고"),
+            search_metadata=UserSearchMetadata(
+                party_type="자동차",
+                location="교차로 사고",
+                retrieval_query="자동차 사고 기존 검색 질의",
+            ),
             pipeline_config=None,
             loader_strategy="pdfplumber",
             embedding_provider="bge",
@@ -1364,7 +1397,11 @@ class BasicRagTest(unittest.TestCase):
     def test_analyze_question_passes_metadata_filters_to_retrieval_pipeline(self):
         from rag.service.analysis.analysis_service import analyze_question
 
-        metadata = UserSearchMetadata(party_type="자동차", location="교차로 사고")
+        metadata = UserSearchMetadata(
+            party_type="자동차",
+            location="교차로 사고",
+            retrieval_query="정규화된 검색 질의",
+        )
         fake_document = Document(page_content="context")
         fake_llm = MagicMock()
         fake_llm.invoke.return_value = MagicMock(
@@ -1382,7 +1419,7 @@ class BasicRagTest(unittest.TestCase):
         self.assertEqual(contexts, ["context"])
         pipeline_mock.assert_called_once_with(
             "components",
-            "query",
+            "정규화된 검색 질의",
             filters={"$and": [{"party_type": "자동차"}, {"location": "교차로 사고"}]},
             pipeline_config=None,
         )

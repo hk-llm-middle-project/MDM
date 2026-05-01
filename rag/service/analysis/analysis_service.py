@@ -35,13 +35,18 @@ def analyze_question(
         chunker_strategy,
     )
     filters = build_metadata_filters(search_metadata)
+    retrieval_query = (
+        search_metadata.retrieval_query
+        if search_metadata is not None and search_metadata.retrieval_query
+        else question
+    )
     retrieval_kwargs = {
         "filters": filters,
         "pipeline_config": pipeline_config,
     }
     if trace_context is not None:
         retrieval_kwargs["trace_context"] = trace_context
-    documents = run_retrieval_pipeline(components, question, **retrieval_kwargs)
+    documents = run_retrieval_pipeline(components, retrieval_query, **retrieval_kwargs)
     retrieved_contexts = [
         RetrievedContext(
             content=document.page_content,
@@ -54,6 +59,8 @@ def analyze_question(
 
     logger = logging.getLogger(__name__)
     logger.info(f"[retrieved] question={question}")
+    if retrieval_query != question:
+        logger.info(f"[retrieved] retrieval_query={retrieval_query}")
     for index, context in enumerate(contexts, start=1):
         logger.info(f"[retrieved:{index}] {context}")
 

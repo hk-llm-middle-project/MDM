@@ -9,6 +9,7 @@ class UserSearchMetadata:
 
     party_type: str | None = None
     location: str | None = None
+    retrieval_query: str | None = None
 
 
 @dataclass(frozen=True)

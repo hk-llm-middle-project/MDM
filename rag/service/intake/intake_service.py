@@ -45,6 +45,7 @@ def normalize_metadata_response(data: dict[str, Any]) -> IntakeDecision:
     """LLM 추출 결과를 허용값과 신뢰도 기준으로 검증합니다."""
     raw_party_type = data.get("party_type")
     raw_location = data.get("location")
+    raw_retrieval_query = data.get("retrieval_query")
     confidence_data = data.get("confidence")
     if not isinstance(confidence_data, dict):
         confidence_data = {}
@@ -52,10 +53,23 @@ def normalize_metadata_response(data: dict[str, Any]) -> IntakeDecision:
     confidence = {
         "party_type": clamp_confidence(confidence_data.get("party_type")),
         "location": clamp_confidence(confidence_data.get("location")),
+        "retrieval_query": clamp_confidence(confidence_data.get("retrieval_query")),
     }
 
     party_type = raw_party_type if raw_party_type in PARTY_TYPES else None
     location = raw_location if raw_location in LOCATIONS else None
+    retrieval_query = (
+        raw_retrieval_query.strip()
+        if isinstance(raw_retrieval_query, str) and raw_retrieval_query.strip()
+        else None
+    )
+    has_retrieval_query_confidence = "retrieval_query" in confidence_data
+    if (
+        retrieval_query is not None
+        and has_retrieval_query_confidence
+        and confidence["retrieval_query"] < CONFIDENCE_THRESHOLD
+    ):
+        retrieval_query = None
 
     missing_field_names: list[str] = []
     missing_fields: list[MissingField] = []
@@ -92,6 +106,7 @@ def normalize_metadata_response(data: dict[str, Any]) -> IntakeDecision:
         search_metadata=UserSearchMetadata(
             party_type=party_type,
             location=location,
+            retrieval_query=retrieval_query,
         ),
         confidence=confidence,
         missing_fields=missing_fields,

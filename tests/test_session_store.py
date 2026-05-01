@@ -38,6 +38,7 @@ class SessionSerializationTest(unittest.TestCase):
             search_metadata=UserSearchMetadata(
                 party_type="보행자",
                 location="횡단보도 없음",
+                retrieval_query="보행자 횡단보도 없음 사고",
             ),
             last_missing_fields=["location"],
             last_follow_up_questions=["사고 장소는 어디인가요?"],

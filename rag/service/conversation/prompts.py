@@ -31,6 +31,7 @@ def _format_intake_state(intake_state: IntakeState | None) -> str:
             "search_metadata": {
                 "party_type": state.search_metadata.party_type,
                 "location": state.search_metadata.location,
+                "retrieval_query": state.search_metadata.retrieval_query,
             },
             "last_missing_fields": state.last_missing_fields,
             "last_follow_up_questions": state.last_follow_up_questions,

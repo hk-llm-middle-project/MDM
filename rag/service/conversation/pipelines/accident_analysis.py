@@ -60,6 +60,7 @@ def merge_search_metadata(
     return UserSearchMetadata(
         party_type=current.party_type or previous.party_type,
         location=current.location or previous.location,
+        retrieval_query=current.retrieval_query or previous.retrieval_query,
     )
 
 

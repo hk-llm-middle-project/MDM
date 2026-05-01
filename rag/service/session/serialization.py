@@ -94,6 +94,9 @@ def intake_state_from_dict(data: dict[str, Any]) -> IntakeState:
             location=metadata_data.get("location")
             if isinstance(metadata_data.get("location"), str)
             else None,
+            retrieval_query=metadata_data.get("retrieval_query")
+            if isinstance(metadata_data.get("retrieval_query"), str)
+            else None,
         ),
         last_missing_fields=[
             value for value in last_missing_fields if isinstance(value, str)
