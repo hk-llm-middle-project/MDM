@@ -16,7 +16,8 @@ from rag.pipeline.retriever.components import (
 from rag.service.tracing import TraceContext
 
 
-DEFAULT_CANDIDATE_K = 20
+MIN_ENSEMBLE_CANDIDATE_K = 20
+DEFAULT_CANDIDATE_K_MULTIPLIER = 4
 DEFAULT_ID_KEY = "chunk_id"
 
 
@@ -111,7 +112,10 @@ def _build_dense_retriever(
 def _candidate_k(configured_k: int | None, final_k: int) -> int:
     if configured_k is not None:
         return configured_k
-    return max(final_k * 4, DEFAULT_CANDIDATE_K)
+    return max(
+        final_k * DEFAULT_CANDIDATE_K_MULTIPLIER,
+        MIN_ENSEMBLE_CANDIDATE_K,
+    )
 
 
 def _select_id_key(

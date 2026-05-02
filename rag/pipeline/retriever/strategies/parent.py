@@ -11,6 +11,10 @@ from rag.pipeline.retriever.components import RetrievalComponents
 from rag.service.tracing import TraceContext
 
 
+PARENT_CHILD_CANDIDATE_K_MULTIPLIER = 8
+PARENT_CHILD_MIN_CANDIDATE_K = 20
+
+
 @dataclass(frozen=True)
 class ParentDocumentRetrieverConfig:
     """Parent document retrieval settings.
@@ -114,6 +118,13 @@ def _parent_for_child(
     return parents_by_diagram_id.get(str(diagram_id))
 
 
+def _parent_child_candidate_k(final_k: int) -> int:
+    return max(
+        final_k * PARENT_CHILD_CANDIDATE_K_MULTIPLIER,
+        PARENT_CHILD_MIN_CANDIDATE_K,
+    )
+
+
 def _retrieve_child_candidates(
     components: RetrievalComponents,
     query: str,
@@ -122,7 +133,8 @@ def _retrieve_child_candidates(
     trace_context: TraceContext | None,
 ) -> list[Document]:
     child_filter = _merge_filter(filters, {"chunk_type": "child"})
-    search_kwargs: dict[str, object] = {"k": max(k * 8, 20), "filter": child_filter}
+    candidate_k = _parent_child_candidate_k(k)
+    search_kwargs: dict[str, object] = {"k": candidate_k, "filter": child_filter}
     retriever = components.vectorstore.as_retriever(search_kwargs=search_kwargs)
     config_dict = trace_context.langchain_config("mdm.retrieve.parent.child") if trace_context else None
     return list(retriever.invoke(query, config=config_dict) if config_dict else retriever.invoke(query))

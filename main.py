@@ -204,13 +204,16 @@ def render_sidebar(store: ConversationStore) -> tuple[str, str, str, str, float,
             index=ENSEMBLE_CANDIDATE_K_OPTIONS.index(current_candidate_k),
         )
         st.session_state.ensemble_use_chunk_id = st.sidebar.checkbox(
-            "chunk_id 기준 앙상블",
+            "같은 문서 조각 합치기",
             value=bool(
                 st.session_state.get(
                     "ensemble_use_chunk_id",
                     DEFAULT_ENSEMBLE_USE_CHUNK_ID,
                 )
             ),
+        )
+        st.sidebar.caption(
+            "BM25와 Dense가 같은 chunk_id를 찾으면 하나의 후보로 합칩니다."
         )
     return (
         selected_loader_strategy,

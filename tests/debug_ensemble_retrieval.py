@@ -28,8 +28,9 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from rag.pipeline.retriever.common import kiwi_tokenize  # noqa: E402
 from rag.pipeline.retriever.strategies.ensemble import (  # noqa: E402
-    DEFAULT_CANDIDATE_K,
+    DEFAULT_CANDIDATE_K_MULTIPLIER,
     EnsembleRetrieverConfig,
+    MIN_ENSEMBLE_CANDIDATE_K,
     _metadata_matches_filter,
     retrieve_with_ensemble,
 )
@@ -172,7 +173,10 @@ def retrieve_selected_strategy(
 def candidate_k(configured_k: int | None, final_k: int) -> int:
     if configured_k is not None:
         return configured_k
-    return max(final_k * 4, DEFAULT_CANDIDATE_K)
+    return max(
+        final_k * DEFAULT_CANDIDATE_K_MULTIPLIER,
+        MIN_ENSEMBLE_CANDIDATE_K,
+    )
 
 
 def document_key(document) -> str:

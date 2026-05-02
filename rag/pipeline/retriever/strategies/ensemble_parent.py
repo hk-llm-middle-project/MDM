@@ -19,6 +19,7 @@ from rag.pipeline.retriever.strategies.parent import (
     _has_metadata_parent_structure,
     _is_accident_situation_child,
     _merge_filter,
+    _parent_child_candidate_k,
     _parent_for_child,
 )
 from rag.service.tracing import TraceContext
@@ -88,7 +89,11 @@ def retrieve_with_ensemble_parent_documents(
     child_candidates = retrieve_with_ensemble(
         components,
         query,
-        k=max(k * 8, ensemble_config.bm25_k or 0, ensemble_config.dense_k or 0),
+        k=max(
+            _parent_child_candidate_k(k),
+            ensemble_config.bm25_k or 0,
+            ensemble_config.dense_k or 0,
+        ),
         filters=child_filter,
         strategy_config=ensemble_config,
         trace_context=trace_context,
