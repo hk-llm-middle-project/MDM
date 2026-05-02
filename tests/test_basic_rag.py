@@ -456,13 +456,17 @@ class BasicRagTest(unittest.TestCase):
         first_call, second_call = retrieve_mock.call_args_list
         self.assertEqual(first_call.kwargs["filters"], {"party_type": "자동차"})
         self.assertIsNone(second_call.kwargs["filters"])
-        rerank_mock.assert_called_once_with(
-            query="query",
-            documents=fallback_documents,
-            k=2,
-            strategy="none",
-            strategy_config=None,
-        )
+        rerank_mock.assert_called_once()
+        rerank_kwargs = rerank_mock.call_args.kwargs
+        self.assertEqual(rerank_kwargs["query"], "query")
+        self.assertEqual(rerank_kwargs["k"], 2)
+        self.assertEqual(rerank_kwargs["strategy"], "none")
+        self.assertIsNone(rerank_kwargs["strategy_config"])
+        marked_documents = rerank_kwargs["documents"]
+        self.assertEqual([document.page_content for document in marked_documents], ["fallback"])
+        self.assertTrue(marked_documents[0].metadata["retrieval_fallback"])
+        self.assertEqual(marked_documents[0].metadata["fallback_from"], "vectorstore:filtered")
+        self.assertEqual(marked_documents[0].metadata["fallback_to"], "vectorstore:unfiltered")
 
     def test_unknown_retrieval_strategy_raises(self):
         with self.assertRaises(ValueError):

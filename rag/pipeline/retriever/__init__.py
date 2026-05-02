@@ -4,6 +4,7 @@ from rag.pipeline.retriever.components import RetrievalComponents, build_retriev
 from rag.pipeline.retriever.retriever import RETRIEVAL_STRATEGIES, StrategyConfig, retrieve
 from rag.pipeline.retriever.strategies import (
     EnsembleRetrieverConfig,
+    EnsembleParentRetrieverConfig,
     MultiQueryRetrieverConfig,
     ParentDocumentRetrieverConfig,
     VectorStoreRetrieverConfig,
@@ -17,6 +18,7 @@ __all__ = [
     "retrieve",
     "VectorStoreRetrieverConfig",
     "EnsembleRetrieverConfig",
+    "EnsembleParentRetrieverConfig",
     "ParentDocumentRetrieverConfig",
     "MultiQueryRetrieverConfig",
 ]
