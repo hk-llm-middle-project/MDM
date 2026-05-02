@@ -8,6 +8,9 @@ from config import (
     DEFAULT_CHUNKER_STRATEGY,
     DEFAULT_EMBEDDING_PROVIDER,
     DEFAULT_LOADER_STRATEGY,
+    DEFAULT_RERANKER_CANDIDATE_K,
+    DEFAULT_RERANKER_FINAL_K,
+    DEFAULT_RERANKER_STRATEGY,
 )
 from rag.embeddings import EMBEDDING_STRATEGIES
 from rag.pipeline.retrieval import RetrievalPipelineConfig
@@ -36,9 +39,6 @@ RETRIEVER_STRATEGY_OPTIONS = tuple(
 RERANKER_STRATEGY_OPTIONS = ("none", "cross-encoder", "flashrank")
 USER_ID = "local"
 DEFAULT_ENSEMBLE_BM25_WEIGHT = 0.5
-DEFAULT_RERANKER_STRATEGY = "none"
-DEFAULT_RERANKER_CANDIDATE_K = 10
-DEFAULT_RERANKER_FINAL_K = 3
 PROJECT_ROOT = Path(__file__).resolve().parent
 
 
