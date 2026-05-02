@@ -31,6 +31,12 @@ HTML_TABLE_RE = re.compile(r"<table\b[^>]*>.*?</table>", re.IGNORECASE | re.DOTA
 FIGCAP_RE = re.compile(r"<figcaption\b[^>]*>.*?</figcaption>", re.IGNORECASE | re.DOTALL)
 HTML_TAG_RE = re.compile(r"<[^>]+>")
 MARKDOWN_SEPARATOR_RE = re.compile(r"^\|[\s:\-|]+\|$")
+TABLE_OCR_NOISE_TOKENS = ("品番吊品",)
+CONTEXT_HEADING_DROP_PAGE_MIN = 226
+CONTEXT_HEADING_TO_DROP = "(3) 한쪽 지시표지 있는 교차로"
+CONTEXT_HEADING_LINE_RE = re.compile(
+    r"(?m)^" + re.escape(CONTEXT_HEADING_TO_DROP) + r"\r?\n(?:\r?\n)?"
+)
 
 
 class HTMLTableTextParser(HTMLParser):
@@ -81,6 +87,8 @@ def clean_cell(cell: str) -> str:
     cell = FIGCAP_RE.sub("", cell)
     cell = HTML_TABLE_RE.sub(lambda match: flatten_html_table(match.group(0)), cell)
     cell = HTML_TAG_RE.sub("", cell)
+    for token in TABLE_OCR_NOISE_TOKENS:
+        cell = cell.replace(token, "")
     # The pipe character would split markdown cells after rendering.
     cell = cell.replace("|", " ")
     return normalize_space(cell)
@@ -171,6 +179,26 @@ def clean_table_blocks(content: str) -> tuple[str, int]:
     return "\n\n".join(part for part in parts if part.strip()), table_count
 
 
+def should_drop_context_heading(chunk: dict[str, Any], content: str) -> bool:
+    """Drop only the repeated page-226 context heading from generated chunks."""
+    metadata = chunk.get("metadata", {})
+    if not isinstance(metadata, dict):
+        return False
+    page = metadata.get("page")
+    if isinstance(page, str) and page.isdigit():
+        page = int(page)
+    return (
+        isinstance(page, int)
+        and page >= CONTEXT_HEADING_DROP_PAGE_MIN
+        and CONTEXT_HEADING_TO_DROP in content
+    )
+
+
+def drop_context_heading(content: str) -> tuple[str, int]:
+    cleaned, count = CONTEXT_HEADING_LINE_RE.subn("", content)
+    return cleaned, count
+
+
 def extract_markdown_tables(content: str) -> list[str]:
     """Extract cleaned markdown table blocks from one chunk."""
     tables: list[str] = []
@@ -237,16 +265,27 @@ def build_table_clean_copy(chunks: list[dict[str, Any]]) -> tuple[list[dict[str,
     table_blocks = 0
     removed_markdown_images = 0
     flattened_html_tables = 0
+    removed_context_headings = 0
 
     for chunk in output:
         content = str(chunk.get("page_content", ""))
-        if "|" not in content and "![image]" not in content and "<table" not in content:
+        should_clean_tables = "|" in content or "![image]" in content or "<table" in content
+        should_clean_context = should_drop_context_heading(chunk, content)
+        if not should_clean_tables and not should_clean_context:
             continue
 
         removed_markdown_images += len(MD_IMAGE_RE.findall(content))
         flattened_html_tables += len(HTML_TABLE_RE.findall(content))
-        cleaned, count = clean_table_blocks(content)
-        table_blocks += count
+        if should_clean_tables:
+            cleaned, count = clean_table_blocks(content)
+            table_blocks += count
+        else:
+            cleaned = content
+
+        if should_clean_context:
+            cleaned, count = drop_context_heading(cleaned)
+            removed_context_headings += count
+
         if cleaned != content:
             chunk["page_content"] = cleaned
             changed_chunks += 1
@@ -258,6 +297,7 @@ def build_table_clean_copy(chunks: list[dict[str, Any]]) -> tuple[list[dict[str,
         "cleaned_table_blocks": table_blocks,
         "removed_markdown_images": removed_markdown_images,
         "flattened_html_tables": flattened_html_tables,
+        "removed_context_headings": removed_context_headings,
     }
     return output, report
 
