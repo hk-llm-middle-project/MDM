@@ -55,6 +55,7 @@ def build_retrieval_query_from_slots(slots: QuerySlots, max_terms: int = 4) -> s
     terms: list[str] = []
     signal_pair = build_signal_movement_pair(slots)
     movement_pair = build_movement_pair(slots)
+    relation = normalize_relation_for_query(slots.relation, slots.road_priority)
 
     if slots.special_condition:
         append_compact_term(terms, slots.special_condition)
@@ -62,10 +63,10 @@ def build_retrieval_query_from_slots(slots: QuerySlots, max_terms: int = 4) -> s
         append_compact_term(terms, signal_pair)
     if movement_pair:
         append_compact_term(terms, movement_pair)
-    if slots.road_priority:
-        append_compact_term(terms, slots.road_priority)
-    if slots.relation:
-        append_compact_term(terms, slots.relation)
+    for road_priority_term in build_road_priority_terms(slots.road_priority):
+        append_compact_term(terms, road_priority_term)
+    if relation:
+        append_compact_term(terms, relation)
 
     compact_terms = [term for term in terms if not is_broad_query_term(term)]
     if not compact_terms:
@@ -96,8 +97,56 @@ def build_movement_pair(slots: QuerySlots) -> str | None:
 
 def normalize_movement_for_query(movement: str) -> str:
     normalized = movement.replace(" ", "")
+    if normalized in {"차로변경", "진로변경"}:
+        return "진로변경"
     if normalized == "비보호좌회전":
         return "비보호좌회전"
+    return normalized
+
+
+def build_road_priority_terms(road_priority: str | None) -> list[str]:
+    if not road_priority:
+        return []
+
+    terms: list[str] = []
+    normalized = normalize_spacing(road_priority)
+    if contains_any(normalized, ("대로", "소로")):
+        terms.append("대로 소로 교차로")
+    if "동일 폭" in normalized or "동일폭" in normalized:
+        terms.append("동일 폭 교차로")
+    for term in (
+        "오른쪽 소로",
+        "왼쪽 소로",
+        "오른쪽 대로",
+        "왼쪽 대로",
+        "오른쪽 도로",
+        "왼쪽 도로",
+    ):
+        if term in normalized:
+            terms.append(term)
+    if not terms:
+        terms.append(normalized)
+    return terms
+
+
+def normalize_relation_for_query(
+    relation: str | None,
+    road_priority: str | None,
+) -> str | None:
+    if not relation:
+        return None
+    normalized = normalize_spacing(relation)
+    if (
+        normalized == "상대차량이 맞은편에서 진입"
+        and road_priority
+        and contains_any(
+            road_priority,
+            ("오른쪽", "왼쪽", "대로", "소로", "동일 폭", "동일폭"),
+        )
+    ):
+        return "상대차량이 측면에서 진입"
+    if normalized in {"도로 외 진입", "상대차량이 도로 외 진입"}:
+        return "도로 외 진입"
     return normalized
 
 
@@ -132,6 +181,9 @@ def collect_retrieval_query_terms(
         remove_terms.append("상대차량이 측면에서 진입")
         terms.append("상대차량이 맞은편에서 진입")
     elif contains_any(user_input, ("측면", "서로 다른 방향")):
+        terms.append("상대차량이 측면에서 진입")
+    elif contains_any(user_text, ("오른쪽 도로", "왼쪽 도로", "오른쪽 소로", "왼쪽 소로", "오른쪽 대로", "왼쪽 대로")):
+        remove_terms.append("상대차량이 맞은편에서 진입")
         terms.append("상대차량이 측면에서 진입")
 
     terms.extend(collect_road_terms(user_text))
@@ -390,7 +442,13 @@ def is_road_priority_term(term: str) -> bool:
 def is_location_relation_term(term: str) -> bool:
     return contains_any(
         term,
-        ("상대차량이 측면에서 진입", "상대차량이 맞은편에서 진입", "오른쪽 도로", "왼쪽 도로"),
+        (
+            "상대차량이 측면에서 진입",
+            "상대차량이 맞은편에서 진입",
+            "오른쪽 도로",
+            "왼쪽 도로",
+            "도로 외 진입",
+        ),
     )
 
 
