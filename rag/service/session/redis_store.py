@@ -69,6 +69,20 @@ class RedisConversationStore:
         self._expire_session(user_id, session_id)
         return meta
 
+    def delete_session(self, user_id: str, session_id: str) -> None:
+        self._client.lrem(self._user_sessions_key(user_id), 0, session_id)
+        if self.get_active_session(user_id) == session_id:
+            self._client.delete(self._active_session_key(user_id))
+        self._client.delete(
+            self._messages_key(session_id),
+            self._intake_state_key(session_id),
+            self._session_meta_key(session_id),
+        )
+        self._expire_keys(
+            self._user_sessions_key(user_id),
+            self._loader_strategy_key(user_id),
+        )
+
     def get_messages(self, user_id: str, session_id: str) -> list[ChatMessage]:
         del user_id
         values = self._client.lrange(self._messages_key(session_id), 0, -1)
@@ -77,8 +91,15 @@ class RedisConversationStore:
             messages.append(message_from_dict(json_loads(value)))
         return messages
 
-    def append_message(self, user_id: str, session_id: str, role: str, content: str) -> None:
-        message = ChatMessage(role=role, content=content)
+    def append_message(
+        self,
+        user_id: str,
+        session_id: str,
+        role: str,
+        content: str,
+        metadata: dict[str, object] | None = None,
+    ) -> None:
+        message = ChatMessage(role=role, content=content, metadata=metadata or {})
         self._client.rpush(self._messages_key(session_id), json_dumps(message_to_dict(message)))
         self._touch_session(session_id)
         self._expire_session(user_id, session_id)

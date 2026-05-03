@@ -10,7 +10,14 @@ from langchain_openai import ChatOpenAI
 from config import LLM_MODEL
 from rag.service.common.json_utils import extract_json_object
 from rag.service.intake.prompts import build_intake_prompt
-from rag.service.intake.schema import IntakeDecision, IntakeState, MissingField, UserSearchMetadata
+from rag.service.intake.query_normalizer import enrich_intake_decision
+from rag.service.intake.schema import (
+    IntakeDecision,
+    IntakeState,
+    MissingField,
+    QuerySlots,
+    UserSearchMetadata,
+)
 from rag.service.intake.values import LOCATIONS, PARTY_TYPES
 from rag.service.session.schema import ChatMessage
 from rag.service.tracing import TraceContext
@@ -45,6 +52,8 @@ def normalize_metadata_response(data: dict[str, Any]) -> IntakeDecision:
     """LLM 추출 결과를 허용값과 신뢰도 기준으로 검증합니다."""
     raw_party_type = data.get("party_type")
     raw_location = data.get("location")
+    raw_retrieval_query = data.get("retrieval_query")
+    query_slots = normalize_query_slots(data.get("query_slots"))
     confidence_data = data.get("confidence")
     if not isinstance(confidence_data, dict):
         confidence_data = {}
@@ -52,10 +61,23 @@ def normalize_metadata_response(data: dict[str, Any]) -> IntakeDecision:
     confidence = {
         "party_type": clamp_confidence(confidence_data.get("party_type")),
         "location": clamp_confidence(confidence_data.get("location")),
+        "retrieval_query": clamp_confidence(confidence_data.get("retrieval_query")),
     }
 
     party_type = raw_party_type if raw_party_type in PARTY_TYPES else None
     location = raw_location if raw_location in LOCATIONS else None
+    retrieval_query = (
+        raw_retrieval_query.strip()
+        if isinstance(raw_retrieval_query, str) and raw_retrieval_query.strip()
+        else None
+    )
+    has_retrieval_query_confidence = "retrieval_query" in confidence_data
+    if (
+        retrieval_query is not None
+        and has_retrieval_query_confidence
+        and confidence["retrieval_query"] < CONFIDENCE_THRESHOLD
+    ):
+        retrieval_query = None
 
     missing_field_names: list[str] = []
     missing_fields: list[MissingField] = []
@@ -92,10 +114,36 @@ def normalize_metadata_response(data: dict[str, Any]) -> IntakeDecision:
         search_metadata=UserSearchMetadata(
             party_type=party_type,
             location=location,
+            retrieval_query=retrieval_query,
+            query_slots=query_slots,
         ),
         confidence=confidence,
         missing_fields=missing_fields,
         follow_up_questions=follow_up_questions,
+    )
+
+
+def normalize_query_slots(data: object) -> QuerySlots:
+    """LLM이 반환한 query_slots를 문자열/null 필드로 정리합니다."""
+    if not isinstance(data, dict):
+        return QuerySlots()
+
+    def value(name: str) -> str | None:
+        raw_value = data.get(name)
+        if not isinstance(raw_value, str):
+            return None
+        normalized = raw_value.strip()
+        return normalized or None
+
+    return QuerySlots(
+        road_control=value("road_control"),
+        relation=value("relation"),
+        a_signal=value("a_signal"),
+        b_signal=value("b_signal"),
+        a_movement=value("a_movement"),
+        b_movement=value("b_movement"),
+        road_priority=value("road_priority"),
+        special_condition=value("special_condition"),
     )
 
 
@@ -131,6 +179,7 @@ def evaluate_input_sufficiency(
     response = intake_llm.invoke(prompt, config=config) if config else intake_llm.invoke(prompt)
     content = getattr(response, "content", response)
     decision = normalize_metadata_response(extract_json_object(str(content)))
+    decision = enrich_intake_decision(normalized_description, decision)
     return IntakeDecision(
         is_sufficient=decision.is_sufficient,
         normalized_description=normalized_description,

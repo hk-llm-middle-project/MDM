@@ -8,7 +8,12 @@ from langchain.retrievers import EnsembleRetriever
 from langchain_community.retrievers import BM25Retriever
 from langchain_core.documents import Document
 
-from rag.pipeline.retriever.common import kiwi_tokenize, mark_retrieval_fallback
+from rag.pipeline.retriever.common import (
+    filter_documents_by_metadata,
+    kiwi_tokenize,
+    mark_retrieval_fallback,
+    metadata_matches_filter,
+)
 from rag.pipeline.retriever.components import (
     RetrievalComponents,
     get_or_create_bm25_retriever,
@@ -47,7 +52,7 @@ def retrieve_with_ensemble(
     if not source_documents:
         return []
 
-    bm25_documents = _filter_documents(source_documents, filters)
+    bm25_documents = filter_documents_by_metadata(source_documents, filters)
     dense_retriever = _build_dense_retriever(components, config, k, filters)
 
     if not bm25_documents:
@@ -140,54 +145,16 @@ def _filter_documents(
     documents: list[Document],
     filters: dict[str, object] | None,
 ) -> list[Document]:
-    if not filters:
-        return documents
-    return [
-        document
-        for document in documents
-        if _metadata_matches_filter(document.metadata, filters)
-    ]
+    """Backward-compatible wrapper for debug scripts."""
+    return filter_documents_by_metadata(documents, filters)
 
 
 def _metadata_matches_filter(
     metadata: dict[str, object],
     filters: dict[str, object],
 ) -> bool:
-    if "$and" in filters:
-        conditions = filters["$and"]
-        return isinstance(conditions, list) and all(
-            isinstance(condition, dict)
-            and _metadata_matches_filter(metadata, condition)
-            for condition in conditions
-        )
-    if "$or" in filters:
-        conditions = filters["$or"]
-        return isinstance(conditions, list) and any(
-            isinstance(condition, dict)
-            and _metadata_matches_filter(metadata, condition)
-            for condition in conditions
-        )
-
-    return all(
-        _metadata_value_matches(metadata.get(key), expected)
-        for key, expected in filters.items()
-    )
-
-
-def _metadata_value_matches(actual: object, expected: object) -> bool:
-    if not isinstance(expected, dict):
-        return actual == expected
-
-    for operator, value in expected.items():
-        if operator == "$eq" and actual != value:
-            return False
-        if operator == "$ne" and actual == value:
-            return False
-        if operator == "$in" and actual not in value:
-            return False
-        if operator == "$nin" and actual in value:
-            return False
-    return True
+    """Backward-compatible wrapper for debug scripts."""
+    return metadata_matches_filter(metadata, filters)
 
 
 def _invoke_retriever(

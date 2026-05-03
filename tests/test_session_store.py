@@ -21,12 +21,24 @@ class SessionSerializationTest(unittest.TestCase):
 
         self.assertEqual(restored, message)
 
+    def test_chat_message_round_trips_metadata(self):
+        message = ChatMessage(
+            role="assistant",
+            content="답변",
+            metadata={"fault_ratio_a": 30, "fault_ratio_b": 70},
+        )
+
+        restored = message_from_dict(json_loads(json_dumps(message_to_dict(message))))
+
+        self.assertEqual(restored, message)
+
     def test_intake_state_round_trips_nested_metadata(self):
         state = IntakeState(
             attempt_count=2,
             search_metadata=UserSearchMetadata(
                 party_type="보행자",
                 location="횡단보도 없음",
+                retrieval_query="보행자 횡단보도 없음 사고",
             ),
             last_missing_fields=["location"],
             last_follow_up_questions=["사고 장소는 어디인가요?"],
@@ -54,13 +66,23 @@ class MemoryConversationStoreTest(unittest.TestCase):
         session = store.create_session("local")
 
         store.append_message("local", session.session_id, "user", "질문")
-        store.append_message("local", session.session_id, "assistant", "답변")
+        store.append_message(
+            "local",
+            session.session_id,
+            "assistant",
+            "답변",
+            metadata={"fault_ratio_a": 30, "fault_ratio_b": 70},
+        )
 
         self.assertEqual(
             store.get_messages("local", session.session_id),
             [
                 ChatMessage(role="user", content="질문"),
-                ChatMessage(role="assistant", content="답변"),
+                ChatMessage(
+                    role="assistant",
+                    content="답변",
+                    metadata={"fault_ratio_a": 30, "fault_ratio_b": 70},
+                ),
             ],
         )
 
@@ -75,6 +97,24 @@ class MemoryConversationStoreTest(unittest.TestCase):
         store.set_intake_state("local", session.session_id, state)
 
         self.assertEqual(store.get_intake_state("local", session.session_id), state)
+
+    def test_delete_session_removes_messages_state_and_active_session(self):
+        store = MemoryConversationStore()
+        session = store.create_session("local", title="삭제할 세션")
+        store.set_active_session("local", session.session_id)
+        store.append_message("local", session.session_id, "user", "질문")
+        store.set_intake_state(
+            "local",
+            session.session_id,
+            IntakeState(search_metadata=UserSearchMetadata(party_type="자동차")),
+        )
+
+        store.delete_session("local", session.session_id)
+
+        self.assertEqual(store.list_sessions("local"), [])
+        self.assertIsNone(store.get_active_session("local"))
+        self.assertEqual(store.get_messages("local", session.session_id), [])
+        self.assertEqual(store.get_intake_state("local", session.session_id), IntakeState())
 
     def test_loader_strategy_defaults_and_updates(self):
         store = MemoryConversationStore()

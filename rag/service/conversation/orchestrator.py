@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from config import DEFAULT_CHUNKER_STRATEGY, DEFAULT_EMBEDDING_PROVIDER, DEFAULT_LOADER_STRATEGY
+from rag.service.analysis.answer_schema import RetrievedContext
 from rag.pipeline.retrieval import RetrievalPipelineConfig
 from rag.service.conversation.pipelines.accident_analysis import answer_accident_analysis
 from rag.service.conversation.pipelines.general_chat import answer_general_chat
@@ -23,6 +24,9 @@ class AnswerResult:
     needs_more_input: bool = False
     intake_state: IntakeState = field(default_factory=IntakeState)
     result_type: TurnResultType = TurnResultType.ACCIDENT_RAG
+    fault_ratio_a: int | None = None
+    fault_ratio_b: int | None = None
+    retrieved_contexts: list[RetrievedContext] = field(default_factory=list)
 
 
 def answer_conversation_turn(
@@ -64,7 +68,7 @@ def answer_conversation_turn(
             result_type=TurnResultType.GENERAL_CHAT,
         )
 
-    answer, contexts, needs_more_input, next_state, result_type = answer_accident_analysis(
+    pipeline_result = answer_accident_analysis(
         question,
         pipeline_config=pipeline_config,
         intake_state=current_state,
@@ -77,9 +81,12 @@ def answer_conversation_turn(
         analyzer=analyzer,
     )
     return AnswerResult(
-        answer=answer,
-        contexts=contexts,
-        needs_more_input=needs_more_input,
-        intake_state=next_state,
-        result_type=result_type,
+        answer=pipeline_result.answer,
+        contexts=pipeline_result.contexts,
+        needs_more_input=pipeline_result.needs_more_input,
+        intake_state=pipeline_result.intake_state,
+        result_type=pipeline_result.result_type,
+        fault_ratio_a=pipeline_result.fault_ratio_a,
+        fault_ratio_b=pipeline_result.fault_ratio_b,
+        retrieved_contexts=pipeline_result.retrieved_contexts,
     )

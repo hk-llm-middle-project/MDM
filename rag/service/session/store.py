@@ -23,10 +23,20 @@ class ConversationStore(Protocol):
     def create_session(self, user_id: str, title: str | None = None) -> SessionMeta:
         """사용자에게 새 세션을 생성합니다."""
 
+    def delete_session(self, user_id: str, session_id: str) -> None:
+        """사용자의 세션과 관련 상태를 삭제합니다."""
+
     def get_messages(self, user_id: str, session_id: str) -> list[ChatMessage]:
         """한 세션의 메시지 목록을 반환합니다."""
 
-    def append_message(self, user_id: str, session_id: str, role: str, content: str) -> None:
+    def append_message(
+        self,
+        user_id: str,
+        session_id: str,
+        role: str,
+        content: str,
+        metadata: dict[str, object] | None = None,
+    ) -> None:
         """세션에 채팅 메시지 한 건을 추가합니다."""
 
     def get_intake_state(self, user_id: str, session_id: str) -> IntakeState:
