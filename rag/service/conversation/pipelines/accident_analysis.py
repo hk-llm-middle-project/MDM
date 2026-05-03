@@ -91,8 +91,6 @@ def get_missing_metadata_fields(metadata: UserSearchMetadata) -> list[str]:
 
 def get_missing_query_slot_fields(metadata: UserSearchMetadata) -> list[str]:
     """검색 품질에 중요한 사고 단서 중 추가 확인할 필드를 반환합니다."""
-    if not metadata.retrieval_query:
-        return []
     if metadata.party_type != "자동차":
         return []
 
