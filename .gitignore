@@ -23,6 +23,7 @@ experiments/parser/llamaparser/**/images/
 .codex
 .claude
 .omx
+AGENTS.md
 
 # Local Docker overrides
 docker-compose.override.yml

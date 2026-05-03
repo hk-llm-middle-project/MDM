@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Container
 from typing import Any
 
 from kiwipiepy import Kiwi
@@ -25,18 +26,48 @@ def kiwi_tokenize(text: str) -> list[str]:
 
 
 def metadata_matches_filter(metadata: dict[str, Any], filters: dict[str, object] | None) -> bool:
-    """현재 사용하는 Chroma equality/$and metadata filter를 로컬 문서에도 적용합니다."""
+    """현재 사용하는 Chroma metadata filter를 로컬 문서에도 적용합니다."""
     if not filters:
         return True
 
-    and_conditions = filters.get("$and")
-    if isinstance(and_conditions, list):
-        return all(
-            isinstance(condition, dict) and metadata_matches_filter(metadata, condition)
-            for condition in and_conditions
+    if "$and" in filters:
+        conditions = filters["$and"]
+        return isinstance(conditions, list) and all(
+            isinstance(condition, dict)
+            and metadata_matches_filter(metadata, condition)
+            for condition in conditions
+        )
+    if "$or" in filters:
+        conditions = filters["$or"]
+        return isinstance(conditions, list) and any(
+            isinstance(condition, dict)
+            and metadata_matches_filter(metadata, condition)
+            for condition in conditions
         )
 
-    return all(metadata.get(key) == value for key, value in filters.items())
+    return all(
+        metadata_value_matches(metadata.get(key), expected)
+        for key, expected in filters.items()
+    )
+
+
+def metadata_value_matches(actual: object, expected: object) -> bool:
+    """Chroma filter value operator를 로컬 metadata 값에 적용합니다."""
+    if not isinstance(expected, dict):
+        return actual == expected
+
+    for operator, value in expected.items():
+        if operator == "$eq" and actual != value:
+            return False
+        if operator == "$ne" and actual == value:
+            return False
+        if operator == "$in":
+            if not isinstance(value, Container) or actual not in value:
+                return False
+        if operator == "$nin":
+            if isinstance(value, Container) and actual in value:
+                return False
+    return True
 
 
 def filter_documents_by_metadata(
@@ -51,6 +82,42 @@ def filter_documents_by_metadata(
         for document in documents
         if metadata_matches_filter(document.metadata, filters)
     ]
+
+
+def mark_retrieval_fallback(
+    documents: list[Document],
+    fallback_from: str,
+    fallback_to: str,
+    reason: str,
+) -> list[Document]:
+    """Return copied documents annotated with retrieval fallback metadata."""
+    fallback_event = {
+        "from": fallback_from,
+        "to": fallback_to,
+        "reason": reason,
+    }
+    marked_documents: list[Document] = []
+    for document in documents:
+        metadata = dict(document.metadata)
+        existing_events = metadata.get("retrieval_fallbacks")
+        fallback_events = (
+            [*existing_events, fallback_event]
+            if isinstance(existing_events, list)
+            else [fallback_event]
+        )
+        metadata.update(
+            {
+                "retrieval_fallback": True,
+                "fallback_from": fallback_from,
+                "fallback_to": fallback_to,
+                "fallback_reason": reason,
+                "retrieval_fallbacks": fallback_events,
+            },
+        )
+        marked_documents.append(
+            Document(page_content=document.page_content, metadata=metadata),
+        )
+    return marked_documents
 
 
 def get_vectorstore_documents(vectorstore: Any) -> list[Document]:
