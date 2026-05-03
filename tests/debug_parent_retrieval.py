@@ -1,12 +1,12 @@
-"""Debug parent retrieval results without LangSmith or LLM calls.
+"""LangSmith와 LLM 호출 없이 parent 최종 검색 결과를 확인합니다.
 
-Run from the project root, for example:
+프로젝트 루트에서 다음처럼 실행합니다.
 
     .venv\Scripts\python.exe tests\debug_parent_retrieval.py ^
-      --query "신호기에 의해 교통정리가 이루어지고 있지 않고 한쪽 도로가 일방통행로인 교차로..."
+      --query "검색 질문"
 
-The script prints every returned document's metadata and a content preview,
-regardless of how many documents are returned.
+반환 문서 개수와 관계없이 각 문서의 metadata와 content preview를 출력합니다.
+BM25/Dense 단계별 비교는 debug_retrieval_strategies.py에서 확인합니다.
 """
 
 from __future__ import annotations
@@ -27,37 +27,39 @@ from rag.pipeline.retriever.strategies.parent import retrieve_with_parent_docume
 from rag.service.vectorstore.vectorstore_service import get_retrieval_components  # noqa: E402
 
 
-DEFAULT_QUERY = (
-    "신호기에 의해 교통정리가 이루어지고 있지 않고 한쪽 도로가 일방통행로인 교차로에서 "
-    "일방통행로가 아닌 도로를 이용하여 교차로에 진입하여 직진 중인 A차량과 "
-    "일방통행로를 역주행하여 교차로에 진입한 B차량이 충돌한 사고이다."
-)
-
-
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Print documents returned by the parent retriever or retrieval pipeline.",
+        description="parent 검색 전략 또는 retrieval pipeline 반환 문서를 출력합니다.",
     )
-    parser.add_argument("--query", default=DEFAULT_QUERY, help="Search query text.")
-    parser.add_argument("--loader", default="upstage", help="Loader strategy.")
-    parser.add_argument("--chunker", default="custom", help="Chunker strategy.")
-    parser.add_argument("--embedding", default="openai", help="Embedding provider.")
-    parser.add_argument("--k", type=int, default=3, help="Requested retrieval k.")
+    parser.add_argument(
+        "--query",
+        default=None,
+        help="검색 질문입니다. 생략하면 실행 중 입력받습니다.",
+    )
+    parser.add_argument("--loader", default="upstage", help="loader 전략입니다.")
+    parser.add_argument("--chunker", default="custom", help="chunker 전략입니다.")
+    parser.add_argument("--embedding", default="openai", help="embedding 제공자입니다.")
+    parser.add_argument("--k", type=int, default=3, help="요청할 검색 문서 수입니다.")
     parser.add_argument(
         "--mode",
         choices=("parent", "pipeline"),
         default="parent",
-        help="Run parent strategy directly or through the retrieval pipeline.",
+        help="parent 전략을 직접 실행할지 retrieval pipeline으로 실행할지 선택합니다.",
     )
-    parser.add_argument("--party-type", default="자동차", help="Optional party_type metadata filter.")
-    parser.add_argument("--location", default="교차로 사고", help="Optional location metadata filter.")
+    parser.add_argument("--party-type", default=None, help="party_type metadata filter입니다.")
+    parser.add_argument("--location", default=None, help="location metadata filter입니다.")
     parser.add_argument(
         "--preview-chars",
         type=int,
         default=900,
-        help="Maximum characters to print for each document.",
+        help="각 문서 preview에 출력할 최대 글자 수입니다.",
     )
-    return parser.parse_args()
+    args = parser.parse_args()
+    if args.query is None:
+        args.query = input("query: ").strip()
+    if not args.query:
+        parser.error("--query가 없으면 실행 중 질문을 입력해야 합니다.")
+    return args
 
 
 def build_filters(args: argparse.Namespace) -> dict[str, object] | None:

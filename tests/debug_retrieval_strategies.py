@@ -1,15 +1,25 @@
-"""Debug BM25, dense, and ensemble retrieval without LangSmith or LLM calls.
+"""LangSmith와 LLM 호출 없이 검색 전략별 결과를 확인합니다.
 
-Run from the project root, for example:
+프로젝트 루트에서 다음처럼 실행합니다.
 
-    .venv\Scripts\python.exe tests\debug_ensemble_retrieval.py ^
+    .venv\Scripts\python.exe tests\debug_retrieval_strategies.py ^
+      --query "검색 질문" ^
       --loader llamaparser ^
       --chunker case-boundary ^
+      --embedding openai ^
+      --strategy ensemble_parent ^
+      --target "보3" ^
+      --party-type "보행자" ^
+      --location "횡단보도 내" ^
+      --k 3 ^
+      --preview-chars 300 ^
+      --use-chunk-id ^
       --bm25-weight 0.85 ^
       --dense-weight 0.15
 
-The script prints each retriever's returned metadata and content preview so the
-BM25/Dense contribution can be inspected separately from the final ensemble.
+BM25/Dense 기여도와 최종 전략 결과를 분리해서 볼 수 있도록
+각 retriever가 반환한 metadata와 content preview를 출력합니다.
+최종 전략은 ensemble, parent, ensemble_parent 중에서 선택할 수 있습니다.
 """
 
 from __future__ import annotations
@@ -29,6 +39,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from rag.pipeline.retriever.common import kiwi_tokenize  # noqa: E402
 from rag.pipeline.retriever.strategies.ensemble import (  # noqa: E402
     DEFAULT_CANDIDATE_K_MULTIPLIER,
+    DEFAULT_ID_KEY,
     EnsembleRetrieverConfig,
     MIN_ENSEMBLE_CANDIDATE_K,
     _metadata_matches_filter,
@@ -45,47 +56,61 @@ from rag.service.vectorstore.vectorstore_service import get_retrieval_components
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Print BM25, dense, and ensemble retrieval results.",
+        description="BM25, Dense, 선택한 최종 검색 전략 결과를 출력합니다.",
     )
     parser.add_argument(
         "--query",
         default=None,
-        help="Search query text. If omitted, the script asks for it interactively.",
+        help="검색 질문입니다. 생략하면 실행 중 입력받습니다.",
     )
-    parser.add_argument("--loader", default="llamaparser", help="Loader strategy.")
-    parser.add_argument("--chunker", default="case-boundary", help="Chunker strategy.")
-    parser.add_argument("--embedding", default="openai", help="Embedding provider.")
+    parser.add_argument("--loader", default="llamaparser", help="loader 전략입니다.")
+    parser.add_argument("--chunker", default="case-boundary", help="chunker 전략입니다.")
+    parser.add_argument("--embedding", default="openai", help="embedding 제공자입니다.")
     parser.add_argument(
         "--strategy",
         choices=("ensemble", "ensemble_parent", "parent"),
         default="ensemble",
-        help="Final retrieval strategy to print after BM25/Dense baselines.",
+        help="BM25/Dense baseline 뒤에 출력할 최종 검색 전략입니다.",
     )
-    parser.add_argument("--k", type=int, default=5, help="Final top-k to print.")
-    parser.add_argument("--bm25-k", type=int, default=None, help="BM25 candidate k.")
-    parser.add_argument("--dense-k", type=int, default=None, help="Dense candidate k.")
-    parser.add_argument("--bm25-weight", type=float, default=0.85, help="BM25 weight.")
-    parser.add_argument("--dense-weight", type=float, default=0.15, help="Dense weight.")
-    parser.add_argument("--party-type", default="자동차", help="Optional party_type filter.")
-    parser.add_argument("--location", default="교차로 사고", help="Optional location filter.")
-    parser.add_argument("--target", default="차7-2", help="Expected diagram/chunk marker.")
+    parser.add_argument("--k", type=int, default=5, help="출력할 최종 top-k입니다.")
+    parser.add_argument("--bm25-k", type=int, default=None, help="BM25 후보 k입니다.")
+    parser.add_argument("--dense-k", type=int, default=None, help="Dense 후보 k입니다.")
+    parser.add_argument("--bm25-weight", type=float, default=0.85, help="BM25 가중치입니다.")
+    parser.add_argument("--dense-weight", type=float, default=0.15, help="Dense 가중치입니다.")
+    chunk_id_group = parser.add_mutually_exclusive_group()
+    chunk_id_group.add_argument(
+        "--use-chunk-id",
+        dest="use_chunk_id",
+        action="store_true",
+        default=True,
+        help="ensemble 문서 식별 기준으로 metadata chunk_id를 사용합니다.",
+    )
+    chunk_id_group.add_argument(
+        "--no-chunk-id",
+        dest="use_chunk_id",
+        action="store_false",
+        help="ensemble 문서 식별 기준으로 page_content를 사용합니다.",
+    )
+    parser.add_argument("--party-type", default=None, help="party_type metadata filter입니다.")
+    parser.add_argument("--location", default=None, help="location metadata filter입니다.")
+    parser.add_argument("--target", default=None, help="기대하는 diagram/chunk marker입니다.")
     parser.add_argument(
         "--noise",
         nargs="*",
-        default=["차1-1", "차12-1"],
-        help="Unexpected diagram/chunk markers to count.",
+        default=[],
+        help="섞이면 안 되는 diagram/chunk marker를 집계합니다.",
     )
     parser.add_argument(
         "--preview-chars",
         type=int,
         default=500,
-        help="Maximum characters to print for each document.",
+        help="각 문서 preview에 출력할 최대 글자 수입니다.",
     )
     args = parser.parse_args()
     if args.query is None:
         args.query = input("query: ").strip()
     if not args.query:
-        parser.error("--query is required when no interactive query is entered.")
+        parser.error("--query가 없으면 실행 중 질문을 입력해야 합니다.")
     return args
 
 
@@ -145,6 +170,7 @@ def retrieve_selected_strategy(
         weights=(args.bm25_weight, args.dense_weight),
         bm25_k=bm25_k,
         dense_k=dense_k,
+        id_key=DEFAULT_ID_KEY if args.use_chunk_id else None,
     )
     if args.strategy == "ensemble_parent":
         return retrieve_with_ensemble_parent_documents(
@@ -194,7 +220,11 @@ def marker_found(document, marker: str) -> bool:
 
 
 def print_summary(name: str, documents, args: argparse.Namespace, filters) -> None:
-    target_hits = sum(1 for document in documents if marker_found(document, args.target))
+    target_hits = (
+        sum(1 for document in documents if marker_found(document, args.target))
+        if args.target
+        else None
+    )
     noise_hits = {
         marker: sum(1 for document in documents if marker_found(document, marker))
         for marker in args.noise
@@ -212,8 +242,10 @@ def print_summary(name: str, documents, args: argparse.Namespace, filters) -> No
 
     print(f"\n=== {name} ===")
     print(f"returned count: {len(documents)}")
-    print(f"target hits ({args.target}): {target_hits}")
-    print(f"noise hits: {noise_hits}")
+    if args.target:
+        print(f"target hits ({args.target}): {target_hits}")
+    if args.noise:
+        print(f"noise hits: {noise_hits}")
     print(f"filter violations: {filter_violations}")
     print(f"rank keys: {keys}")
 
@@ -270,6 +302,7 @@ def main() -> None:
     print(f"strategy: {args.strategy}")
     print(f"filters: {filters}")
     print(f"weights: BM25={args.bm25_weight}, dense={args.dense_weight}")
+    print(f"id_key: {DEFAULT_ID_KEY if args.use_chunk_id else None}")
     print(f"k: final={args.k}, bm25={bm25_k}, dense={dense_k}")
     print(f"source documents: {len(source_documents)}")
     print(f"BM25 documents after filter: {len(bm25_documents)}")

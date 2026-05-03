@@ -6,7 +6,13 @@ import streamlit as st
 from config import (
     DEFAULT_CHUNKER_STRATEGY,
     DEFAULT_EMBEDDING_PROVIDER,
+    DEFAULT_ENSEMBLE_BM25_WEIGHT,
+    DEFAULT_ENSEMBLE_CANDIDATE_K,
+    DEFAULT_ENSEMBLE_USE_CHUNK_ID,
     DEFAULT_LOADER_STRATEGY,
+    ENSEMBLE_CANDIDATE_K_OPTIONS,
+    ENSEMBLE_ID_KEY,
+    ENSEMBLE_RETRIEVER_STRATEGIES,
 )
 from rag.embeddings import EMBEDDING_STRATEGIES
 from rag.pipeline.retrieval import RetrievalPipelineConfig
@@ -31,12 +37,6 @@ RETRIEVER_STRATEGY_OPTIONS = tuple(
     if strategy != "vectorstore"
 )
 USER_ID = "local"
-DEFAULT_ENSEMBLE_BM25_WEIGHT = 0.5
-ENSEMBLE_RETRIEVER_STRATEGIES = ("ensemble", "ensemble_parent")
-ENSEMBLE_CANDIDATE_K_OPTIONS = (5, 10, 20, 30)
-DEFAULT_ENSEMBLE_CANDIDATE_K = 20
-DEFAULT_ENSEMBLE_USE_CHUNK_ID = True
-ENSEMBLE_ID_KEY = "chunk_id"
 
 
 def ensure_active_session(store: ConversationStore) -> str:
