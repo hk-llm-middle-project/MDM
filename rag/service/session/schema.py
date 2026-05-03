@@ -1,6 +1,7 @@
 """저장되는 대화 세션 데이터 구조입니다."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -9,6 +10,7 @@ class ChatMessage:
 
     role: str
     content: str
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)

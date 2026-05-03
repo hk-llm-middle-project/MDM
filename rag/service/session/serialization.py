@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict
+from dataclasses import asdict, fields
 import json
 from typing import Any
 
-from rag.service.intake.schema import IntakeState, UserSearchMetadata
+from rag.service.intake.schema import IntakeState, QuerySlots, UserSearchMetadata
 from rag.service.session.schema import ChatMessage, SessionMeta
 
 
@@ -21,8 +21,11 @@ def json_loads(value: str) -> dict[str, Any]:
     return data
 
 
-def message_to_dict(message: ChatMessage) -> dict[str, str]:
-    return {"role": message.role, "content": message.content}
+def message_to_dict(message: ChatMessage) -> dict[str, Any]:
+    data: dict[str, Any] = {"role": message.role, "content": message.content}
+    if message.metadata:
+        data["metadata"] = message.metadata
+    return data
 
 
 def message_from_dict(data: dict[str, Any]) -> ChatMessage:
@@ -30,7 +33,10 @@ def message_from_dict(data: dict[str, Any]) -> ChatMessage:
     content = data.get("content")
     if not isinstance(role, str) or not isinstance(content, str):
         raise ValueError("채팅 메시지에는 문자열 role과 content가 필요합니다.")
-    return ChatMessage(role=role, content=content)
+    metadata = data.get("metadata")
+    if not isinstance(metadata, dict):
+        metadata = {}
+    return ChatMessage(role=role, content=content, metadata=metadata)
 
 
 def session_meta_to_dict(meta: SessionMeta) -> dict[str, str]:
@@ -79,6 +85,17 @@ def intake_state_from_dict(data: dict[str, Any]) -> IntakeState:
     except (TypeError, ValueError):
         attempt_count = 0
 
+    query_slots_data = metadata_data.get("query_slots")
+    if not isinstance(query_slots_data, dict):
+        query_slots_data = {}
+    query_slot_names = {field.name for field in fields(QuerySlots)}
+    query_slots = QuerySlots(
+        **{
+            name: value if isinstance(value := query_slots_data.get(name), str) else None
+            for name in query_slot_names
+        }
+    )
+
     return IntakeState(
         attempt_count=max(0, attempt_count),
         search_metadata=UserSearchMetadata(
@@ -88,6 +105,10 @@ def intake_state_from_dict(data: dict[str, Any]) -> IntakeState:
             location=metadata_data.get("location")
             if isinstance(metadata_data.get("location"), str)
             else None,
+            retrieval_query=metadata_data.get("retrieval_query")
+            if isinstance(metadata_data.get("retrieval_query"), str)
+            else None,
+            query_slots=query_slots,
         ),
         last_missing_fields=[
             value for value in last_missing_fields if isinstance(value, str)

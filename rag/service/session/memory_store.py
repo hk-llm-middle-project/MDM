@@ -54,13 +54,35 @@ class MemoryConversationStore:
         self._intake_states[session_id] = IntakeState()
         return meta
 
+    def delete_session(self, user_id: str, session_id: str) -> None:
+        session_ids = self._user_sessions.get(user_id, [])
+        self._user_sessions[user_id] = [
+            existing_session_id
+            for existing_session_id in session_ids
+            if existing_session_id != session_id
+        ]
+        self._session_meta.pop(session_id, None)
+        self._messages.pop(session_id, None)
+        self._intake_states.pop(session_id, None)
+        if self._active_sessions.get(user_id) == session_id:
+            self._active_sessions.pop(user_id, None)
+
     def get_messages(self, user_id: str, session_id: str) -> list[ChatMessage]:
         del user_id
         return list(self._messages.get(session_id, []))
 
-    def append_message(self, user_id: str, session_id: str, role: str, content: str) -> None:
+    def append_message(
+        self,
+        user_id: str,
+        session_id: str,
+        role: str,
+        content: str,
+        metadata: dict[str, object] | None = None,
+    ) -> None:
         del user_id
-        self._messages.setdefault(session_id, []).append(ChatMessage(role=role, content=content))
+        self._messages.setdefault(session_id, []).append(
+            ChatMessage(role=role, content=content, metadata=metadata or {})
+        )
         self._touch_session(session_id)
 
     def get_intake_state(self, user_id: str, session_id: str) -> IntakeState:

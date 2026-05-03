@@ -2,6 +2,7 @@
 
 from rag.pipeline.reranker.strategies import (
     CohereRerankerConfig,
+    CrossEncoderRerankerConfig,
     FlashrankRerankerConfig,
     LLMScoreRerankerConfig,
     NoOpRerankerConfig,
@@ -10,6 +11,7 @@ from rag.pipeline.reranker.reranker import RERANKER_STRATEGIES, RerankerConfig, 
 
 __all__ = [
     "CohereRerankerConfig",
+    "CrossEncoderRerankerConfig",
     "FlashrankRerankerConfig",
     "LLMScoreRerankerConfig",
     "NoOpRerankerConfig",

@@ -6,10 +6,12 @@ from config import RETRIEVER_K
 from rag.pipeline.retriever.components import RetrievalComponents
 from rag.pipeline.retriever.strategies import (
     EnsembleRetrieverConfig,
+    EnsembleParentRetrieverConfig,
     MultiQueryRetrieverConfig,
     ParentDocumentRetrieverConfig,
     VectorStoreRetrieverConfig,
     retrieve_with_ensemble,
+    retrieve_with_ensemble_parent_documents,
     retrieve_with_multiquery,
     retrieve_with_parent_documents,
     retrieve_with_vectorstore,
@@ -20,6 +22,7 @@ from rag.service.tracing import TraceContext
 RETRIEVAL_STRATEGIES = {
     "vectorstore": retrieve_with_vectorstore,
     "ensemble": retrieve_with_ensemble,
+    "ensemble_parent": retrieve_with_ensemble_parent_documents,
     "parent": retrieve_with_parent_documents,
     "multiquery": retrieve_with_multiquery,
     "similarity": retrieve_with_vectorstore,
@@ -28,6 +31,7 @@ RETRIEVAL_STRATEGIES = {
 StrategyConfig = (
     VectorStoreRetrieverConfig
     | EnsembleRetrieverConfig
+    | EnsembleParentRetrieverConfig
     | ParentDocumentRetrieverConfig
     | MultiQueryRetrieverConfig
 )

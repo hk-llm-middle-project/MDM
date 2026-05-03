@@ -9,6 +9,7 @@ from langchain_core.documents import Document
 from config import RETRIEVER_K
 from rag.pipeline.reranker import RerankerConfig, rerank
 from rag.pipeline.retriever import RetrievalComponents, StrategyConfig, retrieve
+from rag.pipeline.retriever.common import mark_retrieval_fallback
 from rag.service.tracing import TraceContext
 
 
@@ -46,7 +47,13 @@ def run_retrieval_pipeline(
         retrieve_kwargs["trace_context"] = trace_context
     candidate_documents = retrieve(**retrieve_kwargs)
     if filters is not None and not candidate_documents:
-        candidate_documents = retrieve(**{**retrieve_kwargs, "filters": None})
+        fallback_documents = retrieve(**{**retrieve_kwargs, "filters": None})
+        candidate_documents = mark_retrieval_fallback(
+            fallback_documents,
+            fallback_from=f"{config.retriever_strategy}:filtered",
+            fallback_to=f"{config.retriever_strategy}:unfiltered",
+            reason="no documents matched metadata filter",
+        )
 
     rerank_kwargs = {
         "query": query,
