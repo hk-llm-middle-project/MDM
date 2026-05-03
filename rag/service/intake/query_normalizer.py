@@ -314,12 +314,14 @@ def get_party_context(text: str, party: str) -> str | None:
         for match in marker_pattern.finditer(text)
         if match.group(0)[0] in {"A", "B"}
     ]
+    segments = []
     for index, (found_party, start, _) in enumerate(markers):
         if found_party != party:
             continue
         end = markers[index + 1][1] if index + 1 < len(markers) else len(text)
-        return text[start:end]
-    return None
+        segments.append(text[start:end])
+
+    return " ".join(segments) if segments else None
 
 
 def detect_shared_party_signal(text: str) -> str | None:
