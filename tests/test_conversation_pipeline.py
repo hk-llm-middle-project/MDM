@@ -5,7 +5,7 @@ from rag.service.analysis.answer_schema import AnalysisResult
 from rag.service.conversation.orchestrator import answer_conversation_turn
 from rag.service.conversation.router import route_conversation_turn
 from rag.service.conversation.schema import RouteType, TurnResultType
-from rag.service.intake.schema import IntakeDecision, IntakeState, UserSearchMetadata
+from rag.service.intake.schema import IntakeDecision, IntakeState, QuerySlots, UserSearchMetadata
 from rag.service.session.schema import ChatMessage
 
 
@@ -165,6 +165,77 @@ class ConversationPipelineTest(unittest.TestCase):
         self.assertEqual(result.contexts, ["context"])
         self.assertEqual(result.fault_ratio_a, 30)
         self.assertEqual(result.fault_ratio_b, 70)
+
+    def test_accident_analysis_asks_for_missing_query_slots(self):
+        router_llm = FakeLLM(
+            '{"route_type":"accident_analysis","confidence":0.97,"reason":"사고 분석"}'
+        )
+        intake = MagicMock(
+            return_value=IntakeDecision(
+                is_sufficient=True,
+                normalized_description="교차로에서 사고났어",
+                search_metadata=UserSearchMetadata(
+                    party_type="자동차",
+                    location="교차로 사고",
+                    retrieval_query="양쪽 신호등 있는 교차로",
+                    query_slots=QuerySlots(road_control="양쪽 신호등"),
+                ),
+            )
+        )
+        analyzer = MagicMock()
+
+        result = answer_conversation_turn(
+            "교차로에서 사고났어",
+            chat_history=[],
+            intake_evaluator=intake,
+            analyzer=analyzer,
+            router_llm=router_llm,
+        )
+
+        self.assertEqual(result.result_type, TurnResultType.ACCIDENT_FOLLOW_UP)
+        self.assertTrue(result.needs_more_input)
+        self.assertIn("두 차량의 신호", result.answer)
+        self.assertIn("각각 직진", result.answer)
+        self.assertEqual(result.intake_state.last_missing_fields[0], "query_slots.signals")
+        analyzer.assert_not_called()
+
+    def test_accident_analysis_runs_when_core_query_slots_are_present(self):
+        router_llm = FakeLLM(
+            '{"route_type":"accident_analysis","confidence":0.97,"reason":"사고 분석"}'
+        )
+        metadata = UserSearchMetadata(
+            party_type="자동차",
+            location="교차로 사고",
+            retrieval_query="녹색직진 대 적색직진",
+            query_slots=QuerySlots(
+                road_control="양쪽 신호등",
+                relation="상대차량이 측면에서 진입",
+                a_signal="녹색",
+                b_signal="적색",
+                a_movement="직진",
+                b_movement="직진",
+            ),
+        )
+        intake = MagicMock(
+            return_value=IntakeDecision(
+                is_sufficient=True,
+                normalized_description="정규화된 설명",
+                search_metadata=metadata,
+            )
+        )
+        analyzer = MagicMock(return_value=("answer", ["context"]))
+
+        result = answer_conversation_turn(
+            "교차로에서 A 녹색 직진, B 적색 직진",
+            chat_history=[],
+            intake_evaluator=intake,
+            analyzer=analyzer,
+            router_llm=router_llm,
+        )
+
+        self.assertEqual(result.result_type, TurnResultType.ACCIDENT_RAG)
+        self.assertFalse(result.needs_more_input)
+        analyzer.assert_called_once()
 
 
 if __name__ == "__main__":

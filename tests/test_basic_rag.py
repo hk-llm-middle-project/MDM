@@ -38,7 +38,7 @@ from rag.service.intake.intake_service import (
     normalize_metadata_response,
 )
 from rag.service.intake.query_normalizer import normalize_retrieval_query_terms
-from rag.service.intake.schema import IntakeDecision, IntakeState, UserSearchMetadata
+from rag.service.intake.schema import IntakeDecision, IntakeState, QuerySlots, UserSearchMetadata
 from rag.service.presentation.result_service import format_context_preview, truncate_context
 from rag.service.tracing import TraceContext
 
@@ -1332,6 +1332,11 @@ class BasicRagTest(unittest.TestCase):
             search_metadata=UserSearchMetadata(
                 party_type="자동차",
                 retrieval_query="자동차 사고 기존 검색 질의",
+                query_slots=QuerySlots(
+                    relation="상대차량이 측면에서 진입",
+                    a_movement="직진",
+                    b_movement="직진",
+                ),
             ),
             last_missing_fields=["location"],
             last_follow_up_questions=["사고 상황은 어디에 가까운가요?"],
@@ -1361,6 +1366,11 @@ class BasicRagTest(unittest.TestCase):
                 party_type="자동차",
                 location="교차로 사고",
                 retrieval_query="자동차 사고 기존 검색 질의",
+                query_slots=QuerySlots(
+                    relation="상대차량이 측면에서 진입",
+                    a_movement="직진",
+                    b_movement="직진",
+                ),
             ),
             pipeline_config=None,
             loader_strategy="pdfplumber",

@@ -89,6 +89,85 @@ def get_missing_metadata_fields(metadata: UserSearchMetadata) -> list[str]:
     return missing_fields
 
 
+def get_missing_query_slot_fields(metadata: UserSearchMetadata) -> list[str]:
+    """검색 품질에 중요한 사고 단서 중 추가 확인할 필드를 반환합니다."""
+    if not metadata.retrieval_query:
+        return []
+    if metadata.party_type != "자동차":
+        return []
+
+    slots = metadata.query_slots
+    missing_fields: list[str] = []
+    has_movement_pair = bool(slots.a_movement and slots.b_movement)
+
+    if metadata.location == "교차로 사고":
+        if slots.road_control and "신호" in slots.road_control:
+            if not (slots.a_signal and slots.b_signal):
+                missing_fields.append("query_slots.signals")
+        if not has_movement_pair:
+            missing_fields.append("query_slots.movements")
+        if not (slots.relation or slots.road_priority):
+            missing_fields.append("query_slots.relation")
+    elif metadata.location == "같은 방향 진행차량 상호간의 사고":
+        if not (slots.special_condition or slots.a_movement or slots.b_movement):
+            missing_fields.append("query_slots.same_direction_detail")
+    elif metadata.location == "마주보는 방향 진행차량 상호 간의 사고":
+        if not slots.special_condition:
+            missing_fields.append("query_slots.opposite_direction_detail")
+    elif metadata.location == "기타":
+        if not (slots.special_condition or slots.relation):
+            missing_fields.append("query_slots.special_condition")
+
+    return missing_fields[:2]
+
+
+def get_missing_search_fields(metadata: UserSearchMetadata) -> list[str]:
+    """필수 metadata와 검색 품질 보강용 slot 누락을 함께 반환합니다."""
+    metadata_fields = get_missing_metadata_fields(metadata)
+    if metadata_fields:
+        return metadata_fields
+    return get_missing_query_slot_fields(metadata)
+
+
+def build_query_slot_follow_up_questions(missing_field_names: list[str]) -> list[str]:
+    """slot 누락에 대해 사용자가 답하기 쉬운 추가 질문을 만듭니다."""
+    questions: list[str] = []
+    if "query_slots.signals" in missing_field_names:
+        questions.append("두 차량의 신호는 각각 무엇이었나요? 예: A 녹색 직진, B 적색 직진")
+    if "query_slots.movements" in missing_field_names:
+        questions.append("두 차량은 각각 직진, 좌회전, 우회전, 진로변경 중 어떻게 진행했나요?")
+    if "query_slots.relation" in missing_field_names:
+        questions.append("상대 차량은 맞은편에서 왔나요, 오른쪽/왼쪽 도로처럼 측면에서 진입했나요?")
+    if "query_slots.same_direction_detail" in missing_field_names:
+        questions.append("같은 방향 사고라면 추돌인지, 진로변경/차로변경 중 충돌인지 알려주세요.")
+    if "query_slots.opposite_direction_detail" in missing_field_names:
+        questions.append("마주보는 방향 사고라면 중앙선 침범이나 역주행이 있었나요?")
+    if "query_slots.special_condition" in missing_field_names:
+        questions.append("도로 외 진입, 주차장, 문 열림, 유턴, 정차 후 출발 중 해당되는 특수 상황이 있나요?")
+    return questions[:2]
+
+
+def build_follow_up_questions(
+    missing_field_names: list[str],
+    intake_decision: IntakeDecision,
+) -> list[str]:
+    """누락 종류에 따라 LLM 질문 또는 기본 질문을 선택합니다."""
+    metadata_missing_fields = [
+        field_name
+        for field_name in missing_field_names
+        if not field_name.startswith("query_slots.")
+    ]
+    if metadata_missing_fields:
+        return (
+            intake_decision.follow_up_questions
+            or build_default_follow_up_questions(metadata_missing_fields)
+        )
+    return (
+        intake_decision.follow_up_questions
+        or build_query_slot_follow_up_questions(missing_field_names)
+    )
+
+
 def build_follow_up_answer(follow_up_questions: list[str]) -> str:
     """검색에 필요한 정보가 부족할 때 사용자에게 보여줄 답변을 만듭니다."""
     if not follow_up_questions:
@@ -154,13 +233,13 @@ def answer_accident_analysis(
         current_state.search_metadata,
         intake_decision.search_metadata,
     )
-    missing_field_names = get_missing_metadata_fields(merged_metadata)
+    missing_field_names = get_missing_search_fields(merged_metadata)
 
     if missing_field_names:
         if current_state.attempt_count < MAX_FOLLOW_UP_ATTEMPTS:
-            follow_up_questions = (
-                intake_decision.follow_up_questions
-                or build_default_follow_up_questions(missing_field_names)
+            follow_up_questions = build_follow_up_questions(
+                missing_field_names,
+                intake_decision,
             )
             next_state = IntakeState(
                 attempt_count=current_state.attempt_count + 1,
