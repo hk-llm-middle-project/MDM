@@ -10,13 +10,15 @@ Run validation:
 python3 evaluation/validate_langsmith_testsets.py
 ```
 
-Run the default retrieval LangSmith evaluation (`upstage/custom/bge`):
+Run the default retrieval evaluation locally (`upstage/custom/bge`). This does
+not create LangSmith traces. The default retriever follows the Streamlit app and
+uses `similarity` with no reranker:
 
 ```bash
 uv run python evaluation/evaluate_retrieval_langsmith.py
 ```
 
-Results are stored in LangSmith and summarized locally under:
+Results are written locally under:
 
 ```text
 evaluation/results/langsmith/
@@ -27,22 +29,51 @@ Each completed run writes:
 - `<timestamp>-<run-name>.csv`
 - `<timestamp>-<run-name>.summary.json`
 
+Only run through LangSmith when you explicitly need remote experiments/traces:
+
+```bash
+uv run python evaluation/evaluate_retrieval_langsmith.py --langsmith
+```
+
 List configured retrieval evaluation combinations:
 
 ```bash
 uv run python evaluation/evaluate_retrieval_langsmith.py --list-matrix
 ```
 
-Run the default matrix preset (`upstage/custom/bge`, `upstage/raw/bge`, `upstage/raw/openai`):
+Run the default matrix preset locally. Missing vectorstores are skipped by
+default, and no LangSmith traces are created:
 
 ```bash
 uv run python evaluation/evaluate_retrieval_langsmith.py --matrix
 ```
 
-Run every Streamlit-selectable parser/chunker/embedder combination. Missing vectorstores are skipped by default:
+Run every Streamlit-selectable parser/chunker/embedder combination locally:
 
 ```bash
 uv run python evaluation/evaluate_retrieval_langsmith.py --preset all
+```
+
+Evaluate the same parser/chunker/embedder matrix with a different retrieval
+strategy or reranker:
+
+```bash
+uv run python evaluation/evaluate_retrieval_langsmith.py \
+  --preset all \
+  --retriever-strategy ensemble_parent
+
+uv run python evaluation/evaluate_retrieval_langsmith.py \
+  --preset parser-baseline \
+  --retriever-strategy ensemble_parent \
+  --reranker-strategy cross-encoder \
+  --candidate-k 30 \
+  --k 3
+```
+
+Run the same matrix through LangSmith only when trace quota is acceptable:
+
+```bash
+uv run python evaluation/evaluate_retrieval_langsmith.py --preset all --langsmith
 ```
 
 Fail instead of skipping missing vectorstores:
