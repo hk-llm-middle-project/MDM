@@ -88,6 +88,21 @@ def main() -> None:
             option_values(summary, "reranker_strategy"),
             default=option_values(summary, "reranker_strategy"),
         )
+        selected_suites = st.multiselect(
+            "Evaluation suite",
+            option_values(examples, "evaluation_suite"),
+            default=option_values(examples, "evaluation_suite"),
+        )
+        selected_difficulties = st.multiselect(
+            "Difficulty",
+            option_values(examples, "difficulty"),
+            default=option_values(examples, "difficulty"),
+        )
+        selected_case_families = st.multiselect(
+            "Case family",
+            option_values(examples, "case_family"),
+            default=option_values(examples, "case_family"),
+        )
 
     summary = filter_frame(
         summary,
@@ -96,6 +111,7 @@ def main() -> None:
         selected_embedders,
         selected_retrievers,
         selected_rerankers,
+        evaluation_suite=selected_suites,
     )
     examples = filter_frame(
         examples,
@@ -104,6 +120,9 @@ def main() -> None:
         selected_embedders,
         selected_retrievers,
         selected_rerankers,
+        evaluation_suite=selected_suites,
+        difficulty=selected_difficulties,
+        case_family=selected_case_families,
     )
     metrics = filter_frame(
         metrics,
@@ -112,6 +131,7 @@ def main() -> None:
         selected_embedders,
         selected_retrievers,
         selected_rerankers,
+        evaluation_suite=selected_suites,
     )
 
     tabs = st.tabs(TAB_LABELS)

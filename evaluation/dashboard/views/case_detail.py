@@ -33,10 +33,18 @@ def render(examples: pd.DataFrame) -> None:
         column
         for column in [
             "reference.expected_diagram_ids",
+            "reference.acceptable_diagram_ids",
+            "reference.near_miss_diagram_ids",
             "reference.expected_location",
             "reference.expected_party_type",
             "reference.expected_chunk_types",
             "reference.expected_keywords",
+            "reference.expected_filter",
+            "reference.expected_route_type",
+            "reference.expected_final_fault_ratio",
+            "reference.expected_party_roles",
+            "reference.expected_applicable_modifiers",
+            "reference.expected_non_applicable_modifiers",
         ]
         if column in rows.columns
     ]
@@ -49,6 +57,10 @@ def render(examples: pd.DataFrame) -> None:
         column
         for column in [
             "run_label",
+            "evaluation_suite",
+            "case_type_codes",
+            "difficulty",
+            "case_family",
             "run_name",
             "loader_strategy",
             "chunker_strategy",

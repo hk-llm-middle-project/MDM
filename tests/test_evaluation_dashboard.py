@@ -12,9 +12,11 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from evaluation.dashboard.loaders import discover_result_bundles, load_results
 from evaluation.dashboard.transforms import (
+    build_failure_breakdown,
     build_example_frame,
     build_metric_frame,
     build_summary_frame,
+    filter_frame,
 )
 
 
@@ -93,6 +95,10 @@ class EvaluationDashboardTest(unittest.TestCase):
                 [
                     {
                         "inputs.question": "q1",
+                        "metadata.suite": "retrieval",
+                        "metadata.case_type_codes": json.dumps(["RET_DIAGRAM"]),
+                        "metadata.difficulty": "hard",
+                        "metadata.case_family": "car_intersection",
                         "feedback.critical_error": 1,
                         "feedback.diagram_id_hit": 0,
                     },
@@ -108,13 +114,55 @@ class EvaluationDashboardTest(unittest.TestCase):
 
         self.assertEqual(len(frame), 2)
         self.assertEqual(frame.loc[0, "run_name"], "upstage-custom-bge")
+        self.assertEqual(frame.loc[0, "evaluation_suite"], "retrieval")
         self.assertEqual(frame.loc[0, "critical_error"], 1)
         self.assertEqual(frame.loc[0, "diagram_id_hit"], 0)
+        self.assertEqual(frame.loc[0, "case_type_codes"], json.dumps(["RET_DIAGRAM"]))
+        self.assertEqual(frame.loc[0, "difficulty"], "hard")
+        self.assertEqual(frame.loc[0, "case_family"], "car_intersection")
+
+    def test_failure_breakdown_includes_case_metadata_when_available(self):
+        failed = pd.DataFrame(
+            [
+                {
+                    "run_name": "run-a",
+                    "run_label": "run-a / vectorstore / none",
+                    "loader_strategy": "upstage",
+                    "chunker_strategy": "custom",
+                    "embedding_provider": "bge",
+                    "retriever_strategy": "vectorstore",
+                    "reranker_strategy": "none",
+                    "case_type_codes": json.dumps(["RET_NEAR_MISS"]),
+                    "difficulty": "hard",
+                    "case_family": "car_intersection",
+                },
+                {
+                    "run_name": "run-a",
+                    "run_label": "run-a / vectorstore / none",
+                    "loader_strategy": "upstage",
+                    "chunker_strategy": "custom",
+                    "embedding_provider": "bge",
+                    "retriever_strategy": "vectorstore",
+                    "reranker_strategy": "none",
+                    "case_type_codes": json.dumps(["RET_NEAR_MISS"]),
+                    "difficulty": "hard",
+                    "case_family": "car_intersection",
+                },
+            ]
+        )
+
+        breakdown = build_failure_breakdown(failed)
+
+        self.assertIn("case_type_codes", breakdown.columns)
+        self.assertIn("difficulty", breakdown.columns)
+        self.assertIn("case_family", breakdown.columns)
+        self.assertEqual(breakdown.loc[0, "failed_count"], 2)
 
     def test_build_metric_frame_converts_summary_metrics_to_long_rows(self):
         summary_frame = pd.DataFrame(
             [
                 {
+                    "evaluation_suite": "retrieval",
                     "run_name": "upstage-custom-bge",
                     "loader_strategy": "upstage",
                     "chunker_strategy": "custom",
@@ -130,9 +178,75 @@ class EvaluationDashboardTest(unittest.TestCase):
 
         self.assertEqual(set(metric_frame["metric"]), {"critical_error", "diagram_id_hit"})
         self.assertEqual(
+            metric_frame.loc[metric_frame["metric"] == "critical_error", "evaluation_suite"].iloc[0],
+            "retrieval",
+        )
+        self.assertEqual(
             metric_frame.loc[metric_frame["metric"] == "critical_error", "score"].iloc[0],
             0.8,
         )
+
+    def test_filter_frame_can_filter_suite_and_case_metadata(self):
+        frame = pd.DataFrame(
+            [
+                {
+                    "evaluation_suite": "retrieval",
+                    "difficulty": "hard",
+                    "case_family": "car_intersection",
+                    "loader_strategy": "upstage",
+                    "chunker_strategy": "custom",
+                    "embedding_provider": "bge",
+                },
+                {
+                    "evaluation_suite": "intake",
+                    "difficulty": "easy",
+                    "case_family": "general_rule",
+                    "loader_strategy": "upstage",
+                    "chunker_strategy": "custom",
+                    "embedding_provider": "bge",
+                },
+            ]
+        )
+
+        filtered = filter_frame(
+            frame,
+            loader_strategy=["upstage"],
+            chunker_strategy=["custom"],
+            embedding_provider=["bge"],
+            evaluation_suite=["retrieval"],
+            difficulty=["hard"],
+            case_family=["car_intersection"],
+        )
+
+        self.assertEqual(len(filtered), 1)
+        self.assertEqual(filtered.loc[0, "evaluation_suite"], "retrieval")
+
+    def test_strategy_filters_keep_strategyless_decision_suite_rows(self):
+        frame = pd.DataFrame(
+            [
+                {
+                    "evaluation_suite": "retrieval",
+                    "loader_strategy": "upstage",
+                    "chunker_strategy": "custom",
+                    "embedding_provider": "bge",
+                },
+                {
+                    "evaluation_suite": "intake",
+                    "loader_strategy": None,
+                    "chunker_strategy": None,
+                    "embedding_provider": None,
+                },
+            ]
+        )
+
+        filtered = filter_frame(
+            frame,
+            loader_strategy=["upstage"],
+            chunker_strategy=["custom"],
+            embedding_provider=["bge"],
+        )
+
+        self.assertEqual(set(filtered["evaluation_suite"]), {"retrieval", "intake"})
 
     def test_load_results_returns_empty_frames_for_missing_directory(self):
         with tempfile.TemporaryDirectory() as temp_dir:

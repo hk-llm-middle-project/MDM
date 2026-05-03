@@ -24,4 +24,7 @@ Useful local evaluation commands:
 uv run python evaluation/evaluate_retrieval_langsmith.py --preset all
 uv run python evaluation/evaluate_retrieval_langsmith.py --preset all --retriever-strategy ensemble_parent
 uv run python evaluation/evaluate_retrieval_langsmith.py --preset parser-baseline --retriever-strategy ensemble_parent --reranker-strategy cross-encoder --candidate-k 30 --k 3
+uv run python evaluation/evaluate_retrieval_langsmith.py --preset all --all-strategies
+uv run python evaluation/evaluate_retrieval_langsmith.py --preset parser-baseline --retriever-strategies vectorstore,ensemble_parent --reranker-strategies none,cross-encoder
+uv run python evaluation/evaluate_decision_suites.py --suite all
 ```

@@ -15,14 +15,53 @@ METRIC_COLUMNS = (
     "party_type_match",
     "chunk_type_match",
     "keyword_coverage",
+    "near_miss_not_above_expected",
     "retrieval_relevance",
     "critical_error",
+    "intake_is_sufficient",
+    "missing_fields_match",
+    "follow_up_contains",
+    "forbidden_filter_absent",
+    "intake_overall",
+    "route_type_match",
+    "reason_category_match",
+    "router_overall",
+    "metadata_filter_match",
+    "metadata_filter_overall",
+    "state_sequence_match",
+    "followup_questions_match",
+    "final_metadata_match",
+    "final_result_type_match",
+    "turns_to_ready_match",
+    "multiturn_overall",
+    "final_fault_ratio_match",
+    "cannot_determine_match",
+    "required_evidence_coverage",
+    "party_role_coverage",
+    "applicable_modifier_coverage",
+    "non_applicable_modifier_coverage",
+    "reference_diagram_hit",
+    "structured_output_overall",
+)
+
+CASE_METADATA_COLUMNS = (
+    "evaluation_suite",
+    "suite",
+    "case_type_codes",
+    "difficulty",
+    "case_family",
+    "inference_type",
+    "query_style",
+    "requires_diagram",
+    "requires_table",
+    "filter_risk",
 )
 
 SUMMARY_METADATA_COLUMNS = (
     "experiment_name",
     "dataset_name",
     "testset_path",
+    "evaluation_suite",
     "run_name",
     "loader_strategy",
     "chunker_strategy",
@@ -70,6 +109,7 @@ def build_summary_frame(bundles: Iterable[Any]) -> pd.DataFrame:
             "experiment_name": summary.get("experiment_name"),
             "dataset_name": summary.get("dataset_name"),
             "testset_path": summary.get("testset_path"),
+            "evaluation_suite": summary.get("evaluation_suite") or summary.get("suite"),
             "run_name": run_name,
             "loader_strategy": loader,
             "chunker_strategy": chunker,
@@ -167,6 +207,16 @@ def build_example_frame(bundles: Iterable[Any]) -> pd.DataFrame:
         frame["run_label"] = make_run_label(run_name, retriever, reranker)
         frame["summary_path"] = str(getattr(bundle, "summary_path", ""))
         frame["csv_path"] = str(getattr(bundle, "csv_path", "") or "")
+        if "evaluation_suite" not in frame.columns:
+            frame["evaluation_suite"] = summary.get("evaluation_suite") or summary.get("suite")
+        for column in CASE_METADATA_COLUMNS:
+            metadata_column = f"metadata.{column}"
+            if column not in frame.columns and metadata_column in frame.columns:
+                frame[column] = frame[metadata_column]
+        if "evaluation_suite" in frame.columns and "suite" in frame.columns:
+            frame["evaluation_suite"] = frame["evaluation_suite"].fillna(frame["suite"])
+        elif "evaluation_suite" not in frame.columns and "suite" in frame.columns:
+            frame["evaluation_suite"] = frame["suite"]
 
         frame["case_key"] = frame.apply(make_case_key, axis=1)
         for metric_name in METRIC_COLUMNS:
@@ -201,6 +251,7 @@ def build_metric_frame(summary_frame: pd.DataFrame) -> pd.DataFrame:
         )
 
     id_columns = [
+        "evaluation_suite",
         "run_name",
         "loader_strategy",
         "chunker_strategy",
@@ -229,19 +280,35 @@ def filter_frame(
     embedding_provider: list[str],
     retriever_strategy: list[str] | None = None,
     reranker_strategy: list[str] | None = None,
+    evaluation_suite: list[str] | None = None,
+    difficulty: list[str] | None = None,
+    case_family: list[str] | None = None,
 ) -> pd.DataFrame:
     filtered = frame
     if loader_strategy and "loader_strategy" in filtered.columns:
-        filtered = filtered[filtered["loader_strategy"].isin(loader_strategy)]
+        filtered = filtered[_matches_filter_or_empty(filtered["loader_strategy"], loader_strategy)]
     if chunker_strategy and "chunker_strategy" in filtered.columns:
-        filtered = filtered[filtered["chunker_strategy"].isin(chunker_strategy)]
+        filtered = filtered[_matches_filter_or_empty(filtered["chunker_strategy"], chunker_strategy)]
     if embedding_provider and "embedding_provider" in filtered.columns:
-        filtered = filtered[filtered["embedding_provider"].isin(embedding_provider)]
+        filtered = filtered[_matches_filter_or_empty(filtered["embedding_provider"], embedding_provider)]
     if retriever_strategy and "retriever_strategy" in filtered.columns:
-        filtered = filtered[filtered["retriever_strategy"].isin(retriever_strategy)]
+        filtered = filtered[_matches_filter_or_empty(filtered["retriever_strategy"], retriever_strategy)]
     if reranker_strategy and "reranker_strategy" in filtered.columns:
-        filtered = filtered[filtered["reranker_strategy"].isin(reranker_strategy)]
+        filtered = filtered[_matches_filter_or_empty(filtered["reranker_strategy"], reranker_strategy)]
+    if evaluation_suite and "evaluation_suite" in filtered.columns:
+        filtered = filtered[filtered["evaluation_suite"].isin(evaluation_suite)]
+    if difficulty and "difficulty" in filtered.columns:
+        filtered = filtered[filtered["difficulty"].isin(difficulty)]
+    if case_family and "case_family" in filtered.columns:
+        filtered = filtered[filtered["case_family"].isin(case_family)]
     return filtered.reset_index(drop=True)
+
+
+def _matches_filter_or_empty(series: pd.Series, selected: list[str]) -> pd.Series:
+    """Keep strategy-less suite rows when parser/retriever filters are active."""
+
+    text_values = series.astype("string")
+    return series.isna() | text_values.isin(selected) | (text_values.fillna("") == "")
 
 
 def build_case_metric_matrix(examples: pd.DataFrame, metric: str) -> pd.DataFrame:
@@ -323,6 +390,13 @@ def build_failure_breakdown(failed: pd.DataFrame) -> pd.DataFrame:
     """Count failed rows by strategy and run for systematic failure analysis."""
 
     group_columns = [
+        "evaluation_suite",
+        "suite",
+        "case_type_codes",
+        "difficulty",
+        "case_family",
+        "inference_type",
+        "query_style",
         "loader_strategy",
         "chunker_strategy",
         "embedding_provider",

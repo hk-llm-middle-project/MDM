@@ -55,6 +55,19 @@ RERANKER_STRATEGY_CHOICES = tuple(
     if strategy in RERANKER_STRATEGIES
 )
 CONTENT_PREVIEW_CHARS = 500
+EXAMPLE_METADATA_FIELDS = (
+    "suite",
+    "case_type_codes",
+    "difficulty",
+    "case_family",
+    "inference_type",
+    "query_style",
+    "requires_diagram",
+    "requires_table",
+    "filter_risk",
+    "candidate_k",
+    "final_k",
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -121,6 +134,30 @@ def parse_args() -> argparse.Namespace:
         help="Reranker strategy exposed in Streamlit, e.g. none, cross-encoder, flashrank.",
     )
     parser.add_argument(
+        "--retriever-strategies",
+        default=None,
+        help=(
+            "Comma-separated retriever strategy list, or 'all'. "
+            "Expands each parser/chunker/embedder run across these strategies."
+        ),
+    )
+    parser.add_argument(
+        "--reranker-strategies",
+        default=None,
+        help=(
+            "Comma-separated reranker strategy list, or 'all'. "
+            "Expands each parser/chunker/embedder run across these strategies."
+        ),
+    )
+    parser.add_argument(
+        "--all-strategies",
+        action="store_true",
+        help=(
+            "Shorthand for all retriever strategies x all exposed reranker strategies. "
+            "Explicit --retriever-strategies/--reranker-strategies values narrow either side."
+        ),
+    )
+    parser.add_argument(
         "--k",
         type=int,
         default=DEFAULT_K,
@@ -181,6 +218,97 @@ def parse_args() -> argparse.Namespace:
 
 def should_run_matrix(args: argparse.Namespace) -> bool:
     return bool(args.matrix or args.preset)
+
+
+def _dedupe_preserve_order(values: list[str]) -> list[str]:
+    seen: set[str] = set()
+    deduped: list[str] = []
+    for value in values:
+        if value in seen:
+            continue
+        seen.add(value)
+        deduped.append(value)
+    return deduped
+
+
+def resolve_strategy_values(
+    raw_value: str | None,
+    default_value: str,
+    choices: tuple[str, ...],
+    label: str,
+    *,
+    all_by_default: bool = False,
+) -> list[str]:
+    if raw_value is None:
+        return list(choices) if all_by_default else [default_value]
+
+    value = raw_value.strip()
+    if value == "all":
+        return list(choices)
+
+    selected = _dedupe_preserve_order(
+        [part.strip() for part in value.split(",") if part.strip()]
+    )
+    if not selected:
+        return [default_value]
+
+    unknown = [strategy for strategy in selected if strategy not in choices]
+    if unknown:
+        available = ", ".join(choices)
+        raise ValueError(
+            f"Unknown {label} strategy: {', '.join(unknown)}. "
+            f"Available {label} strategies: {available}"
+        )
+    return selected
+
+
+def resolve_strategy_combinations(args: argparse.Namespace) -> list[dict[str, str]]:
+    all_strategies = bool(getattr(args, "all_strategies", False))
+    retriever_raw = getattr(args, "retriever_strategies", None)
+    reranker_raw = getattr(args, "reranker_strategies", None)
+    retrievers = resolve_strategy_values(
+        retriever_raw,
+        getattr(args, "retriever_strategy", DEFAULT_RETRIEVER_STRATEGY),
+        RETRIEVER_STRATEGY_CHOICES,
+        "retriever",
+        all_by_default=all_strategies and retriever_raw is None,
+    )
+    rerankers = resolve_strategy_values(
+        reranker_raw,
+        getattr(args, "reranker_strategy", DEFAULT_RERANKER_STRATEGY),
+        RERANKER_STRATEGY_CHOICES,
+        "reranker",
+        all_by_default=all_strategies and reranker_raw is None,
+    )
+    return [
+        {
+            "retriever_strategy": retriever,
+            "reranker_strategy": reranker,
+        }
+        for retriever in retrievers
+        for reranker in rerankers
+    ]
+
+
+def build_execution_plan(
+    args: argparse.Namespace,
+    runs: list[dict[str, str]],
+) -> list[tuple[dict[str, str], dict[str, str]]]:
+    strategy_combinations = resolve_strategy_combinations(args)
+    return [
+        (run, strategy_combination)
+        for run in runs
+        for strategy_combination in strategy_combinations
+    ]
+
+
+def args_with_strategy(
+    args: argparse.Namespace,
+    strategy_combination: dict[str, str],
+) -> argparse.Namespace:
+    values = vars(args).copy()
+    values.update(strategy_combination)
+    return argparse.Namespace(**values)
 
 
 def effective_candidate_k(reranker_strategy: str, candidate_k: int) -> int | None:
@@ -295,27 +423,68 @@ def build_examples(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
         if not question:
             continue
 
+        inputs: dict[str, Any] = {"question": question}
+        if row.get("candidate_k") is not None:
+            inputs["candidate_k"] = row.get("candidate_k")
+        if row.get("final_k") is not None:
+            inputs["final_k"] = row.get("final_k")
+
+        expected_keywords = row.get("expected_keywords")
+        if expected_keywords is None:
+            expected_keywords = row.get("expected_evidence_keywords", [])
+
+        metadata = {
+            "id": row.get("id"),
+            "notes": row.get("notes"),
+            "suite": row.get("suite") or infer_suite_from_row(row),
+        }
+        for field in EXAMPLE_METADATA_FIELDS:
+            if field == "suite":
+                continue
+            if row.get(field) is not None:
+                metadata[field] = row.get(field)
+
         examples.append(
             {
-                "inputs": {"question": question},
+                "inputs": inputs,
                 "outputs": {
                     "reference": row.get("reference", ""),
                     "expected_diagram_ids": row.get("expected_diagram_ids", []),
+                    "acceptable_diagram_ids": row.get("acceptable_diagram_ids", []),
+                    "near_miss_diagram_ids": row.get("near_miss_diagram_ids", []),
                     "expected_party_type": row.get("expected_party_type"),
                     "expected_location": row.get("expected_location"),
                     "expected_chunk_types": row.get("expected_chunk_types", []),
-                    "expected_keywords": row.get("expected_keywords", []),
+                    "expected_keywords": expected_keywords,
+                    "requires_diagram": row.get("requires_diagram"),
+                    "requires_table": row.get("requires_table"),
                 },
-                "metadata": {
-                    "id": row.get("id"),
-                    "notes": row.get("notes"),
-                },
+                "metadata": metadata,
             }
         )
 
     if not examples:
         raise RuntimeError("No valid examples with question were found.")
     return examples
+
+
+def infer_suite_from_row(row: dict[str, Any]) -> str:
+    """Infer a suite label from testset IDs when rows omit an explicit suite."""
+
+    row_id = str(row.get("id") or "")
+    prefix_map = {
+        "retrieval_": "retrieval",
+        "reranker_": "reranker",
+        "intake_": "intake",
+        "router_": "router",
+        "filter_": "metadata_filter",
+        "mt_": "multiturn",
+        "struct_": "structured_output",
+    }
+    for prefix, suite in prefix_map.items():
+        if row_id.startswith(prefix):
+            return suite
+    return "retrieval"
 
 
 def get_existing_dataset(client: Client, dataset_name: str) -> Dataset | None:
@@ -397,15 +566,19 @@ def build_retrieval_target(
 
     vectorstore = load_vectorstore(vectorstore_dir, embedding_provider=embedding_provider)
     components = build_retrieval_components(vectorstore)
-    pipeline_config = RetrievalPipelineConfig(
-        retriever_strategy=retriever_strategy,
-        reranker_strategy=reranker_strategy,
-        final_k=k,
-        candidate_k=candidate_k,
-    )
-
     def retrieval_target(inputs: dict[str, Any]) -> dict[str, Any]:
         question = inputs["question"]
+        final_k = positive_int_or_default(inputs.get("final_k"), k)
+        effective_candidate = positive_int_or_default(
+            inputs.get("candidate_k"),
+            candidate_k,
+        )
+        pipeline_config = RetrievalPipelineConfig(
+            retriever_strategy=retriever_strategy,
+            reranker_strategy=reranker_strategy,
+            final_k=final_k,
+            candidate_k=effective_candidate,
+        )
         documents = run_retrieval_pipeline(
             components=components,
             query=question,
@@ -422,13 +595,22 @@ def build_retrieval_target(
             "chunker_strategy": chunker_strategy,
             "retriever_strategy": retriever_strategy,
             "reranker_strategy": reranker_strategy,
-            "k": k,
+            "k": final_k,
+            "candidate_k": effective_candidate,
             "retrieved": retrieved,
             "retrieved_metadata": [item["metadata"] for item in retrieved],
             "contexts": [item["page_content"] for item in retrieved],
         }
 
     return retrieval_target
+
+
+def positive_int_or_default(value: Any, default: int | None) -> int | None:
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        return default
+    return parsed if parsed > 0 else default
 
 
 def _metadata_values(outputs: dict[str, Any], key: str) -> list[Any]:
@@ -452,15 +634,61 @@ def diagram_id_hit(
     outputs: dict[str, Any],
     reference_outputs: dict[str, Any],
 ) -> dict[str, Any]:
-    expected = set(_expected_list(reference_outputs, "expected_diagram_ids"))
-    actual = set(_metadata_values(outputs, "diagram_id"))
+    expected = expected_diagram_candidates(reference_outputs)
+    actual_values = _metadata_values(outputs, "diagram_id")
+    actual = set(actual_values)
     if not expected:
         hit = bool(outputs.get("retrieved"))
         comment = "General query; non-empty retrieval result is accepted."
     else:
         hit = bool(expected & actual)
-        comment = f"expected={sorted(expected)}, actual_topk={list(actual)}"
+        comment = f"expected_or_acceptable={sorted(expected)}, actual_topk={actual_values}"
     return {"key": "diagram_id_hit", "score": int(hit), "comment": comment}
+
+
+def expected_diagram_candidates(reference_outputs: dict[str, Any]) -> set[Any]:
+    expected = set(_expected_list(reference_outputs, "expected_diagram_ids"))
+    expected.update(_expected_list(reference_outputs, "acceptable_diagram_ids"))
+    return expected
+
+
+def _first_rank(values: list[Any], candidates: set[Any]) -> int | None:
+    for index, value in enumerate(values, start=1):
+        if value in candidates:
+            return index
+    return None
+
+
+def near_miss_not_above_expected(
+    outputs: dict[str, Any],
+    reference_outputs: dict[str, Any],
+) -> dict[str, Any]:
+    expected = set(_expected_list(reference_outputs, "expected_diagram_ids"))
+    near_miss = set(_expected_list(reference_outputs, "near_miss_diagram_ids"))
+    actual_values = _metadata_values(outputs, "diagram_id")
+    if not expected or not near_miss:
+        return {
+            "key": "near_miss_not_above_expected",
+            "score": None,
+            "comment": "No expected or near-miss diagram IDs.",
+        }
+
+    expected_rank = _first_rank(actual_values, expected)
+    near_miss_rank = _first_rank(actual_values, near_miss)
+    if expected_rank is None:
+        score = 0
+    elif near_miss_rank is None:
+        score = 1
+    else:
+        score = int(expected_rank < near_miss_rank)
+    return {
+        "key": "near_miss_not_above_expected",
+        "score": score,
+        "comment": (
+            f"expected_rank={expected_rank}, near_miss_rank={near_miss_rank}, "
+            f"actual_topk={actual_values}"
+        ),
+    }
 
 
 def location_match(
@@ -559,7 +787,7 @@ def critical_error(
     outputs: dict[str, Any],
     reference_outputs: dict[str, Any],
 ) -> dict[str, Any]:
-    expected_diagram_ids = _expected_list(reference_outputs, "expected_diagram_ids")
+    expected_diagram_ids = expected_diagram_candidates(reference_outputs)
     diagram_score = diagram_id_hit(outputs, reference_outputs)["score"]
     party_score = party_type_match(outputs, reference_outputs)["score"]
     location_score = location_match(outputs, reference_outputs)["score"]
@@ -583,6 +811,7 @@ def build_evaluators() -> list:
         party_type_match,
         chunk_type_match,
         keyword_coverage,
+        near_miss_not_above_expected,
         retrieval_relevance,
         critical_error,
     ]
@@ -623,7 +852,12 @@ def evaluate_local_rows(
 
         record["error"] = error
         record["execution_time"] = time.perf_counter() - started_at
-        record["example_id"] = example.get("metadata", {}).get("id")
+        metadata = example.get("metadata", {})
+        record["example_id"] = metadata.get("id")
+        for field in EXAMPLE_METADATA_FIELDS:
+            if metadata.get(field) is not None:
+                record[field] = _csv_cell(metadata.get(field))
+        _flatten_record("metadata", metadata, record)
         _flatten_record("inputs", inputs, record)
         _flatten_record("outputs", outputs, record)
         _flatten_record("reference", reference_outputs, record)
@@ -714,15 +948,23 @@ def save_experiment_dataframe(
 ) -> dict[str, Path]:
     output_dir.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    base_name = safe_filename(f"{timestamp}-{run['name']}")
+    base_name = safe_filename(
+        f"{timestamp}-{run['name']}-{retriever_strategy}-{reranker_strategy}"
+    )
     csv_path = output_dir / f"{base_name}.csv"
     summary_path = output_dir / f"{base_name}.summary.json"
 
     dataframe.to_csv(csv_path, index=False)
+    suite = None
+    if "evaluation_suite" in dataframe.columns and len(dataframe["evaluation_suite"].dropna()):
+        suite = str(dataframe["evaluation_suite"].dropna().iloc[0])
+    elif "suite" in dataframe.columns and len(dataframe["suite"].dropna()):
+        suite = str(dataframe["suite"].dropna().iloc[0])
     summary = {
         "experiment_name": experiment_name,
         "dataset_name": dataset_name,
         "testset_path": str(testset_path),
+        "evaluation_suite": suite,
         "run_name": run["name"],
         "loader_strategy": run["loader_strategy"],
         "chunker_strategy": run["chunker_strategy"],
@@ -928,15 +1170,22 @@ def main() -> None:
     else:
         runs = [single_run_from_args(args)]
 
-    for index, run in enumerate(runs, start=1):
-        if len(runs) > 1:
-            print(f"[MATRIX] {index}/{len(runs)} {run['name']}")
+    execution_plan = build_execution_plan(args, runs)
+    matrix_mode = len(execution_plan) > 1
+
+    for index, (run, strategy_combination) in enumerate(execution_plan, start=1):
+        run_args = args_with_strategy(args, strategy_combination)
+        if matrix_mode:
+            print(
+                f"[MATRIX] {index}/{len(execution_plan)} "
+                f"{run['name']} / {run_args.retriever_strategy} / {run_args.reranker_strategy}"
+            )
         run_retrieval_experiment(
-            args=args,
+            args=run_args,
             client=client,
             rows=rows,
             run=run,
-            matrix_mode=len(runs) > 1,
+            matrix_mode=matrix_mode,
         )
 
 

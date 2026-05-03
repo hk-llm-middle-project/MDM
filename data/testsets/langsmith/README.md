@@ -26,8 +26,8 @@ evaluation/results/langsmith/
 
 Each completed run writes:
 
-- `<timestamp>-<run-name>.csv`
-- `<timestamp>-<run-name>.summary.json`
+- `<timestamp>-<run-name>-<retriever>-<reranker>.csv`
+- `<timestamp>-<run-name>-<retriever>-<reranker>.summary.json`
 
 Only run through LangSmith when you explicitly need remote experiments/traces:
 
@@ -68,6 +68,24 @@ uv run python evaluation/evaluate_retrieval_langsmith.py \
   --reranker-strategy cross-encoder \
   --candidate-k 30 \
   --k 3
+```
+
+Run every configured parser/chunker/embedder combination against every exposed
+retriever and reranker strategy:
+
+```bash
+uv run python evaluation/evaluate_retrieval_langsmith.py \
+  --preset all \
+  --all-strategies
+```
+
+Run a narrower strategy product when the full matrix is too large:
+
+```bash
+uv run python evaluation/evaluate_retrieval_langsmith.py \
+  --preset parser-baseline \
+  --retriever-strategies vectorstore,ensemble_parent \
+  --reranker-strategies none,cross-encoder
 ```
 
 Run the same matrix through LangSmith only when trace quota is acceptable:

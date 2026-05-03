@@ -40,6 +40,12 @@ def render(examples: pd.DataFrame) -> None:
         column
         for column in [
             "case_key",
+            "evaluation_suite",
+            "case_type_codes",
+            "difficulty",
+            "case_family",
+            "inference_type",
+            "query_style",
             "run_label",
             "run_name",
             "loader_strategy",

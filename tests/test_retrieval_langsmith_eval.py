@@ -117,6 +117,86 @@ class RetrievalLangSmithEvalTest(unittest.TestCase):
         self.assertEqual(frame.loc[0, "feedback.diagram_id_hit"], 1)
         self.assertEqual(frame.loc[0, "feedback.critical_error"], 0)
 
+    def test_build_examples_maps_extended_testset_contract(self):
+        module = load_retrieval_eval_module()
+
+        examples = module.build_examples(
+            [
+                {
+                    "id": "reranker_001",
+                    "question": "테스트 질문",
+                    "expected_diagram_ids": ["보1"],
+                    "acceptable_diagram_ids": ["보1", "보3"],
+                    "near_miss_diagram_ids": ["보5"],
+                    "expected_evidence_keywords": ["적색신호", "횡단보도"],
+                    "candidate_k": 10,
+                    "final_k": 3,
+                    "case_type_codes": ["RET_NEAR_MISS"],
+                    "difficulty": "medium",
+                    "case_family": "pedestrian_crosswalk",
+                    "inference_type": "implicit_metadata",
+                }
+            ]
+        )
+
+        example = examples[0]
+        self.assertEqual(example["inputs"]["candidate_k"], 10)
+        self.assertEqual(example["inputs"]["final_k"], 3)
+        self.assertEqual(example["outputs"]["expected_keywords"], ["적색신호", "횡단보도"])
+        self.assertEqual(example["outputs"]["acceptable_diagram_ids"], ["보1", "보3"])
+        self.assertEqual(example["outputs"]["near_miss_diagram_ids"], ["보5"])
+        self.assertEqual(example["metadata"]["case_type_codes"], ["RET_NEAR_MISS"])
+        self.assertEqual(example["metadata"]["difficulty"], "medium")
+        self.assertEqual(example["metadata"]["case_family"], "pedestrian_crosswalk")
+        self.assertEqual(example["metadata"]["inference_type"], "implicit_metadata")
+
+    def test_diagram_id_hit_accepts_acceptable_diagram_ids(self):
+        module = load_retrieval_eval_module()
+
+        feedback = module.diagram_id_hit(
+            outputs={
+                "retrieved": [{"metadata": {"diagram_id": "보3"}}],
+                "retrieved_metadata": [{"diagram_id": "보3"}],
+            },
+            reference_outputs={
+                "expected_diagram_ids": ["보1"],
+                "acceptable_diagram_ids": ["보1", "보3"],
+            },
+        )
+
+        self.assertEqual(feedback["score"], 1)
+
+    def test_evaluate_local_rows_exports_case_metadata_for_dashboard(self):
+        module = load_retrieval_eval_module()
+
+        frame = module.evaluate_local_rows(
+            rows=[
+                {
+                    "id": "case_001",
+                    "question": "테스트 질문",
+                    "case_type_codes": ["RET_DIAGRAM"],
+                    "difficulty": "hard",
+                    "case_family": "car_intersection",
+                    "inference_type": "explicit_keyword",
+                    "expected_evidence_keywords": ["차1-4"],
+                }
+            ],
+            target=lambda inputs: {
+                "query": inputs["question"],
+                "retrieved": [{"metadata": {"diagram_id": "차1-4"}, "page_content": "차1-4"}],
+                "retrieved_metadata": [{"diagram_id": "차1-4"}],
+                "contexts": ["차1-4"],
+            },
+            evaluators=[module.keyword_coverage],
+        )
+
+        self.assertEqual(frame.loc[0, "example_id"], "case_001")
+        self.assertEqual(frame.loc[0, "case_type_codes"], json.dumps(["RET_DIAGRAM"], ensure_ascii=False))
+        self.assertEqual(frame.loc[0, "difficulty"], "hard")
+        self.assertEqual(frame.loc[0, "case_family"], "car_intersection")
+        self.assertEqual(frame.loc[0, "inference_type"], "explicit_keyword")
+        self.assertEqual(frame.loc[0, "feedback.keyword_coverage"], 1.0)
+
     def test_default_dataset_name_includes_loader_chunker_and_embedding(self):
         module = load_retrieval_eval_module()
 
@@ -176,6 +256,101 @@ class RetrievalLangSmithEvalTest(unittest.TestCase):
             args = module.parse_args()
 
         self.assertTrue(module.should_run_matrix(args))
+
+    def test_all_strategies_arg_expands_retriever_and_reranker_product(self):
+        module = load_retrieval_eval_module()
+
+        with patch.object(sys, "argv", ["evaluate_retrieval_langsmith.py", "--all-strategies"]):
+            args = module.parse_args()
+
+        combos = module.resolve_strategy_combinations(args)
+
+        self.assertEqual(
+            len(combos),
+            len(module.RETRIEVER_STRATEGY_CHOICES) * len(module.RERANKER_STRATEGY_CHOICES),
+        )
+        self.assertIn(
+            {"retriever_strategy": "ensemble_parent", "reranker_strategy": "cross-encoder"},
+            combos,
+        )
+        self.assertIn(
+            {"retriever_strategy": args.retriever_strategy, "reranker_strategy": args.reranker_strategy},
+            combos,
+        )
+
+    def test_strategy_list_args_expand_only_requested_product(self):
+        module = load_retrieval_eval_module()
+
+        with patch.object(
+            sys,
+            "argv",
+            [
+                "evaluate_retrieval_langsmith.py",
+                "--retriever-strategies",
+                "vectorstore,ensemble_parent",
+                "--reranker-strategies",
+                "none,cross-encoder",
+            ],
+        ):
+            args = module.parse_args()
+
+        self.assertEqual(
+            module.resolve_strategy_combinations(args),
+            [
+                {"retriever_strategy": "vectorstore", "reranker_strategy": "none"},
+                {"retriever_strategy": "vectorstore", "reranker_strategy": "cross-encoder"},
+                {"retriever_strategy": "ensemble_parent", "reranker_strategy": "none"},
+                {"retriever_strategy": "ensemble_parent", "reranker_strategy": "cross-encoder"},
+            ],
+        )
+
+    def test_build_execution_plan_multiplies_base_runs_by_strategy_combinations(self):
+        module = load_retrieval_eval_module()
+        args = Namespace(
+            retriever_strategy="similarity",
+            reranker_strategy="none",
+            retriever_strategies="vectorstore,ensemble_parent",
+            reranker_strategies="none,cross-encoder",
+            all_strategies=False,
+        )
+        runs = [
+            {
+                "name": "upstage-custom-bge",
+                "loader_strategy": "upstage",
+                "chunker_strategy": "custom",
+                "embedding_provider": "bge",
+            },
+            {
+                "name": "upstage-raw-bge",
+                "loader_strategy": "upstage",
+                "chunker_strategy": "raw",
+                "embedding_provider": "bge",
+            },
+        ]
+
+        plan = module.build_execution_plan(args, runs)
+
+        self.assertEqual(len(plan), 8)
+        self.assertEqual(plan[0][0]["name"], "upstage-custom-bge")
+        self.assertEqual(plan[0][1], {"retriever_strategy": "vectorstore", "reranker_strategy": "none"})
+        self.assertEqual(plan[-1][0]["name"], "upstage-raw-bge")
+        self.assertEqual(
+            plan[-1][1],
+            {"retriever_strategy": "ensemble_parent", "reranker_strategy": "cross-encoder"},
+        )
+
+    def test_strategy_values_reject_unknown_names(self):
+        module = load_retrieval_eval_module()
+        args = Namespace(
+            retriever_strategy="similarity",
+            reranker_strategy="none",
+            retriever_strategies="missing",
+            reranker_strategies=None,
+            all_strategies=False,
+        )
+
+        with self.assertRaisesRegex(ValueError, "Unknown retriever strategy"):
+            module.resolve_strategy_combinations(args)
 
     def test_matrix_run_skips_missing_vectorstore_by_default(self):
         module = load_retrieval_eval_module()
@@ -281,6 +456,10 @@ class RetrievalLangSmithEvalTest(unittest.TestCase):
         self.assertEqual(summary["reranker_strategy"], "cross-encoder")
         self.assertEqual(summary["final_k"], 3)
         self.assertEqual(summary["candidate_k"], 30)
+        self.assertIn(
+            "upstage-custom-bge-ensemble_parent-cross-encoder",
+            paths["csv"].stem,
+        )
 
     def test_summarize_feedback_metrics_ignores_feedback_comment_columns(self):
         module = load_retrieval_eval_module()
@@ -326,6 +505,38 @@ class RetrievalLangSmithEvalTest(unittest.TestCase):
 
         get_dir.assert_called_once_with("upstage", "bge", chunker_strategy="custom")
         self.assertEqual(outputs["chunker_strategy"], "custom")
+
+    def test_build_retrieval_target_uses_row_specific_reranker_k_values(self):
+        module = load_retrieval_eval_module()
+        vectorstore_dir = Path("data/vectorstore/upstage/custom/bge")
+        seen_configs = []
+
+        def fake_run_retrieval_pipeline(**kwargs):
+            seen_configs.append(kwargs["pipeline_config"])
+            return []
+
+        with (
+            patch.object(module, "get_vectorstore_dir", return_value=vectorstore_dir),
+            patch.object(module, "vectorstore_exists", return_value=True),
+            patch.object(module, "load_vectorstore", return_value=object()),
+            patch.object(module, "build_retrieval_components", return_value=object()),
+            patch.object(module, "run_retrieval_pipeline", side_effect=fake_run_retrieval_pipeline),
+        ):
+            target = module.build_retrieval_target(
+                loader_strategy="upstage",
+                embedding_provider="bge",
+                chunker_strategy="custom",
+                retriever_strategy="vectorstore",
+                reranker_strategy="cross-encoder",
+                k=5,
+                candidate_k=20,
+            )
+            outputs = target({"question": "테스트 질문", "candidate_k": 10, "final_k": 3})
+
+        self.assertEqual(seen_configs[0].candidate_k, 10)
+        self.assertEqual(seen_configs[0].final_k, 3)
+        self.assertEqual(outputs["candidate_k"], 10)
+        self.assertEqual(outputs["k"], 3)
 
 
 if __name__ == "__main__":
