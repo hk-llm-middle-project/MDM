@@ -24,6 +24,42 @@ def kiwi_tokenize(text: str) -> list[str]:
     return [token.form for token in get_kiwi().tokenize(text)]
 
 
+def mark_retrieval_fallback(
+    documents: list[Document],
+    fallback_from: str,
+    fallback_to: str,
+    reason: str,
+) -> list[Document]:
+    """Return copied documents annotated with retrieval fallback metadata."""
+    fallback_event = {
+        "from": fallback_from,
+        "to": fallback_to,
+        "reason": reason,
+    }
+    marked_documents: list[Document] = []
+    for document in documents:
+        metadata = dict(document.metadata)
+        existing_events = metadata.get("retrieval_fallbacks")
+        fallback_events = (
+            [*existing_events, fallback_event]
+            if isinstance(existing_events, list)
+            else [fallback_event]
+        )
+        metadata.update(
+            {
+                "retrieval_fallback": True,
+                "fallback_from": fallback_from,
+                "fallback_to": fallback_to,
+                "fallback_reason": reason,
+                "retrieval_fallbacks": fallback_events,
+            },
+        )
+        marked_documents.append(
+            Document(page_content=document.page_content, metadata=metadata),
+        )
+    return marked_documents
+
+
 def get_vectorstore_documents(vectorstore: Any) -> list[Document]:
     """벡터스토어에 저장된 문서와 메타데이터를 추출합니다."""
     if not hasattr(vectorstore, "get"):

@@ -6,7 +6,13 @@ import streamlit as st
 from config import (
     DEFAULT_CHUNKER_STRATEGY,
     DEFAULT_EMBEDDING_PROVIDER,
+    DEFAULT_ENSEMBLE_BM25_WEIGHT,
+    DEFAULT_ENSEMBLE_CANDIDATE_K,
+    DEFAULT_ENSEMBLE_USE_CHUNK_ID,
     DEFAULT_LOADER_STRATEGY,
+    ENSEMBLE_CANDIDATE_K_OPTIONS,
+    ENSEMBLE_ID_KEY,
+    ENSEMBLE_RETRIEVER_STRATEGIES,
 )
 from rag.embeddings import EMBEDDING_STRATEGIES
 from rag.pipeline.retrieval import RetrievalPipelineConfig
@@ -31,7 +37,6 @@ RETRIEVER_STRATEGY_OPTIONS = tuple(
     if strategy != "vectorstore"
 )
 USER_ID = "local"
-DEFAULT_ENSEMBLE_BM25_WEIGHT = 0.5
 
 
 def ensure_active_session(store: ConversationStore) -> str:
@@ -71,6 +76,10 @@ def init_state(store: ConversationStore) -> None:
         st.session_state.retriever_strategy = "similarity"
     if "ensemble_bm25_weight" not in st.session_state:
         st.session_state.ensemble_bm25_weight = DEFAULT_ENSEMBLE_BM25_WEIGHT
+    if "ensemble_candidate_k" not in st.session_state:
+        st.session_state.ensemble_candidate_k = DEFAULT_ENSEMBLE_CANDIDATE_K
+    if "ensemble_use_chunk_id" not in st.session_state:
+        st.session_state.ensemble_use_chunk_id = DEFAULT_ENSEMBLE_USE_CHUNK_ID
     st.session_state.active_session = ensure_active_session(store)
 
 
@@ -88,7 +97,7 @@ def normalize_chunker_strategy(chunker_strategy: str, loader_strategy: str) -> s
     return options[0]
 
 
-def render_sidebar(store: ConversationStore) -> tuple[str, str, str, str, float]:
+def render_sidebar(store: ConversationStore) -> tuple[str, str, str, str, float, int, bool]:
     st.sidebar.title("세션 목록")
     if st.sidebar.button("새 세션", use_container_width=True):
         session_count = len(store.list_sessions(USER_ID))
@@ -154,7 +163,7 @@ def render_sidebar(store: ConversationStore) -> tuple[str, str, str, str, float]
     current_ensemble_bm25_weight = float(
         st.session_state.get("ensemble_bm25_weight", DEFAULT_ENSEMBLE_BM25_WEIGHT)
     )
-    if st.session_state.retriever_strategy == "ensemble":
+    if st.session_state.retriever_strategy in ENSEMBLE_RETRIEVER_STRATEGIES:
         current_ensemble_bm25_percent = int(
             st.session_state.get(
                 "ensemble_bm25_percent",
@@ -184,12 +193,36 @@ def render_sidebar(store: ConversationStore) -> tuple[str, str, str, str, float]
             build_ensemble_weight_caption_html(st.session_state.ensemble_bm25_weight),
             unsafe_allow_html=True,
         )
+        current_candidate_k = int(
+            st.session_state.get("ensemble_candidate_k", DEFAULT_ENSEMBLE_CANDIDATE_K)
+        )
+        if current_candidate_k not in ENSEMBLE_CANDIDATE_K_OPTIONS:
+            current_candidate_k = DEFAULT_ENSEMBLE_CANDIDATE_K
+        st.session_state.ensemble_candidate_k = st.sidebar.selectbox(
+            "후보 문서 수",
+            ENSEMBLE_CANDIDATE_K_OPTIONS,
+            index=ENSEMBLE_CANDIDATE_K_OPTIONS.index(current_candidate_k),
+        )
+        st.session_state.ensemble_use_chunk_id = st.sidebar.checkbox(
+            "같은 문서 조각 합치기",
+            value=bool(
+                st.session_state.get(
+                    "ensemble_use_chunk_id",
+                    DEFAULT_ENSEMBLE_USE_CHUNK_ID,
+                )
+            ),
+        )
+        st.sidebar.caption(
+            "BM25와 Dense가 같은 chunk_id를 찾으면 하나의 후보로 합칩니다."
+        )
     return (
         selected_loader_strategy,
         st.session_state.chunker_strategy,
         st.session_state.embedding_provider,
         st.session_state.retriever_strategy,
         st.session_state.ensemble_bm25_weight,
+        st.session_state.ensemble_candidate_k,
+        st.session_state.ensemble_use_chunk_id,
     )
 
 
@@ -261,16 +294,25 @@ def build_ensemble_slider_css(bm25_weight: float) -> str:
 def build_pipeline_config(
     retriever_strategy: str,
     ensemble_bm25_weight: float = DEFAULT_ENSEMBLE_BM25_WEIGHT,
+    ensemble_candidate_k: int = DEFAULT_ENSEMBLE_CANDIDATE_K,
+    ensemble_use_chunk_id: bool = DEFAULT_ENSEMBLE_USE_CHUNK_ID,
 ) -> RetrievalPipelineConfig:
     """Streamlit 선택값을 retrieval pipeline 설정으로 변환합니다."""
-    if retriever_strategy != "ensemble":
+    if retriever_strategy not in ENSEMBLE_RETRIEVER_STRATEGIES:
         return RetrievalPipelineConfig(retriever_strategy=retriever_strategy)
 
     bm25_weight = round(ensemble_bm25_weight, 2)
     dense_weight = round(1.0 - bm25_weight, 2)
+    candidate_k = int(ensemble_candidate_k)
+    id_key = ENSEMBLE_ID_KEY if ensemble_use_chunk_id else None
     return RetrievalPipelineConfig(
         retriever_strategy=retriever_strategy,
-        retriever_config=EnsembleRetrieverConfig(weights=(bm25_weight, dense_weight)),
+        retriever_config=EnsembleRetrieverConfig(
+            weights=(bm25_weight, dense_weight),
+            bm25_k=candidate_k,
+            dense_k=candidate_k,
+            id_key=id_key,
+        ),
     )
 
 
@@ -281,6 +323,8 @@ def render_chat(
     embedding_provider: str = DEFAULT_EMBEDDING_PROVIDER,
     retriever_strategy: str = "similarity",
     ensemble_bm25_weight: float = DEFAULT_ENSEMBLE_BM25_WEIGHT,
+    ensemble_candidate_k: int = DEFAULT_ENSEMBLE_CANDIDATE_K,
+    ensemble_use_chunk_id: bool = DEFAULT_ENSEMBLE_USE_CHUNK_ID,
 ) -> None:
     active_session = st.session_state.active_session
     messages = store.get_messages(USER_ID, active_session)
@@ -302,6 +346,8 @@ def render_chat(
             "embedding_provider": embedding_provider,
             "retriever_strategy": retriever_strategy,
             "ensemble_bm25_weight": ensemble_bm25_weight,
+            "ensemble_candidate_k": ensemble_candidate_k,
+            "ensemble_use_chunk_id": ensemble_use_chunk_id,
         },
     )
 
@@ -338,6 +384,8 @@ def render_chat(
                     pipeline_config=build_pipeline_config(
                         retriever_strategy,
                         ensemble_bm25_weight,
+                        ensemble_candidate_k,
+                        ensemble_use_chunk_id,
                     ),
                     trace_context=trace_context,
                 )
@@ -367,6 +415,8 @@ def main():
         embedding_provider,
         retriever_strategy,
         ensemble_bm25_weight,
+        ensemble_candidate_k,
+        ensemble_use_chunk_id,
     ) = render_sidebar(store)
     render_chat(
         store,
@@ -375,6 +425,8 @@ def main():
         embedding_provider,
         retriever_strategy,
         ensemble_bm25_weight,
+        ensemble_candidate_k,
+        ensemble_use_chunk_id,
     )
 
 

@@ -21,6 +21,7 @@ class StreamlitUiTest(unittest.TestCase):
 
     def test_retriever_strategy_options_expose_similarity_instead_of_vectorstore(self):
         self.assertIn("similarity", RETRIEVER_STRATEGY_OPTIONS)
+        self.assertIn("ensemble_parent", RETRIEVER_STRATEGY_OPTIONS)
         self.assertNotIn("vectorstore", RETRIEVER_STRATEGY_OPTIONS)
 
     def test_chunker_strategy_options_are_filtered_by_loader(self):
@@ -41,10 +42,33 @@ class StreamlitUiTest(unittest.TestCase):
         self.assertEqual(normalize_chunker_strategy("semantic", "llamaparser"), "semantic")
 
     def test_build_pipeline_config_uses_ensemble_weight_slider_value(self):
-        config = build_pipeline_config("ensemble", ensemble_bm25_weight=0.7)
+        config = build_pipeline_config(
+            "ensemble",
+            ensemble_bm25_weight=0.7,
+            ensemble_candidate_k=30,
+            ensemble_use_chunk_id=False,
+        )
 
         self.assertIsInstance(config.retriever_config, EnsembleRetrieverConfig)
         self.assertEqual(config.retriever_config.weights, (0.7, 0.3))
+        self.assertEqual(config.retriever_config.bm25_k, 30)
+        self.assertEqual(config.retriever_config.dense_k, 30)
+        self.assertIsNone(config.retriever_config.id_key)
+
+    def test_build_pipeline_config_uses_ensemble_parent_options(self):
+        config = build_pipeline_config(
+            "ensemble_parent",
+            ensemble_bm25_weight=0.6,
+            ensemble_candidate_k=10,
+            ensemble_use_chunk_id=True,
+        )
+
+        self.assertEqual(config.retriever_strategy, "ensemble_parent")
+        self.assertIsInstance(config.retriever_config, EnsembleRetrieverConfig)
+        self.assertEqual(config.retriever_config.weights, (0.6, 0.4))
+        self.assertEqual(config.retriever_config.bm25_k, 10)
+        self.assertEqual(config.retriever_config.dense_k, 10)
+        self.assertEqual(config.retriever_config.id_key, "chunk_id")
 
     def test_build_pipeline_config_skips_ensemble_config_for_other_strategies(self):
         config = build_pipeline_config("similarity", ensemble_bm25_weight=0.7)
