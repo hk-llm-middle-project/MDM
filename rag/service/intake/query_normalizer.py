@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 
-from rag.service.intake.schema import IntakeDecision, UserSearchMetadata
+from rag.service.intake.schema import IntakeDecision, QuerySlots, UserSearchMetadata
 
 
 def enrich_intake_decision(user_input: str, decision: IntakeDecision) -> IntakeDecision:
@@ -23,6 +23,7 @@ def enrich_intake_decision(user_input: str, decision: IntakeDecision) -> IntakeD
             party_type=decision.search_metadata.party_type,
             location=decision.search_metadata.location,
             retrieval_query=retrieval_query,
+            query_slots=decision.search_metadata.query_slots,
         ),
         confidence=decision.confidence,
         missing_fields=decision.missing_fields,
@@ -35,13 +36,69 @@ def normalize_retrieval_query_terms(
     metadata: UserSearchMetadata,
 ) -> str | None:
     """LLM 검색 질의에 사고 유형 단서를 중복 없이 추가합니다."""
+    slot_query = build_retrieval_query_from_slots(metadata.query_slots)
     base_query = metadata.retrieval_query
     if not base_query:
-        return None
+        return slot_query
 
     remove_terms, add_terms = collect_retrieval_query_terms(user_input, base_query, metadata)
     query = remove_query_terms(base_query, remove_terms)
-    return append_unique_terms(query, add_terms)
+    query = append_unique_terms(query, add_terms)
+    fallback_query = compact_retrieval_query(query)
+    if slot_query is None:
+        return fallback_query
+    return compact_retrieval_query(f"{fallback_query}, {slot_query}")
+
+
+def build_retrieval_query_from_slots(slots: QuerySlots, max_terms: int = 4) -> str | None:
+    """구조화된 사고 단서로 도표 제목형 검색 질의를 만듭니다."""
+    terms: list[str] = []
+    signal_pair = build_signal_movement_pair(slots)
+    movement_pair = build_movement_pair(slots)
+
+    if slots.special_condition:
+        append_compact_term(terms, slots.special_condition)
+    if signal_pair:
+        append_compact_term(terms, signal_pair)
+    if movement_pair:
+        append_compact_term(terms, movement_pair)
+    if slots.road_priority:
+        append_compact_term(terms, slots.road_priority)
+    if slots.relation:
+        append_compact_term(terms, slots.relation)
+
+    compact_terms = [term for term in terms if not is_broad_query_term(term)]
+    if not compact_terms:
+        return None
+    return ", ".join(compact_terms[:max_terms])
+
+
+def build_signal_movement_pair(slots: QuerySlots) -> str | None:
+    if not (slots.a_signal and slots.a_movement and slots.b_signal and slots.b_movement):
+        return None
+    return (
+        f"{slots.a_signal}{normalize_movement_for_query(slots.a_movement)} 대 "
+        f"{slots.b_signal}{normalize_movement_for_query(slots.b_movement)}"
+    )
+
+
+def build_movement_pair(slots: QuerySlots) -> str | None:
+    if not (slots.a_movement and slots.b_movement):
+        return None
+    a_movement = normalize_movement_for_query(slots.a_movement)
+    b_movement = normalize_movement_for_query(slots.b_movement)
+    if a_movement == "추돌" or b_movement == "추돌":
+        return "추돌사고"
+    if a_movement == "진로변경" and b_movement == "진로변경":
+        return "동시 진로변경 사고"
+    return f"{a_movement} 대 {b_movement} 사고"
+
+
+def normalize_movement_for_query(movement: str) -> str:
+    normalized = movement.replace(" ", "")
+    if normalized == "비보호좌회전":
+        return "비보호좌회전"
+    return normalized
 
 
 def collect_retrieval_query_terms(
@@ -260,6 +317,101 @@ def append_unique_terms(query: str, terms: list[str]) -> str:
         if term and term not in parts and term not in query:
             parts.append(term)
     return ", ".join(parts)
+
+
+def compact_retrieval_query(query: str, max_terms: int = 4) -> str:
+    """검색 질의를 도표 제목형 핵심 표현 위주로 압축합니다."""
+    parts = [part.strip() for part in query.split(",") if part.strip()]
+    selected: list[str] = []
+
+    for selector in (
+        is_specific_case_term,
+        is_signal_pair_term,
+        is_movement_pair_term,
+        is_road_priority_term,
+        is_location_relation_term,
+        is_accident_family_term,
+    ):
+        for part in parts:
+            if selector(part):
+                append_compact_term(selected, part)
+                if len(selected) >= max_terms:
+                    return ", ".join(selected)
+
+    for part in parts:
+        if not is_broad_query_term(part):
+            append_compact_term(selected, part)
+            if len(selected) >= max_terms:
+                return ", ".join(selected)
+
+    return ", ".join(selected or parts[:max_terms])
+
+
+def append_compact_term(parts: list[str], term: str) -> None:
+    if term and term not in parts:
+        parts.append(term)
+
+
+def is_specific_case_term(term: str) -> bool:
+    return contains_any(
+        term,
+        (
+            "녹색(적색)신호위반 좌회전",
+            "녹색신호위반 좌회전 진입 후 황색",
+            "녹색 비보호 좌회전",
+            "동시 진로변경",
+            "도로가 아닌 장소에서 도로로 진입",
+            "중앙선 침범",
+        ),
+    )
+
+
+def is_signal_pair_term(term: str) -> bool:
+    return " 대 " in term and contains_any(
+        term,
+        ("녹색", "황색", "적색", "점멸", "비보호"),
+    )
+
+
+def is_movement_pair_term(term: str) -> bool:
+    return " 대 " in term and contains_any(
+        term,
+        ("직진", "좌회전", "우회전", "진로변경", "추돌"),
+    )
+
+
+def is_road_priority_term(term: str) -> bool:
+    return contains_any(
+        term,
+        ("동일 폭", "대로 소로", "오른쪽 소로", "왼쪽 소로", "오른쪽 대로", "왼쪽 대로"),
+    )
+
+
+def is_location_relation_term(term: str) -> bool:
+    return contains_any(
+        term,
+        ("상대차량이 측면에서 진입", "상대차량이 맞은편에서 진입", "오른쪽 도로", "왼쪽 도로"),
+    )
+
+
+def is_accident_family_term(term: str) -> bool:
+    return contains_any(
+        term,
+        ("추돌사고", "진로변경 사고", "직진 대 직진 사고", "직진 대 좌회전 사고", "직진 대 우회전 사고"),
+    )
+
+
+def is_broad_query_term(term: str) -> bool:
+    return term in {
+        "자동차 대 자동차",
+        "자동차 대 자전거",
+        "자전거 대 자동차",
+        "양쪽 신호등 있는 교차로",
+        "신호등 없는 교차로",
+        "교차로 사고",
+        "같은 방향 진행차량 상호간의 사고",
+        "같은 방향 진행차량 상호간 사고",
+    }
 
 
 def contains_any(text: str, needles: tuple[str, ...]) -> bool:

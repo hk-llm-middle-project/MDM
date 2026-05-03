@@ -30,6 +30,16 @@ def _format_previous_state(previous_state: IntakeState | None) -> str:
                 "party_type": state.search_metadata.party_type,
                 "location": state.search_metadata.location,
                 "retrieval_query": state.search_metadata.retrieval_query,
+                "query_slots": {
+                    "road_control": state.search_metadata.query_slots.road_control,
+                    "relation": state.search_metadata.query_slots.relation,
+                    "a_signal": state.search_metadata.query_slots.a_signal,
+                    "b_signal": state.search_metadata.query_slots.b_signal,
+                    "a_movement": state.search_metadata.query_slots.a_movement,
+                    "b_movement": state.search_metadata.query_slots.b_movement,
+                    "road_priority": state.search_metadata.query_slots.road_priority,
+                    "special_condition": state.search_metadata.query_slots.special_condition,
+                },
             },
             "last_missing_fields": state.last_missing_fields,
             "last_follow_up_questions": state.last_follow_up_questions,
@@ -66,14 +76,29 @@ location 허용값:
 - 추측하지 마세요.
 - "양쪽 신호등 있는 교차로", "직진 대 직진 사고" 같은 세부 사고유형 표현은 location 값으로 쓰지 말고 retrieval_query에만 넣으세요.
 - 자동차 대 자동차 교차로 세부유형이면 location은 허용값 중 "교차로 사고"를 사용하세요.
+- 중앙선 침범, 역주행, 마주 오는 차량과의 충돌, 반대방향 진행 차량 사고는 location을 "마주보는 방향 진행차량 상호 간의 사고"로 분류하세요.
+- 단, 신호등 있는/없는 교차로에서 "상대차량이 맞은편에서 진입", "맞은편 좌회전", "직진 대 좌회전"처럼 교차로 내부 진입 방향을 설명하는 경우는 "마주보는 방향 진행차량 상호 간의 사고"가 아니라 "교차로 사고"로 분류하세요.
+- 추돌, 안전거리미확보, 진로변경, 차로 변경, 같은 방향, 후행/선행 차량 사고는 location을 "같은 방향 진행차량 상호간의 사고"로 분류하세요.
+- 도로가 아닌 장소에서 도로로 진입, 주차장, 문 열림, 회전교차로, 긴급자동차, 낙하물, 유턴, 정차 후 출발 등 교차로/마주보는 방향/같은 방향 진행차량 상호간 분류에 명확히 속하지 않는 자동차 사고는 location을 "기타"로 분류하세요.
+- 사용자 입력에 "교차로"라는 단어가 없고 중앙선 침범/역주행/추돌/진로변경/도로 외 진입 같은 더 구체적인 유형 단서가 있으면 location을 "교차로 사고"로 분류하지 마세요.
+- 사용자 입력에 "교차로"가 있더라도 중앙선 침범/역주행/추돌/진로변경/도로 외 진입 같은 더 구체적인 비교차로 유형 단서가 명시되면 그 구체 유형의 location을 우선하세요.
 - retrieval_query는 retriever에 넣을 사고 유형 검색어입니다.
-- retrieval_query에는 원문 문장보다 문서 도표 제목과 사고상황에 가까운 핵심어를 넣으세요.
-- retrieval_query에는 당사자 유형, 장소/통제 방식, A/B 신호, A/B 진행방향, 상대 진행방향을 포함하세요.
-- 자동차 대 자동차 교차로 사고는 문서 목차형 표현을 retrieval_query에 함께 포함하세요.
+- query_slots는 retrieval_query를 코드에서 안정적으로 조립하기 위한 구조화된 사고 단서입니다.
+- query_slots 값은 모르면 null로 두고, 확실한 값만 채우세요.
+- query_slots.road_control 예: "양쪽 신호등", "한쪽 신호등", "신호등 없음", "점멸신호", "도로", "주차장"
+- query_slots.relation 예: "상대차량이 측면에서 진입", "상대차량이 맞은편에서 진입", "같은 방향", "도로 외 진입"
+- query_slots.a_signal/b_signal 예: "녹색", "황색", "적색", "적색점멸", "황색점멸"
+- query_slots.a_movement/b_movement 예: "직진", "좌회전", "비보호좌회전", "우회전", "진로변경", "추돌", "역주행"
+- query_slots.road_priority 예: "동일 폭", "대로 소로", "오른쪽 소로", "왼쪽 대로", "오른쪽 도로", "왼쪽 도로"
+- query_slots.special_condition 예: "중앙선 침범", "추돌사고", "진로변경 사고", "동시 진로변경", "도로가 아닌 장소에서 도로로 진입"
+- retrieval_query에는 원문 문장보다 문서 도표 제목에 가까운 짧은 핵심어를 넣으세요.
+- retrieval_query는 가장 중요한 도표 제목형 표현을 앞에 두고, 쉼표 기준 2~4개 표현으로 제한하세요.
+- retrieval_query에는 party_type 같은 넓은 표현보다 신호/진행방향/상대 위치/도로 우선관계처럼 기준번호를 가르는 표현을 우선하세요.
+- 자동차 대 자동차 교차로 사고도 넓은 목차 표현을 길게 나열하지 말고 도표 제목형 표현을 우선하세요.
 - 양쪽 신호등이 있는 교차로에서 서로 다른 도로 또는 측면에서 진입한 직진 대 직진 사고는 반드시 "양쪽 신호등 있는 교차로, 직진 대 직진 사고, 상대차량이 측면에서 진입"을 포함하세요.
 - 신호와 진행방향 조합은 문서 도표 제목형으로 압축해 함께 넣으세요. 예: "녹색직진 대 적색직진", "황색직진 대 적색직진", "적색직진 대 적색직진"
 - "측면에서 직진", "측면에서 진입", "서로 다른 방향"은 검색어에서 "상대차량이 측면에서 진입"으로 정리하세요.
-- 예: "자동차 대 자동차, 양쪽 신호등 있는 교차로, 직진 대 직진 사고, 상대차량이 측면에서 진입, A 녹색직진, B 적색직진, 녹색직진 대 적색직진"
+- 예: "녹색직진 대 적색직진, 직진 대 직진 사고, 상대차량이 측면에서 진입"
 - 불명확한 표현은 문서 검색에 방해되지 않도록 정리하세요. 예를 들어 양쪽 신호등이 명시되면 "한쪽 신호등"이라고 쓰지 마세요.
 - 입력이 짧은 follow-up 답변이라도 이전 상태나 대화 이력으로 사고 설명이 충분하면 retrieval_query를 유지하거나 보완하세요.
 - JSON 외의 문장은 출력하지 마세요.
@@ -88,6 +113,16 @@ location 허용값:
   "party_type": "보행자 | 자동차 | 자전거 | null",
   "location": "허용된 location 값 중 하나 | null",
   "retrieval_query": "검색용 사고 유형 질의 | null",
+  "query_slots": {{
+    "road_control": "string | null",
+    "relation": "string | null",
+    "a_signal": "string | null",
+    "b_signal": "string | null",
+    "a_movement": "string | null",
+    "b_movement": "string | null",
+    "road_priority": "string | null",
+    "special_condition": "string | null"
+  }},
   "confidence": {{
     "party_type": 0.0,
     "location": 0.0,

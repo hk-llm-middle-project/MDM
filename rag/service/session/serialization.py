@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict
+from dataclasses import asdict, fields
 import json
 from typing import Any
 
-from rag.service.intake.schema import IntakeState, UserSearchMetadata
+from rag.service.intake.schema import IntakeState, QuerySlots, UserSearchMetadata
 from rag.service.session.schema import ChatMessage, SessionMeta
 
 
@@ -85,6 +85,17 @@ def intake_state_from_dict(data: dict[str, Any]) -> IntakeState:
     except (TypeError, ValueError):
         attempt_count = 0
 
+    query_slots_data = metadata_data.get("query_slots")
+    if not isinstance(query_slots_data, dict):
+        query_slots_data = {}
+    query_slot_names = {field.name for field in fields(QuerySlots)}
+    query_slots = QuerySlots(
+        **{
+            name: value if isinstance(value := query_slots_data.get(name), str) else None
+            for name in query_slot_names
+        }
+    )
+
     return IntakeState(
         attempt_count=max(0, attempt_count),
         search_metadata=UserSearchMetadata(
@@ -97,6 +108,7 @@ def intake_state_from_dict(data: dict[str, Any]) -> IntakeState:
             retrieval_query=metadata_data.get("retrieval_query")
             if isinstance(metadata_data.get("retrieval_query"), str)
             else None,
+            query_slots=query_slots,
         ),
         last_missing_fields=[
             value for value in last_missing_fields if isinstance(value, str)

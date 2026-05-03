@@ -8,7 +8,7 @@ from rag.pipeline.retrieval import RetrievalPipelineConfig
 from rag.service.analysis.answer_schema import AnalysisResult, RetrievedContext
 from rag.service.conversation.schema import TurnResultType
 from rag.service.intake.intake_service import build_default_follow_up_questions
-from rag.service.intake.schema import IntakeDecision, IntakeState, UserSearchMetadata
+from rag.service.intake.schema import IntakeDecision, IntakeState, QuerySlots, UserSearchMetadata
 from rag.service.session.schema import ChatMessage
 from rag.service.tracing import TraceContext
 
@@ -61,6 +61,21 @@ def merge_search_metadata(
         party_type=current.party_type or previous.party_type,
         location=current.location or previous.location,
         retrieval_query=current.retrieval_query or previous.retrieval_query,
+        query_slots=merge_query_slots(previous.query_slots, current.query_slots),
+    )
+
+
+def merge_query_slots(previous: QuerySlots, current: QuerySlots) -> QuerySlots:
+    """이전 query slot과 이번 입력의 query slot을 필드별로 병합합니다."""
+    return QuerySlots(
+        road_control=current.road_control or previous.road_control,
+        relation=current.relation or previous.relation,
+        a_signal=current.a_signal or previous.a_signal,
+        b_signal=current.b_signal or previous.b_signal,
+        a_movement=current.a_movement or previous.a_movement,
+        b_movement=current.b_movement or previous.b_movement,
+        road_priority=current.road_priority or previous.road_priority,
+        special_condition=current.special_condition or previous.special_condition,
     )
 
 

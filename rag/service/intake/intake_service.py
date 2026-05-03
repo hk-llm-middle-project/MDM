@@ -11,7 +11,13 @@ from config import LLM_MODEL
 from rag.service.common.json_utils import extract_json_object
 from rag.service.intake.prompts import build_intake_prompt
 from rag.service.intake.query_normalizer import enrich_intake_decision
-from rag.service.intake.schema import IntakeDecision, IntakeState, MissingField, UserSearchMetadata
+from rag.service.intake.schema import (
+    IntakeDecision,
+    IntakeState,
+    MissingField,
+    QuerySlots,
+    UserSearchMetadata,
+)
 from rag.service.intake.values import LOCATIONS, PARTY_TYPES
 from rag.service.session.schema import ChatMessage
 from rag.service.tracing import TraceContext
@@ -47,6 +53,7 @@ def normalize_metadata_response(data: dict[str, Any]) -> IntakeDecision:
     raw_party_type = data.get("party_type")
     raw_location = data.get("location")
     raw_retrieval_query = data.get("retrieval_query")
+    query_slots = normalize_query_slots(data.get("query_slots"))
     confidence_data = data.get("confidence")
     if not isinstance(confidence_data, dict):
         confidence_data = {}
@@ -108,10 +115,35 @@ def normalize_metadata_response(data: dict[str, Any]) -> IntakeDecision:
             party_type=party_type,
             location=location,
             retrieval_query=retrieval_query,
+            query_slots=query_slots,
         ),
         confidence=confidence,
         missing_fields=missing_fields,
         follow_up_questions=follow_up_questions,
+    )
+
+
+def normalize_query_slots(data: object) -> QuerySlots:
+    """LLM이 반환한 query_slots를 문자열/null 필드로 정리합니다."""
+    if not isinstance(data, dict):
+        return QuerySlots()
+
+    def value(name: str) -> str | None:
+        raw_value = data.get(name)
+        if not isinstance(raw_value, str):
+            return None
+        normalized = raw_value.strip()
+        return normalized or None
+
+    return QuerySlots(
+        road_control=value("road_control"),
+        relation=value("relation"),
+        a_signal=value("a_signal"),
+        b_signal=value("b_signal"),
+        a_movement=value("a_movement"),
+        b_movement=value("b_movement"),
+        road_priority=value("road_priority"),
+        special_condition=value("special_condition"),
     )
 
 

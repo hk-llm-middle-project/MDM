@@ -4,12 +4,27 @@ from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True)
+class QuerySlots:
+    """검색 질의 생성을 위한 구조화된 사고 단서입니다."""
+
+    road_control: str | None = None
+    relation: str | None = None
+    a_signal: str | None = None
+    b_signal: str | None = None
+    a_movement: str | None = None
+    b_movement: str | None = None
+    road_priority: str | None = None
+    special_condition: str | None = None
+
+
+@dataclass(frozen=True)
 class UserSearchMetadata:
     """사용자 입력에서 검색 필터로 사용할 최소 메타데이터입니다."""
 
     party_type: str | None = None
     location: str | None = None
     retrieval_query: str | None = None
+    query_slots: QuerySlots = field(default_factory=QuerySlots)
 
 
 @dataclass(frozen=True)
