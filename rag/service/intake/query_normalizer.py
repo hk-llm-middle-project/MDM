@@ -37,6 +37,7 @@ def normalize_retrieval_query_terms(
 ) -> str | None:
     """LLM 검색 질의에 사고 유형 단서를 중복 없이 추가합니다."""
     metadata = sanitize_search_metadata(metadata)
+    metadata = suppress_misleading_bicycle_signal_slots(user_input, metadata)
     slot_query = build_retrieval_query_from_slots(metadata.query_slots)
     base_query = metadata.retrieval_query
     if not base_query:
@@ -187,6 +188,9 @@ def collect_retrieval_query_terms(
     if contains_any(text, ("도로가 아닌 장소", "도로로 우회전 진입", "도로로 진입")):
         terms.append("도로가 아닌 장소에서 도로로 진입")
 
+    remove_terms.extend(collect_party_aware_remove_terms(user_text, metadata))
+    terms.extend(collect_party_aware_terms(user_text, metadata))
+
     if metadata.party_type == "자동차" and "맞은편" in user_input:
         remove_terms.append("상대차량이 측면에서 진입")
         terms.append("상대차량이 맞은편에서 진입")
@@ -205,6 +209,41 @@ def collect_retrieval_query_terms(
     terms.extend(collect_specific_case_terms(user_text, metadata))
 
     return remove_terms, terms
+
+
+def collect_party_aware_remove_terms(text: str, metadata: UserSearchMetadata) -> list[str]:
+    """당사자 유형과 맞지 않는 LLM 생성 신호 조합을 제거합니다."""
+    if metadata.party_type != "자전거" and "자전거" not in text:
+        return []
+    if not is_bicycle_protected_left_turn_case(text):
+        return []
+    if "적색" in text:
+        return []
+    return [
+        "녹색직진 대 적색직진",
+        "녹색직진 대 적색비보호좌회전",
+        "적색직진 대 녹색직진",
+    ]
+
+
+def collect_party_aware_terms(text: str, metadata: UserSearchMetadata) -> list[str]:
+    """자전거/보행자처럼 party type이 검색 축인 케이스의 핵심 질의를 보강합니다."""
+    terms: list[str] = []
+    if (metadata.party_type == "자전거" or "자전거" in text) and is_bicycle_protected_left_turn_case(text):
+        terms.append("자전거 대 자동차")
+        if "맞은편" in text:
+            terms.append("녹색 비보호 좌회전 대 맞은편 녹색 직진")
+        terms.append("비보호 좌회전 대 직진")
+    return terms
+
+
+def is_bicycle_protected_left_turn_case(text: str) -> bool:
+    return (
+        "자전거" in text
+        and "자동차" in text
+        and "비보호 좌회전" in text
+        and "직진" in text
+    )
 
 
 def collect_road_terms(text: str) -> list[str]:
@@ -515,6 +554,32 @@ def sanitize_search_metadata(metadata: UserSearchMetadata) -> UserSearchMetadata
             b_movement=clean_optional_term(slots.b_movement),
             road_priority=clean_optional_term(slots.road_priority),
             special_condition=clean_optional_term(slots.special_condition),
+        ),
+    )
+
+
+def suppress_misleading_bicycle_signal_slots(
+    user_input: str,
+    metadata: UserSearchMetadata,
+) -> UserSearchMetadata:
+    """자전거 비보호 좌회전 질의에서 잘못 추론된 적색 신호 pair를 만들지 않습니다."""
+    text = normalize_spacing(user_input)
+    if not is_bicycle_protected_left_turn_case(text) or "적색" in text:
+        return metadata
+    slots = metadata.query_slots
+    return UserSearchMetadata(
+        party_type=metadata.party_type,
+        location=metadata.location,
+        retrieval_query=metadata.retrieval_query,
+        query_slots=QuerySlots(
+            road_control=slots.road_control,
+            relation=slots.relation,
+            a_signal=None,
+            b_signal=None,
+            a_movement=slots.a_movement,
+            b_movement=slots.b_movement,
+            road_priority=slots.road_priority,
+            special_condition=slots.special_condition,
         ),
     )
 
