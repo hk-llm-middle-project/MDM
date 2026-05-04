@@ -50,6 +50,58 @@ class EvaluationDashboardTest(unittest.TestCase):
         self.assertEqual(bundles[0].run_name, "upstage-custom-bge")
         self.assertEqual(bundles[0].csv_path.name, "20260502-120803-upstage-custom-bge.csv")
 
+    def test_discover_result_bundles_skips_invalid_summary_with_warning_log(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_json(
+                root / "valid.summary.json",
+                {
+                    "run_name": "valid-run",
+                    "loader_strategy": "upstage",
+                    "chunker_strategy": "custom",
+                    "embedding_provider": "bge",
+                    "metrics": {"critical_error": 1.0},
+                },
+            )
+            (root / "broken.summary.json").write_text("{not-json", encoding="utf-8")
+
+            with self.assertLogs("evaluation.dashboard.loaders", level="WARNING") as logs:
+                bundles = discover_result_bundles(root)
+
+        self.assertEqual([bundle.run_name for bundle in bundles], ["valid-run"])
+        self.assertTrue(
+            any("Skipping invalid summary file broken.summary.json" in message for message in logs.output)
+        )
+
+    def test_load_results_warns_and_continues_when_summary_file_is_invalid(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_json(
+                root / "valid.summary.json",
+                {
+                    "run_name": "valid-run",
+                    "loader_strategy": "upstage",
+                    "chunker_strategy": "custom",
+                    "embedding_provider": "bge",
+                    "row_count": 1,
+                    "metrics": {"critical_error": 1.0},
+                },
+            )
+            pd.DataFrame([{"inputs.question": "q1", "feedback.critical_error": 1}]).to_csv(
+                root / "valid.csv",
+                index=False,
+            )
+            (root / "broken.summary.json").write_text("{not-json", encoding="utf-8")
+
+            with self.assertLogs("evaluation.dashboard.loaders", level="WARNING"):
+                results = load_results(root)
+
+        self.assertEqual(results.summary.loc[0, "run_name"], "valid-run")
+        self.assertEqual(len(results.examples), 1)
+        self.assertTrue(
+            any("Skipping invalid summary file broken.summary.json" in warning for warning in results.warnings)
+        )
+
     def test_build_summary_frame_flattens_metrics_and_keeps_combo_metadata(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

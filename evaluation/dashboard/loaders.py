@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -14,6 +15,8 @@ from evaluation.dashboard.transforms import (
     build_metric_frame,
     build_summary_frame,
 )
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -51,7 +54,10 @@ def _read_summary(path: Path) -> dict[str, Any]:
     return payload
 
 
-def discover_result_bundles(result_dir: Path) -> list[ResultBundle]:
+def discover_result_bundles(
+    result_dir: Path,
+    warning_messages: list[str] | None = None,
+) -> list[ResultBundle]:
     """Find local summary exports and pair each with its sibling CSV file."""
 
     if not result_dir.exists():
@@ -59,7 +65,15 @@ def discover_result_bundles(result_dir: Path) -> list[ResultBundle]:
 
     bundles: list[ResultBundle] = []
     for summary_path in sorted(result_dir.glob("*.summary.json")):
-        summary = _read_summary(summary_path)
+        try:
+            summary = _read_summary(summary_path)
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError, ValueError) as exc:
+            message = f"Skipping invalid summary file {summary_path.name}: {exc}"
+            logger.warning(message)
+            if warning_messages is not None:
+                warning_messages.append(message)
+            continue
+
         csv_path = summary_path.with_name(
             summary_path.name.removesuffix(".summary.json") + ".csv"
         )
@@ -78,8 +92,8 @@ def load_results(result_dir: Path) -> DashboardResults:
 
     warnings: list[str] = []
     try:
-        bundles = discover_result_bundles(result_dir)
-    except (OSError, json.JSONDecodeError, ValueError) as exc:
+        bundles = discover_result_bundles(result_dir, warning_messages=warnings)
+    except OSError as exc:
         return DashboardResults(
             summary=pd.DataFrame(),
             examples=pd.DataFrame(),
