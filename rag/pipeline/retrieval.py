@@ -8,6 +8,10 @@ from langchain_core.documents import Document
 
 from config import RETRIEVER_K
 from rag.pipeline.reranker import RerankerConfig, rerank
+from rag.pipeline.reranker.strategies.cross_encoder import (
+    CrossEncoderRerankerConfig,
+    get_cross_encoder_model,
+)
 from rag.pipeline.retriever import RetrievalComponents, StrategyConfig, retrieve
 from rag.pipeline.retriever.common import mark_retrieval_fallback
 from rag.service.tracing import TraceContext
@@ -25,6 +29,22 @@ class RetrievalPipelineConfig:
     candidate_k: int | None = None
 
 
+def prewarm_reranker_model(config: RetrievalPipelineConfig) -> None:
+    """Load reranker runtimes before Chroma query work starts."""
+    if config.reranker_strategy != "cross-encoder":
+        return
+    reranker_config = (
+        config.reranker_config
+        if isinstance(config.reranker_config, CrossEncoderRerankerConfig)
+        else CrossEncoderRerankerConfig()
+    )
+    if reranker_config.model is not None:
+        return
+    if reranker_config.use_subprocess:
+        return
+    get_cross_encoder_model(reranker_config.model_name)
+
+
 def run_retrieval_pipeline(
     components: RetrievalComponents,
     query: str,
@@ -34,6 +54,7 @@ def run_retrieval_pipeline(
 ) -> list[Document]:
     """Retriever 결과에 선택적 reranker를 적용해 최종 문서를 반환합니다."""
     config = pipeline_config or RetrievalPipelineConfig()
+    prewarm_reranker_model(config)
     candidate_k = config.candidate_k or config.final_k
     retrieve_kwargs = {
         "components": components,
