@@ -166,6 +166,30 @@ class DashboardTransformPlanTest(unittest.TestCase):
         )
         self.assertEqual(frame.loc[0, "ensemble_bm25_weight"], 0.7)
 
+    def test_build_summary_frame_formats_literal_two_to_nine_weight_label(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_json(
+                root / "run-a.summary.json",
+                {
+                    "run_name": "upstage-custom-openai",
+                    "loader_strategy": "upstage",
+                    "chunker_strategy": "custom",
+                    "embedding_provider": "openai",
+                    "retriever_strategy": "ensemble",
+                    "reranker_strategy": "none",
+                    "ensemble_bm25_weight": 2 / 11,
+                    "metrics": {"critical_error": 0.0},
+                },
+            )
+
+            frame = transforms.build_summary_frame(discover_result_bundles(root))
+
+        self.assertEqual(
+            frame.loc[0, "retriever_reranker"],
+            "ensemble / none / BM25:Dense 2:9",
+        )
+
     def test_build_summary_frame_disambiguates_repeated_run_labels_by_timestamp(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

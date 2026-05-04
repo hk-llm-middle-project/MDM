@@ -297,6 +297,9 @@ def _format_ensemble_weight_label(retriever: Any, bm25_weight: Any) -> str:
     if "ensemble" not in retriever_name or weight is None:
         return ""
 
+    if abs(weight - (2 / 11)) < 0.001:
+        return "BM25:Dense 2:9"
+
     bm25_ratio = round(weight * 10, 1)
     dense_ratio = round((1 - weight) * 10, 1)
     if float(bm25_ratio).is_integer() and float(dense_ratio).is_integer():
