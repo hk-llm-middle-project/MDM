@@ -34,6 +34,7 @@ from rag.pipeline.retriever import RETRIEVAL_STRATEGIES, retrieve
 from rag.service.conversation.app_service import answer_question, answer_question_with_intake
 from rag.service.conversation.app_service import answer_question_without_intake
 from rag.service.conversation.router import route_conversation_turn
+from rag.service.common.json_utils import extract_json_object
 from rag.service.intake.filter_service import build_metadata_filters
 from rag.service.intake.intake_service import (
     evaluate_input_sufficiency,
@@ -560,6 +561,63 @@ class BasicRagTest(unittest.TestCase):
         self.assertEqual([document.page_content for document in marked_documents], ["fallback"])
         self.assertTrue(marked_documents[0].metadata["retrieval_fallback"])
         self.assertEqual(marked_documents[0].metadata["fallback_from"], "vectorstore:filtered")
+        self.assertEqual(marked_documents[0].metadata["fallback_to"], "vectorstore:unfiltered")
+
+    def test_run_retrieval_pipeline_relaxes_composite_filter_to_party_type_first(self):
+        pipeline_config = RetrievalPipelineConfig(candidate_k=5, final_k=2)
+        fallback_documents = [Document(page_content="자전거 fallback")]
+        final_documents = [Document(page_content="final")]
+        components = build_retrieval_components(MagicMock())
+        filters = {"$and": [{"party_type": "자전거"}, {"location": "횡단보도 부근"}]}
+
+        with (
+            patch("rag.pipeline.retrieval.retrieve", side_effect=[[], fallback_documents]) as retrieve_mock,
+            patch("rag.pipeline.retrieval.rerank", return_value=final_documents) as rerank_mock,
+        ):
+            results = run_retrieval_pipeline(
+                components,
+                "query",
+                filters=filters,
+                pipeline_config=pipeline_config,
+            )
+
+        self.assertEqual(results, final_documents)
+        self.assertEqual(retrieve_mock.call_count, 2)
+        first_call, second_call = retrieve_mock.call_args_list
+        self.assertEqual(first_call.kwargs["filters"], filters)
+        self.assertEqual(second_call.kwargs["filters"], {"party_type": "자전거"})
+        marked_documents = rerank_mock.call_args.kwargs["documents"]
+        self.assertEqual([document.page_content for document in marked_documents], ["자전거 fallback"])
+        self.assertTrue(marked_documents[0].metadata["retrieval_fallback"])
+        self.assertEqual(marked_documents[0].metadata["fallback_from"], "vectorstore:filtered")
+        self.assertEqual(marked_documents[0].metadata["fallback_to"], "vectorstore:party_type")
+
+    def test_run_retrieval_pipeline_falls_back_unfiltered_when_party_type_relaxation_is_empty(self):
+        pipeline_config = RetrievalPipelineConfig(candidate_k=5, final_k=2)
+        fallback_documents = [Document(page_content="unfiltered fallback")]
+        final_documents = [Document(page_content="final")]
+        components = build_retrieval_components(MagicMock())
+        filters = {"$and": [{"party_type": "자전거"}, {"location": "횡단보도 부근"}]}
+
+        with (
+            patch("rag.pipeline.retrieval.retrieve", side_effect=[[], [], fallback_documents]) as retrieve_mock,
+            patch("rag.pipeline.retrieval.rerank", return_value=final_documents) as rerank_mock,
+        ):
+            results = run_retrieval_pipeline(
+                components,
+                "query",
+                filters=filters,
+                pipeline_config=pipeline_config,
+            )
+
+        self.assertEqual(results, final_documents)
+        self.assertEqual(retrieve_mock.call_count, 3)
+        _, party_type_call, unfiltered_call = retrieve_mock.call_args_list
+        self.assertEqual(party_type_call.kwargs["filters"], {"party_type": "자전거"})
+        self.assertIsNone(unfiltered_call.kwargs["filters"])
+        marked_documents = rerank_mock.call_args.kwargs["documents"]
+        self.assertEqual([document.page_content for document in marked_documents], ["unfiltered fallback"])
+        self.assertTrue(marked_documents[0].metadata["retrieval_fallback"])
         self.assertEqual(marked_documents[0].metadata["fallback_to"], "vectorstore:unfiltered")
 
     def test_unknown_retrieval_strategy_raises(self):
@@ -1243,6 +1301,12 @@ class BasicRagTest(unittest.TestCase):
         self.assertIn("[2]", result)
         self.assertLessEqual(len(truncate_context("a" * 50, 20)), 20)
 
+    def test_extract_json_object_accepts_llm_multiline_string_values(self):
+        data = extract_json_object('{"response": "첫 줄\n둘째 줄", "fault_ratio_a": 0}')
+
+        self.assertEqual(data["response"], "첫 줄\n둘째 줄")
+        self.assertEqual(data["fault_ratio_a"], 0)
+
     def test_normalize_metadata_response_accepts_confident_allowed_values(self):
         decision = normalize_metadata_response(
             {
@@ -1668,6 +1732,98 @@ class BasicRagTest(unittest.TestCase):
                 party_type="자동차",
                 location="교차로 사고",
                 retrieval_query="자동차 사고 기존 검색 질의",
+                query_slots=QuerySlots(
+                    relation="상대차량이 측면에서 진입",
+                    a_movement="직진",
+                    b_movement="직진",
+                ),
+            ),
+            pipeline_config=None,
+            loader_strategy="pdfplumber",
+            embedding_provider="bge",
+        )
+
+    def test_answer_question_with_intake_preserves_counterparty_party_type_on_follow_up(self):
+        previous_state = IntakeState(
+            attempt_count=1,
+            search_metadata=UserSearchMetadata(
+                party_type="자전거",
+            ),
+            last_missing_fields=["location"],
+            last_follow_up_questions=["사고가 발생한 장소는 어디인가요?"],
+        )
+        with (
+            patch(
+                "rag.service.conversation.app_service.evaluate_input_sufficiency",
+                return_value=IntakeDecision(
+                    is_sufficient=True,
+                    normalized_description="신호등 있는 교차로였고, 저는 자동차로 우회전 중이었어요.",
+                    search_metadata=UserSearchMetadata(
+                        party_type="자동차",
+                        location="교차로 사고",
+                        retrieval_query="우회전 자동차 대 직진 자전거",
+                    ),
+                ),
+            ),
+            patch("rag.service.conversation.app_service.analyze_question", return_value=("answer", ["context"])) as analyze_mock,
+        ):
+            result = answer_question_with_intake(
+                "신호등 있는 교차로였고, 저는 자동차로 우회전 중이었어요.",
+                intake_state=previous_state,
+            )
+
+        self.assertFalse(result.needs_more_input)
+        analyze_mock.assert_called_once_with(
+            "신호등 있는 교차로였고, 저는 자동차로 우회전 중이었어요.",
+            search_metadata=UserSearchMetadata(
+                party_type="자전거",
+                location="교차로 사고",
+                retrieval_query="우회전 자동차 대 직진 자전거",
+            ),
+            pipeline_config=None,
+            loader_strategy="pdfplumber",
+            embedding_provider="bge",
+        )
+
+    def test_answer_question_with_intake_allows_explicit_counterparty_correction(self):
+        previous_state = IntakeState(
+            attempt_count=1,
+            search_metadata=UserSearchMetadata(
+                party_type="자전거",
+            ),
+            last_missing_fields=["location"],
+            last_follow_up_questions=["사고가 발생한 장소는 어디인가요?"],
+        )
+        with (
+            patch(
+                "rag.service.conversation.app_service.evaluate_input_sufficiency",
+                return_value=IntakeDecision(
+                    is_sufficient=True,
+                    normalized_description="아니요, 상대는 자동차였고 교차로 사고였어요.",
+                    search_metadata=UserSearchMetadata(
+                        party_type="자동차",
+                        location="교차로 사고",
+                        query_slots=QuerySlots(
+                            relation="상대차량이 측면에서 진입",
+                            a_movement="직진",
+                            b_movement="직진",
+                        ),
+                    ),
+                ),
+            ),
+            patch("rag.service.conversation.app_service.analyze_question", return_value=("answer", ["context"])) as analyze_mock,
+        ):
+            result = answer_question_with_intake(
+                "아니요, 상대는 자동차였고 교차로 사고였어요.",
+                intake_state=previous_state,
+            )
+
+        self.assertFalse(result.needs_more_input)
+        analyze_mock.assert_called_once_with(
+            "아니요, 상대는 자동차였고 교차로 사고였어요.",
+            search_metadata=UserSearchMetadata(
+                party_type="자동차",
+                location="교차로 사고",
                 query_slots=QuerySlots(
                     relation="상대차량이 측면에서 진입",
                     a_movement="직진",
