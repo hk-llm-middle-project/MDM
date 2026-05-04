@@ -534,6 +534,55 @@ class RetrievalLangSmithEvalTest(unittest.TestCase):
 
         self.assertEqual(evaluate_local_rows.call_args.kwargs["max_concurrency"], 4)
 
+    def test_langsmith_run_passes_target_to_evaluate(self):
+        module = load_retrieval_eval_module()
+        args = Namespace(
+            testset_path=Path("data/testsets/langsmith/retrieval_eval.jsonl"),
+            dataset_name=None,
+            retriever_strategy="ensemble_parent",
+            reranker_strategy="none",
+            k=3,
+            candidate_k=0,
+            max_concurrency=1,
+            upload_only=False,
+            langsmith=True,
+            output_dir=Path("evaluation/results/langsmith"),
+            fail_on_missing_vectorstore=False,
+            no_local_results=True,
+            ensemble_bm25_weight=0.5,
+            ensemble_candidate_k=20,
+            ensemble_use_chunk_id=True,
+        )
+        run = {
+            "name": "upstage-custom-openai",
+            "loader_strategy": "upstage",
+            "chunker_strategy": "custom",
+            "embedding_provider": "openai",
+        }
+        dataset = Mock()
+        dataset.name = "MDM retrieval testset - retrieval_eval"
+        target = Mock()
+        results = Mock()
+        results.experiment_name = "MDM retrieval eval - upstage-custom-openai"
+
+        with (
+            patch.object(module, "get_vectorstore_dir", return_value=Path("vectorstore")),
+            patch.object(module, "vectorstore_exists", return_value=True),
+            patch.object(module, "get_or_create_dataset", return_value=dataset),
+            patch.object(module, "build_retrieval_target", return_value=target),
+            patch.object(module, "evaluate", return_value=results) as evaluate,
+        ):
+            module.run_retrieval_experiment(
+                args=args,
+                client=Mock(),
+                rows=[{"question": "테스트"}],
+                run=run,
+                matrix_mode=False,
+            )
+
+        self.assertIs(evaluate.call_args.args[0], target)
+        self.assertEqual(evaluate.call_args.kwargs["data"], dataset.name)
+
     def test_save_experiment_results_writes_csv_and_summary_json(self):
         module = load_retrieval_eval_module()
         import pandas as pd

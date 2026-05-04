@@ -1249,6 +1249,7 @@ def run_retrieval_experiment(
         f"{run['name']}-{args.retriever_strategy}-{args.reranker_strategy}"
     )
     results = evaluate(
+        target,
         data=dataset.name,
         evaluators=build_evaluators(),
         experiment_prefix=experiment_prefix,
