@@ -1,0 +1,34 @@
+{
+  "canonical_source": "data/chunks/upstage/custom/chunks.json",
+  "legacy_sources": "wording hints only",
+  "suites": {
+    "intake": {
+      "file": "intake_eval.jsonl",
+      "rows": 20
+    },
+    "router": {
+      "file": "router_eval.jsonl",
+      "rows": 15
+    },
+    "metadata_filter": {
+      "file": "metadata_filter_eval.jsonl",
+      "rows": 15
+    },
+    "retrieval": {
+      "file": "retrieval_eval.jsonl",
+      "rows": 30
+    },
+    "reranker": {
+      "file": "reranker_eval.jsonl",
+      "rows": 24
+    },
+    "multiturn": {
+      "file": "multiturn_eval.jsonl",
+      "rows": 6
+    },
+    "structured_output": {
+      "file": "structured_output_eval.jsonl",
+      "rows": 15
+    }
+  }
+}

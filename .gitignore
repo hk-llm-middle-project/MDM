@@ -15,6 +15,8 @@ data/vectorstore/
 # Local test scratch artifacts
 .tmp_tests/
 .tmp_unittest/
+tests/results/
+evaluation/results/
 
 # Parser experiment image artifacts
 experiments/parser/llamaparser/**/images/
