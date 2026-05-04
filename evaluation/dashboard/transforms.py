@@ -6,6 +6,7 @@ from collections.abc import Iterable
 from typing import Any
 import hashlib
 import json
+import re
 
 import pandas as pd
 
@@ -44,6 +45,9 @@ METRIC_COLUMNS = (
     "reference_diagram_hit",
     "structured_output_overall",
 )
+TIME_METRIC_COLUMNS = ("execution_time",)
+COMPARISON_METRIC_COLUMNS = (*METRIC_COLUMNS, *TIME_METRIC_COLUMNS)
+LOWER_IS_BETTER_METRICS = ("critical_error", *TIME_METRIC_COLUMNS)
 
 METRIC_DESCRIPTIONS = {
     "diagram_id_hit": (
@@ -175,6 +179,10 @@ METRIC_DESCRIPTIONS = {
         "`structured_output_overall` - 평가: structured output 관련 세부 점수의 평균입니다. "
         "점수: 0=structured output 조건 전부 실패, 1=조건 전부 통과, 중간값=평균 통과율."
     ),
+    "execution_time": (
+        "`execution_time` - 평가: 각 run의 row별 실행시간 평균입니다. 단위: 초. "
+        "낮을수록 같은 평가를 더 빠르게 처리한 run입니다."
+    ),
 }
 
 CASE_METADATA_COLUMNS = (
@@ -201,7 +209,12 @@ SUMMARY_METADATA_COLUMNS = (
     "embedding_provider",
     "retriever_strategy",
     "reranker_strategy",
+    "ensemble_bm25_weight",
+    "ensemble_candidate_k",
+    "ensemble_use_chunk_id",
+    "retriever_reranker",
     "row_count",
+    "execution_time",
     "summary_path",
     "csv_path",
     "result_stem",
@@ -266,13 +279,80 @@ def make_combo(loader: Any, chunker: Any, embedder: Any) -> str:
     return f"{loader or '-'} / {chunker or '-'} / {embedder or '-'}"
 
 
-def make_run_label(run_name: Any, retriever: Any, reranker: Any) -> str:
+def _numeric_weight(value: Any) -> float | None:
+    if value is None:
+        return None
+    try:
+        weight = float(value)
+    except (TypeError, ValueError):
+        return None
+    if pd.isna(weight):
+        return None
+    return weight
+
+
+def _format_ensemble_weight_label(retriever: Any, bm25_weight: Any) -> str:
+    retriever_name = str(retriever or "")
+    weight = _numeric_weight(bm25_weight)
+    if "ensemble" not in retriever_name or weight is None:
+        return ""
+
+    bm25_ratio = round(weight * 10, 1)
+    dense_ratio = round((1 - weight) * 10, 1)
+    if float(bm25_ratio).is_integer() and float(dense_ratio).is_integer():
+        ratio = f"{int(bm25_ratio)}:{int(dense_ratio)}"
+    else:
+        ratio = f"{bm25_ratio:g}:{dense_ratio:g}"
+    return f"BM25:Dense {ratio}"
+
+
+def _result_stem_suffix(value: Any) -> str:
+    stem = str(value or "").strip()
+    if not stem:
+        return "-"
+    match = re.match(r"(\d{8}-\d{6})", stem)
+    if match:
+        return match.group(1)
+    return stem
+
+
+def _disambiguate_duplicate_run_labels(frame: pd.DataFrame) -> pd.DataFrame:
+    if frame.empty or not {"run_label", "result_stem"}.issubset(frame.columns):
+        return frame
+
+    disambiguated = frame.copy()
+    stems_per_label = disambiguated.groupby("run_label")["result_stem"].transform(
+        lambda values: values.dropna().astype(str).nunique()
+    )
+    duplicate_labels = stems_per_label > 1
+    if not duplicate_labels.any():
+        return disambiguated
+
+    disambiguated.loc[duplicate_labels, "run_label"] = disambiguated.loc[
+        duplicate_labels
+    ].apply(
+        lambda row: f"{row['run_label']} [{_result_stem_suffix(row.get('result_stem'))}]",
+        axis=1,
+    )
+    return disambiguated
+
+
+def make_run_label(
+    run_name: Any,
+    retriever: Any,
+    reranker: Any,
+    ensemble_bm25_weight: Any = None,
+) -> str:
     name = str(run_name or "-")
     retriever_name = str(retriever or "")
     reranker_name = str(reranker or "")
     if not retriever_name and not reranker_name:
         return name
-    return f"{name} / {retriever_name or '-'} / {reranker_name or '-'}"
+    label = f"{name} / {retriever_name or '-'} / {reranker_name or '-'}"
+    weight_label = _format_ensemble_weight_label(retriever, ensemble_bm25_weight)
+    if weight_label:
+        return f"{label} / {weight_label}"
+    return label
 
 
 def _is_empty_scalar(value: Any) -> bool:
@@ -505,6 +585,35 @@ def _bundle_value(bundle: Any, key: str, default: Any = None) -> Any:
     return getattr(bundle, "summary", {}).get(key, default)
 
 
+def _mean_execution_time(bundle: Any) -> float | None:
+    csv_path = getattr(bundle, "csv_path", None)
+    if csv_path is None:
+        return None
+    try:
+        frame = pd.read_csv(csv_path, usecols=["execution_time"])
+    except (OSError, ValueError, pd.errors.EmptyDataError, pd.errors.ParserError):
+        return None
+
+    values = pd.to_numeric(frame["execution_time"], errors="coerce").dropna()
+    if values.empty:
+        return None
+    return float(values.mean())
+
+
+def make_retriever_reranker(
+    retriever: Any,
+    reranker: Any,
+    ensemble_bm25_weight: Any = None,
+) -> str:
+    retriever_value = str(retriever or "unknown")
+    reranker_value = str(reranker or "unknown")
+    label = f"{retriever_value} / {reranker_value}"
+    weight_label = _format_ensemble_weight_label(retriever, ensemble_bm25_weight)
+    if weight_label:
+        return f"{label} / {weight_label}"
+    return label
+
+
 def build_summary_frame(bundles: Iterable[Any]) -> pd.DataFrame:
     records: list[dict[str, Any]] = []
     for bundle in bundles:
@@ -515,6 +624,7 @@ def build_summary_frame(bundles: Iterable[Any]) -> pd.DataFrame:
         embedder = summary.get("embedding_provider")
         retriever = summary.get("retriever_strategy")
         reranker = summary.get("reranker_strategy")
+        ensemble_bm25_weight = summary.get("ensemble_bm25_weight")
         run_name = summary.get("run_name") or getattr(bundle, "run_name", None)
         record: dict[str, Any] = {
             "experiment_name": summary.get("experiment_name"),
@@ -527,12 +637,26 @@ def build_summary_frame(bundles: Iterable[Any]) -> pd.DataFrame:
             "embedding_provider": embedder,
             "retriever_strategy": retriever,
             "reranker_strategy": reranker,
+            "ensemble_bm25_weight": ensemble_bm25_weight,
+            "ensemble_candidate_k": summary.get("ensemble_candidate_k"),
+            "ensemble_use_chunk_id": summary.get("ensemble_use_chunk_id"),
+            "retriever_reranker": make_retriever_reranker(
+                retriever,
+                reranker,
+                ensemble_bm25_weight,
+            ),
             "row_count": summary.get("row_count"),
+            "execution_time": _mean_execution_time(bundle),
             "summary_path": str(getattr(bundle, "summary_path", "")),
             "csv_path": str(getattr(bundle, "csv_path", "") or ""),
             "result_stem": getattr(bundle, "result_stem", None),
             "combo": make_combo(loader, chunker, embedder),
-            "run_label": make_run_label(run_name, retriever, reranker),
+            "run_label": make_run_label(
+                run_name,
+                retriever,
+                reranker,
+                ensemble_bm25_weight,
+            ),
         }
         for metric_name in METRIC_COLUMNS:
             record[metric_name] = metrics.get(metric_name)
@@ -543,7 +667,9 @@ def build_summary_frame(bundles: Iterable[Any]) -> pd.DataFrame:
         return pd.DataFrame(columns=list(SUMMARY_METADATA_COLUMNS) + list(METRIC_COLUMNS))
     for metric_name in METRIC_COLUMNS:
         frame[metric_name] = pd.to_numeric(frame[metric_name], errors="coerce")
-    return frame
+    for metric_name in TIME_METRIC_COLUMNS:
+        frame[metric_name] = pd.to_numeric(frame[metric_name], errors="coerce")
+    return _disambiguate_duplicate_run_labels(frame)
 
 
 def _read_bundle_csv(bundle: Any) -> pd.DataFrame | None:
@@ -606,6 +732,7 @@ def build_example_frame(bundles: Iterable[Any]) -> pd.DataFrame:
         embedder = summary.get("embedding_provider")
         retriever = summary.get("retriever_strategy")
         reranker = summary.get("reranker_strategy")
+        ensemble_bm25_weight = summary.get("ensemble_bm25_weight")
         run_name = summary.get("run_name") or getattr(bundle, "run_name", None)
         frame = frame.copy()
         frame["run_name"] = run_name
@@ -614,10 +741,24 @@ def build_example_frame(bundles: Iterable[Any]) -> pd.DataFrame:
         frame["embedding_provider"] = embedder
         frame["retriever_strategy"] = retriever
         frame["reranker_strategy"] = reranker
+        frame["ensemble_bm25_weight"] = ensemble_bm25_weight
+        frame["ensemble_candidate_k"] = summary.get("ensemble_candidate_k")
+        frame["ensemble_use_chunk_id"] = summary.get("ensemble_use_chunk_id")
+        frame["retriever_reranker"] = make_retriever_reranker(
+            retriever,
+            reranker,
+            ensemble_bm25_weight,
+        )
         frame["combo"] = make_combo(loader, chunker, embedder)
-        frame["run_label"] = make_run_label(run_name, retriever, reranker)
+        frame["run_label"] = make_run_label(
+            run_name,
+            retriever,
+            reranker,
+            ensemble_bm25_weight,
+        )
         frame["summary_path"] = str(getattr(bundle, "summary_path", ""))
         frame["csv_path"] = str(getattr(bundle, "csv_path", "") or "")
+        frame["result_stem"] = getattr(bundle, "result_stem", None)
         if "evaluation_suite" not in frame.columns:
             frame["evaluation_suite"] = summary.get("evaluation_suite") or summary.get("suite")
         for column in CASE_METADATA_COLUMNS:
@@ -643,7 +784,8 @@ def build_example_frame(bundles: Iterable[Any]) -> pd.DataFrame:
 
     if not frames:
         return pd.DataFrame()
-    return reconcile_cross_run_case_keys(pd.concat(frames, ignore_index=True))
+    examples = reconcile_cross_run_case_keys(pd.concat(frames, ignore_index=True))
+    return _disambiguate_duplicate_run_labels(examples)
 
 
 def build_metric_frame(summary_frame: pd.DataFrame) -> pd.DataFrame:
@@ -654,11 +796,31 @@ def build_metric_frame(summary_frame: pd.DataFrame) -> pd.DataFrame:
                 "loader_strategy",
                 "chunker_strategy",
                 "embedding_provider",
+                "retriever_strategy",
+                "reranker_strategy",
+                "ensemble_bm25_weight",
+                "ensemble_candidate_k",
+                "ensemble_use_chunk_id",
+                "retriever_reranker",
                 "combo",
                 "run_label",
                 "metric",
                 "score",
             ]
+        )
+
+    summary_frame = summary_frame.copy()
+    if (
+        "retriever_reranker" not in summary_frame.columns
+        and {"retriever_strategy", "reranker_strategy"}.issubset(summary_frame.columns)
+    ):
+        summary_frame["retriever_reranker"] = summary_frame.apply(
+            lambda row: make_retriever_reranker(
+                row.get("retriever_strategy"),
+                row.get("reranker_strategy"),
+                row.get("ensemble_bm25_weight"),
+            ),
+            axis=1,
         )
 
     id_columns = [
@@ -667,12 +829,18 @@ def build_metric_frame(summary_frame: pd.DataFrame) -> pd.DataFrame:
         "loader_strategy",
         "chunker_strategy",
         "embedding_provider",
+        "retriever_strategy",
+        "reranker_strategy",
+        "ensemble_bm25_weight",
+        "ensemble_candidate_k",
+        "ensemble_use_chunk_id",
+        "retriever_reranker",
         "combo",
         "run_label",
     ]
     id_columns = [column for column in id_columns if column in summary_frame.columns]
     value_columns = [
-        column for column in METRIC_COLUMNS if column in summary_frame.columns
+        column for column in COMPARISON_METRIC_COLUMNS if column in summary_frame.columns
     ]
     metric_frame = summary_frame.melt(
         id_vars=id_columns,
@@ -799,7 +967,7 @@ def rank_combinations(summary: pd.DataFrame, metric: str) -> pd.DataFrame:
         return pd.DataFrame()
     ranked = summary.copy()
     ranked[metric] = pd.to_numeric(ranked[metric], errors="coerce")
-    ascending = metric == "critical_error"
+    ascending = metric in LOWER_IS_BETTER_METRICS
     return ranked.sort_values(metric, ascending=ascending).reset_index(drop=True)
 
 

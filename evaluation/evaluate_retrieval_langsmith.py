@@ -10,6 +10,7 @@ import sys
 import time
 from collections.abc import Iterable
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import replace
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -28,13 +29,20 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from config import (
     BASE_DIR,
+    DEFAULT_CHUNKER_STRATEGY as APP_DEFAULT_CHUNKER_STRATEGY,
     DEFAULT_EMBEDDING_PROVIDER,
+    DEFAULT_ENSEMBLE_BM25_WEIGHT,
+    DEFAULT_ENSEMBLE_CANDIDATE_K,
+    DEFAULT_ENSEMBLE_USE_CHUNK_ID,
+    DEFAULT_LOADER_STRATEGY as APP_DEFAULT_LOADER_STRATEGY,
     DEFAULT_RERANKER_CANDIDATE_K,
+    RETRIEVER_K,
     get_vectorstore_dir,
 )
+from main import build_pipeline_config
 from rag.indexer import load_vectorstore, vectorstore_exists
 from rag.pipeline.reranker import RERANKER_STRATEGIES
-from rag.pipeline.retrieval import RetrievalPipelineConfig, run_retrieval_pipeline
+from rag.pipeline.retrieval import run_retrieval_pipeline
 from rag.pipeline.retriever import RETRIEVAL_STRATEGIES, build_retrieval_components
 
 
@@ -45,11 +53,11 @@ DEFAULT_MATRIX_PATH = BASE_DIR / "evaluation" / "retrieval_eval_matrix.json"
 DEFAULT_OUTPUT_DIR = BASE_DIR / "evaluation" / "results" / "langsmith"
 DEFAULT_DATASET_PREFIX = "MDM retrieval testset"
 DEFAULT_EXPERIMENT_PREFIX = "MDM retrieval eval"
-DEFAULT_LOADER_STRATEGY = "upstage"
-DEFAULT_CHUNKER_STRATEGY = "custom"
+DEFAULT_LOADER_STRATEGY = APP_DEFAULT_LOADER_STRATEGY
+DEFAULT_CHUNKER_STRATEGY = APP_DEFAULT_CHUNKER_STRATEGY
 DEFAULT_RETRIEVER_STRATEGY = "similarity"
 DEFAULT_RERANKER_STRATEGY = "none"
-DEFAULT_K = 5
+DEFAULT_K = RETRIEVER_K
 RETRIEVER_STRATEGY_CHOICES = tuple(RETRIEVAL_STRATEGIES)
 RERANKER_STRATEGY_CHOICES = tuple(
     strategy for strategy in ("none", "cross-encoder", "flashrank", "llm-score")
@@ -185,6 +193,25 @@ def parse_args() -> argparse.Namespace:
             "Number of candidates to retrieve before reranking. "
             "Set to 0 to use the strategy default."
         ),
+    )
+    parser.add_argument(
+        "--ensemble-bm25-weight",
+        type=float,
+        default=DEFAULT_ENSEMBLE_BM25_WEIGHT,
+        help="BM25 weight for ensemble retrievers. Dense weight is 1 - this value.",
+    )
+    parser.add_argument(
+        "--ensemble-candidate-k",
+        type=int,
+        default=DEFAULT_ENSEMBLE_CANDIDATE_K,
+        help="BM25 and dense candidate count for ensemble retrievers.",
+    )
+    parser.add_argument(
+        "--no-ensemble-use-chunk-id",
+        action="store_false",
+        dest="ensemble_use_chunk_id",
+        default=DEFAULT_ENSEMBLE_USE_CHUNK_ID,
+        help="Disable chunk_id de-duplication for ensemble retrievers.",
     )
     parser.add_argument(
         "--max-examples",
@@ -346,6 +373,31 @@ def effective_candidate_k(reranker_strategy: str, candidate_k: int) -> int | Non
     if reranker_strategy != "none":
         return DEFAULT_RERANKER_CANDIDATE_K
     return None
+
+
+def ensemble_bm25_weight_from_args(args: argparse.Namespace) -> float:
+    return float(getattr(args, "ensemble_bm25_weight", DEFAULT_ENSEMBLE_BM25_WEIGHT))
+
+
+def ensemble_candidate_k_from_args(args: argparse.Namespace) -> int:
+    return int(getattr(args, "ensemble_candidate_k", DEFAULT_ENSEMBLE_CANDIDATE_K))
+
+
+def ensemble_use_chunk_id_from_args(args: argparse.Namespace) -> bool:
+    return bool(getattr(args, "ensemble_use_chunk_id", DEFAULT_ENSEMBLE_USE_CHUNK_ID))
+
+
+def validate_run_args(args: argparse.Namespace) -> None:
+    if args.k <= 0:
+        raise ValueError("--k must be greater than 0")
+    if args.candidate_k < 0:
+        raise ValueError("--candidate-k must be greater than or equal to 0")
+    ensemble_bm25_weight = ensemble_bm25_weight_from_args(args)
+    if not 0 <= ensemble_bm25_weight <= 1:
+        raise ValueError("--ensemble-bm25-weight must be between 0 and 1")
+    ensemble_candidate_k = ensemble_candidate_k_from_args(args)
+    if ensemble_candidate_k <= 0:
+        raise ValueError("--ensemble-candidate-k must be greater than 0")
 
 
 def configure_tracing(needs_langsmith: bool) -> None:
@@ -577,6 +629,9 @@ def build_retrieval_target(
     reranker_strategy: str,
     k: int,
     candidate_k: int | None = None,
+    ensemble_bm25_weight: float = DEFAULT_ENSEMBLE_BM25_WEIGHT,
+    ensemble_candidate_k: int = DEFAULT_ENSEMBLE_CANDIDATE_K,
+    ensemble_use_chunk_id: bool = DEFAULT_ENSEMBLE_USE_CHUNK_ID,
 ):
     vectorstore_dir = get_vectorstore_dir(
         loader_strategy,
@@ -591,6 +646,7 @@ def build_retrieval_target(
 
     vectorstore = load_vectorstore(vectorstore_dir, embedding_provider=embedding_provider)
     components = build_retrieval_components(vectorstore)
+
     def retrieval_target(inputs: dict[str, Any]) -> dict[str, Any]:
         question = inputs["question"]
         final_k = positive_int_or_default(inputs.get("final_k"), k)
@@ -598,11 +654,21 @@ def build_retrieval_target(
             inputs.get("candidate_k"),
             candidate_k,
         )
-        pipeline_config = RetrievalPipelineConfig(
+        streamlit_config = build_pipeline_config(
             retriever_strategy=retriever_strategy,
+            ensemble_bm25_weight=ensemble_bm25_weight,
+            ensemble_candidate_k=ensemble_candidate_k,
+            ensemble_use_chunk_id=ensemble_use_chunk_id,
             reranker_strategy=reranker_strategy,
+        )
+        pipeline_config = replace(
+            streamlit_config,
             final_k=final_k,
-            candidate_k=effective_candidate,
+            candidate_k=(
+                effective_candidate
+                if effective_candidate is not None
+                else streamlit_config.candidate_k
+            ),
         )
         documents = run_retrieval_pipeline(
             components=components,
@@ -622,6 +688,9 @@ def build_retrieval_target(
             "reranker_strategy": reranker_strategy,
             "k": final_k,
             "candidate_k": effective_candidate,
+            "ensemble_bm25_weight": ensemble_bm25_weight,
+            "ensemble_candidate_k": ensemble_candidate_k,
+            "ensemble_use_chunk_id": ensemble_use_chunk_id,
             "retrieved": retrieved,
             "retrieved_metadata": [item["metadata"] for item in retrieved],
             "contexts": [item["page_content"] for item in retrieved],
@@ -989,6 +1058,9 @@ def save_experiment_dataframe(
     reranker_strategy: str = DEFAULT_RERANKER_STRATEGY,
     final_k: int = DEFAULT_K,
     candidate_k: int | None = None,
+    ensemble_bm25_weight: float = DEFAULT_ENSEMBLE_BM25_WEIGHT,
+    ensemble_candidate_k: int = DEFAULT_ENSEMBLE_CANDIDATE_K,
+    ensemble_use_chunk_id: bool = DEFAULT_ENSEMBLE_USE_CHUNK_ID,
 ) -> dict[str, Path]:
     output_dir.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -1017,6 +1089,9 @@ def save_experiment_dataframe(
         "reranker_strategy": reranker_strategy,
         "final_k": final_k,
         "candidate_k": candidate_k,
+        "ensemble_bm25_weight": ensemble_bm25_weight,
+        "ensemble_candidate_k": ensemble_candidate_k,
+        "ensemble_use_chunk_id": ensemble_use_chunk_id,
         "row_count": int(len(dataframe)),
         "metrics": summarize_feedback_metrics(dataframe),
     }
@@ -1037,6 +1112,9 @@ def save_experiment_results(
     reranker_strategy: str = DEFAULT_RERANKER_STRATEGY,
     final_k: int = DEFAULT_K,
     candidate_k: int | None = None,
+    ensemble_bm25_weight: float = DEFAULT_ENSEMBLE_BM25_WEIGHT,
+    ensemble_candidate_k: int = DEFAULT_ENSEMBLE_CANDIDATE_K,
+    ensemble_use_chunk_id: bool = DEFAULT_ENSEMBLE_USE_CHUNK_ID,
 ) -> dict[str, Path]:
     dataframe = results.to_pandas()
     return save_experiment_dataframe(
@@ -1050,6 +1128,9 @@ def save_experiment_results(
         reranker_strategy=reranker_strategy,
         final_k=final_k,
         candidate_k=candidate_k,
+        ensemble_bm25_weight=ensemble_bm25_weight,
+        ensemble_candidate_k=ensemble_candidate_k,
+        ensemble_use_chunk_id=ensemble_use_chunk_id,
     )
 
 
@@ -1086,6 +1167,12 @@ def run_retrieval_experiment(
     print(f"[INFO] retriever_strategy: {args.retriever_strategy}")
     print(f"[INFO] reranker_strategy: {args.reranker_strategy}")
     print(f"[INFO] k: {args.k}")
+    ensemble_bm25_weight = ensemble_bm25_weight_from_args(args)
+    ensemble_candidate_k = ensemble_candidate_k_from_args(args)
+    ensemble_use_chunk_id = ensemble_use_chunk_id_from_args(args)
+    print(f"[INFO] ensemble_bm25_weight: {ensemble_bm25_weight}")
+    print(f"[INFO] ensemble_candidate_k: {ensemble_candidate_k}")
+    print(f"[INFO] ensemble_use_chunk_id: {ensemble_use_chunk_id}")
     candidate_k = effective_candidate_k(args.reranker_strategy, args.candidate_k)
     if candidate_k is not None:
         print(f"[INFO] candidate_k: {candidate_k}")
@@ -1099,6 +1186,9 @@ def run_retrieval_experiment(
             reranker_strategy=args.reranker_strategy,
             k=args.k,
             candidate_k=candidate_k,
+            ensemble_bm25_weight=ensemble_bm25_weight,
+            ensemble_candidate_k=ensemble_candidate_k,
+            ensemble_use_chunk_id=ensemble_use_chunk_id,
         )
         dataframe = evaluate_local_rows(
             rows=rows,
@@ -1122,6 +1212,9 @@ def run_retrieval_experiment(
             reranker_strategy=args.reranker_strategy,
             final_k=args.k,
             candidate_k=candidate_k,
+            ensemble_bm25_weight=ensemble_bm25_weight,
+            ensemble_candidate_k=ensemble_candidate_k,
+            ensemble_use_chunk_id=ensemble_use_chunk_id,
         )
         print("[INFO] LangSmith skipped. Local result files were written.")
         print(f"[INFO] local CSV: {saved_paths['csv']}")
@@ -1146,6 +1239,9 @@ def run_retrieval_experiment(
         reranker_strategy=args.reranker_strategy,
         k=args.k,
         candidate_k=candidate_k,
+        ensemble_bm25_weight=ensemble_bm25_weight,
+        ensemble_candidate_k=ensemble_candidate_k,
+        ensemble_use_chunk_id=ensemble_use_chunk_id,
     )
 
     experiment_prefix = (
@@ -1171,6 +1267,9 @@ def run_retrieval_experiment(
             "reranker_strategy": args.reranker_strategy,
             "k": args.k,
             "candidate_k": candidate_k,
+            "ensemble_bm25_weight": ensemble_bm25_weight,
+            "ensemble_candidate_k": ensemble_candidate_k,
+            "ensemble_use_chunk_id": ensemble_use_chunk_id,
         },
     )
     print(f"[INFO] LangSmith experiment: {results.experiment_name}")
@@ -1185,6 +1284,9 @@ def run_retrieval_experiment(
             reranker_strategy=args.reranker_strategy,
             final_k=args.k,
             candidate_k=candidate_k,
+            ensemble_bm25_weight=ensemble_bm25_weight,
+            ensemble_candidate_k=ensemble_candidate_k,
+            ensemble_use_chunk_id=ensemble_use_chunk_id,
         )
         print(f"[INFO] local CSV: {saved_paths['csv']}")
         print(f"[INFO] local summary: {saved_paths['summary_json']}")
@@ -1202,10 +1304,7 @@ def main() -> None:
     configure_tracing(needs_langsmith)
     if needs_langsmith and not os.getenv("LANGSMITH_API_KEY"):
         raise RuntimeError("LANGSMITH_API_KEY is required.")
-    if args.k <= 0:
-        raise ValueError("--k must be greater than 0")
-    if args.candidate_k < 0:
-        raise ValueError("--candidate-k must be greater than or equal to 0")
+    validate_run_args(args)
 
     rows = load_jsonl(args.testset_path, args.max_examples)
     client = Client() if needs_langsmith else None
