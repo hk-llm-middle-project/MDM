@@ -135,6 +135,154 @@ class DashboardTransformPlanTest(unittest.TestCase):
             "upstage-custom-bge / ensemble_parent / cross-encoder",
         )
 
+    def test_build_summary_frame_adds_ensemble_weight_to_labels(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_json(
+                root / "run-a.summary.json",
+                {
+                    "run_name": "upstage-custom-openai",
+                    "loader_strategy": "upstage",
+                    "chunker_strategy": "custom",
+                    "embedding_provider": "openai",
+                    "retriever_strategy": "ensemble_parent",
+                    "reranker_strategy": "none",
+                    "ensemble_bm25_weight": 0.7,
+                    "ensemble_candidate_k": 20,
+                    "ensemble_use_chunk_id": True,
+                    "metrics": {"critical_error": 0.0},
+                },
+            )
+
+            frame = transforms.build_summary_frame(discover_result_bundles(root))
+
+        self.assertEqual(
+            frame.loc[0, "run_label"],
+            "upstage-custom-openai / ensemble_parent / none / BM25:Dense 7:3",
+        )
+        self.assertEqual(
+            frame.loc[0, "retriever_reranker"],
+            "ensemble_parent / none / BM25:Dense 7:3",
+        )
+        self.assertEqual(frame.loc[0, "ensemble_bm25_weight"], 0.7)
+
+    def test_build_summary_frame_formats_literal_two_to_nine_weight_label(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_json(
+                root / "run-a.summary.json",
+                {
+                    "run_name": "upstage-custom-openai",
+                    "loader_strategy": "upstage",
+                    "chunker_strategy": "custom",
+                    "embedding_provider": "openai",
+                    "retriever_strategy": "ensemble",
+                    "reranker_strategy": "none",
+                    "ensemble_bm25_weight": 2 / 11,
+                    "metrics": {"critical_error": 0.0},
+                },
+            )
+
+            frame = transforms.build_summary_frame(discover_result_bundles(root))
+
+        self.assertEqual(
+            frame.loc[0, "retriever_reranker"],
+            "ensemble / none / BM25:Dense 2:9",
+        )
+
+    def test_build_summary_frame_disambiguates_repeated_run_labels_by_timestamp(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            for timestamp in ("20260504-150000", "20260504-151500"):
+                write_json(
+                    root
+                    / f"{timestamp}-upstage-custom-openai-ensemble-none.summary.json",
+                    {
+                        "run_name": "upstage-custom-openai",
+                        "loader_strategy": "upstage",
+                        "chunker_strategy": "custom",
+                        "embedding_provider": "openai",
+                        "retriever_strategy": "ensemble",
+                        "reranker_strategy": "none",
+                        "ensemble_bm25_weight": 0.7,
+                        "metrics": {"critical_error": 0.0},
+                    },
+                )
+
+            frame = transforms.build_summary_frame(discover_result_bundles(root))
+
+        labels = frame["run_label"].tolist()
+        self.assertEqual(len(set(labels)), 2)
+        self.assertIn(
+            "upstage-custom-openai / ensemble / none / BM25:Dense 7:3 [20260504-150000]",
+            labels,
+        )
+        self.assertIn(
+            "upstage-custom-openai / ensemble / none / BM25:Dense 7:3 [20260504-151500]",
+            labels,
+        )
+
+    def test_build_summary_frame_averages_execution_time_from_csv(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_json(
+                root / "run-a.summary.json",
+                {
+                    "run_name": "upstage-custom-bge",
+                    "loader_strategy": "upstage",
+                    "chunker_strategy": "custom",
+                    "embedding_provider": "bge",
+                    "metrics": {"critical_error": 0.0},
+                },
+            )
+            pd.DataFrame(
+                [
+                    {"inputs.question": "q1", "execution_time": 1.5},
+                    {"inputs.question": "q2", "execution_time": 2.5},
+                ]
+            ).to_csv(root / "run-a.csv", index=False)
+
+            frame = transforms.build_summary_frame(discover_result_bundles(root))
+
+        self.assertIn("execution_time", frame.columns)
+        self.assertEqual(frame.loc[0, "execution_time"], 2.0)
+
+    def test_build_metric_frame_includes_execution_time_for_comparison(self) -> None:
+        summary = pd.DataFrame(
+            [
+                {
+                    "run_label": "run-a / similarity / none",
+                    "critical_error": 0.0,
+                    "execution_time": 2.25,
+                }
+            ]
+        )
+
+        metrics = transforms.build_metric_frame(summary)
+
+        self.assertIn("execution_time", metrics["metric"].tolist())
+        execution_time = metrics[metrics["metric"] == "execution_time"].iloc[0]
+        self.assertEqual(execution_time["score"], 2.25)
+
+    def test_build_metric_frame_includes_short_retrieval_group_columns(self) -> None:
+        summary = pd.DataFrame(
+            [
+                {
+                    "run_label": "upstage-custom-bge / ensemble_parent / cross-encoder",
+                    "retriever_strategy": "ensemble_parent",
+                    "reranker_strategy": "cross-encoder",
+                    "critical_error": 0.0,
+                }
+            ]
+        )
+
+        metrics = transforms.build_metric_frame(summary)
+        row = metrics[metrics["metric"] == "critical_error"].iloc[0]
+
+        self.assertEqual(row["retriever_strategy"], "ensemble_parent")
+        self.assertEqual(row["reranker_strategy"], "cross-encoder")
+        self.assertEqual(row["retriever_reranker"], "ensemble_parent / cross-encoder")
+
     def test_case_metric_matrix_uses_run_label_to_avoid_strategy_collisions(self) -> None:
         examples = pd.DataFrame(
             [
@@ -259,6 +407,85 @@ class DashboardTransformPlanTest(unittest.TestCase):
 
         self.assertEqual(rows["run_name"].tolist(), ["run-a", "run-b"])
 
+    def test_compare_runs_for_case_accepts_three_selected_runs(self) -> None:
+        examples = pd.DataFrame(
+            [
+                {"case_key": "retrieval_001", "run_name": "run-a", "critical_error": 0},
+                {"case_key": "retrieval_001", "run_name": "run-b", "critical_error": 1},
+                {"case_key": "retrieval_001", "run_name": "run-c", "critical_error": 0},
+                {"case_key": "retrieval_001", "run_name": "run-d", "critical_error": 1},
+            ]
+        )
+
+        rows = transforms.compare_runs_for_case(
+            examples,
+            "retrieval_001",
+            "run-c",
+            "run-a",
+            "run-b",
+        )
+
+        self.assertEqual(rows["run_name"].tolist(), ["run-c", "run-a", "run-b"])
+
+    def test_case_value_comparison_shows_expected_and_actual_values_by_run(self) -> None:
+        examples = pd.DataFrame(
+            [
+                {
+                    "case_key": "retrieval_001",
+                    "run_label": "run-a / ensemble_parent / none",
+                    "reference.expected_diagram_ids": '["보1"]',
+                    "outputs.retrieved_metadata": '[{"diagram_id":"보1","location":"횡단보도 내"}]',
+                },
+                {
+                    "case_key": "retrieval_001",
+                    "run_label": "run-b / ensemble_parent / cross-encoder",
+                    "reference.expected_diagram_ids": '["보1"]',
+                    "outputs.retrieved_metadata": '[{"diagram_id":"보10","location":"교차로"}]',
+                },
+            ]
+        )
+
+        comparison = transforms.build_case_value_comparison(examples)
+
+        self.assertEqual(
+            comparison.columns.tolist(),
+            [
+                "항목",
+                "예상 값",
+                "run-a / ensemble_parent / none",
+                "run-b / ensemble_parent / cross-encoder",
+            ],
+        )
+        self.assertEqual(comparison.loc[0, "항목"], "기대 diagram")
+        self.assertEqual(comparison.loc[0, "예상 값"], "보1")
+        self.assertEqual(comparison.loc[0, "run-a / ensemble_parent / none"], "보1")
+        self.assertEqual(comparison.loc[0, "run-b / ensemble_parent / cross-encoder"], "보10")
+
+    def test_case_metric_comparison_shows_scores_by_run(self) -> None:
+        examples = pd.DataFrame(
+            [
+                {
+                    "case_key": "retrieval_001",
+                    "run_label": "run-a / ensemble_parent / none",
+                    "diagram_id_hit": 1,
+                    "diagram_id_hit_comment": "expected_or_acceptable=['보1'], actual_topk=['보1']",
+                },
+                {
+                    "case_key": "retrieval_001",
+                    "run_label": "run-b / ensemble_parent / cross-encoder",
+                    "diagram_id_hit": 0,
+                    "diagram_id_hit_comment": "expected_or_acceptable=['보1'], actual_topk=['보10']",
+                },
+            ]
+        )
+
+        comparison = transforms.build_case_metric_comparison(examples)
+
+        self.assertEqual(comparison.loc[0, "metric"], "diagram_id_hit")
+        self.assertEqual(comparison.loc[0, "run-a / ensemble_parent / none"], "1")
+        self.assertEqual(comparison.loc[0, "run-b / ensemble_parent / cross-encoder"], "0")
+        self.assertIn("actual_topk=['보10']", comparison.loc[0, "run-b / ensemble_parent / cross-encoder comment"])
+
     def test_rank_combinations_sorts_critical_error_ascending(self) -> None:
         self.assertTrue(
             hasattr(transforms, "rank_combinations"),
@@ -290,6 +517,143 @@ class DashboardTransformPlanTest(unittest.TestCase):
         ranked = transforms.rank_combinations(summary, "diagram_id_hit")
 
         self.assertEqual(ranked["run_name"].tolist(), ["good", "bad"])
+
+    def test_metric_comparison_defaults_to_one_selected_metric(self) -> None:
+        from evaluation.dashboard.views import metric_comparison
+
+        self.assertEqual(
+            metric_comparison.default_metric_selection(
+                ["retrieval_relevance", "critical_error", "router_overall"]
+            ),
+            ["critical_error"],
+        )
+        self.assertEqual(
+            metric_comparison.default_metric_selection(
+                ["router_overall", "metadata_filter_overall"]
+            ),
+            ["router_overall"],
+        )
+
+    def test_metric_comparison_caption_includes_metric_description(self) -> None:
+        from evaluation.dashboard.views import metric_comparison
+
+        critical_caption = metric_comparison.metric_caption("critical_error")
+        router_caption = metric_comparison.metric_caption("router_overall")
+
+        self.assertIn("critical_error", critical_caption)
+        self.assertIn("낮을수록", critical_caption)
+        self.assertIn("router_overall", router_caption)
+
+    def test_metric_comparison_exposes_execution_time_with_time_caption(self) -> None:
+        from evaluation.dashboard.views import metric_comparison
+
+        available = metric_comparison._available_metrics(
+            pd.DataFrame(columns=["critical_error", "execution_time"])
+        )
+        caption = metric_comparison.metric_caption("execution_time")
+
+        self.assertIn("execution_time", available)
+        self.assertIn("초", caption)
+        self.assertIn("낮을수록", caption)
+
+    def test_metric_comparison_group_by_options_include_short_retrieval_axes(self) -> None:
+        from evaluation.dashboard.views import metric_comparison
+
+        options = metric_comparison.available_group_by_options(
+            pd.DataFrame(
+                columns=[
+                    "run_label",
+                    "retriever_strategy",
+                    "reranker_strategy",
+                    "retriever_reranker",
+                ]
+            )
+        )
+
+        self.assertIn("retriever_strategy", options)
+        self.assertIn("reranker_strategy", options)
+        self.assertIn("retriever_reranker", options)
+        self.assertEqual(
+            metric_comparison.group_by_label("retriever_strategy"),
+            "retriever",
+        )
+        self.assertEqual(
+            metric_comparison.group_by_label("reranker_strategy"),
+            "reranker",
+        )
+        self.assertEqual(
+            metric_comparison.group_by_label("retriever_reranker"),
+            "retriever + reranker",
+        )
+        self.assertEqual(
+            metric_comparison.default_group_by_index(options),
+            options.index("retriever_reranker"),
+        )
+
+    def test_metric_bar_chart_uses_seconds_axis_for_execution_time(self) -> None:
+        from evaluation.dashboard.charts import metric_bar_chart
+
+        chart = metric_bar_chart(
+            pd.DataFrame(
+                [
+                    {
+                        "run_label": "run-a / similarity / none",
+                        "metric": "execution_time",
+                        "score": 2.25,
+                    }
+                ]
+            ),
+            metric="execution_time",
+            group_by="run_label",
+        )
+
+        x_encoding = chart.to_dict()["encoding"]["x"]
+        y_encoding = chart.to_dict()["encoding"]["y"]
+        self.assertEqual(x_encoding["title"], "seconds")
+        self.assertNotIn("domain", x_encoding.get("scale", {}))
+        self.assertEqual(y_encoding["sort"], "x")
+        self.assertGreaterEqual(y_encoding["axis"]["labelLimit"], 320)
+
+    def test_metric_bar_chart_can_use_short_group_label(self) -> None:
+        from evaluation.dashboard.charts import metric_bar_chart
+
+        chart = metric_bar_chart(
+            pd.DataFrame(
+                [
+                    {
+                        "retriever_reranker": "ensemble_parent / cross-encoder",
+                        "metric": "critical_error",
+                        "score": 0.25,
+                    }
+                ]
+            ),
+            metric="critical_error",
+            group_by="retriever_reranker",
+            group_label="retriever + reranker",
+        )
+
+        y_encoding = chart.to_dict()["encoding"]["y"]
+        self.assertEqual(y_encoding["title"], "retriever + reranker")
+
+    def test_parser_chunker_heatmap_accepts_execution_time_without_score_domain(self) -> None:
+        from evaluation.dashboard.charts import parser_chunker_heatmap
+
+        chart = parser_chunker_heatmap(
+            pd.DataFrame(
+                [
+                    {
+                        "loader_strategy": "upstage",
+                        "chunker_strategy": "custom",
+                        "execution_time": 2.25,
+                    }
+                ]
+            ),
+            metric="execution_time",
+        )
+
+        scale = chart.to_dict()["encoding"]["color"]["scale"]
+        self.assertNotIn("domain", scale)
+        self.assertTrue(scale["reverse"])
 
     def test_same_question_with_different_example_ids_stays_one_matrix_case(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -419,6 +783,14 @@ class DashboardTransformPlanTest(unittest.TestCase):
         self.assertEqual(breakdown.loc[0, "failed_count"], 2)
         self.assertEqual(breakdown.loc[0, "run_name"], "run-a")
         self.assertEqual(breakdown.loc[1, "failed_count"], 1)
+
+    def test_metric_descriptions_cover_failure_metrics(self) -> None:
+        for metric in transforms.METRIC_COLUMNS:
+            with self.subTest(metric=metric):
+                description = transforms.describe_metric(metric)
+                self.assertIn(metric, description)
+                self.assertIn("0", description)
+                self.assertIn("1", description)
 
     def test_app_tab_labels_match_dashboard_plan(self) -> None:
         from evaluation.dashboard import app

@@ -5,7 +5,12 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
-from evaluation.dashboard.transforms import METRIC_COLUMNS, rows_for_case
+from evaluation.dashboard.transforms import (
+    build_case_metric_comparison,
+    build_case_value_comparison,
+    case_question,
+    rows_for_case,
+)
 
 
 def render(examples: pd.DataFrame) -> None:
@@ -27,58 +32,18 @@ def render(examples: pd.DataFrame) -> None:
     first = rows.iloc[0]
 
     st.markdown("#### Question")
-    st.write(first.get("inputs.question", ""))
+    st.write(case_question(rows) or first.get("inputs.question", ""))
 
-    expected_columns = [
-        column
-        for column in [
-            "reference.expected_diagram_ids",
-            "reference.acceptable_diagram_ids",
-            "reference.near_miss_diagram_ids",
-            "reference.expected_location",
-            "reference.expected_party_type",
-            "reference.expected_chunk_types",
-            "reference.expected_keywords",
-            "reference.expected_filter",
-            "reference.expected_route_type",
-            "reference.expected_final_fault_ratio",
-            "reference.expected_party_roles",
-            "reference.expected_applicable_modifiers",
-            "reference.expected_non_applicable_modifiers",
-        ]
-        if column in rows.columns
-    ]
-    if expected_columns:
-        st.markdown("#### Expected")
-        st.dataframe(rows[expected_columns].head(1), use_container_width=True, hide_index=True)
+    value_comparison = build_case_value_comparison(rows)
+    if not value_comparison.empty:
+        st.markdown("#### Expected vs actual")
+        st.caption("왼쪽은 testset의 기대값이고, 각 run 컬럼은 해당 run이 실제로 낸 값입니다.")
+        st.dataframe(value_comparison, use_container_width=True, hide_index=True)
 
-    score_columns = [metric for metric in METRIC_COLUMNS if metric in rows.columns]
-    display_columns = [
-        column
-        for column in [
-            "run_label",
-            "evaluation_suite",
-            "case_type_codes",
-            "difficulty",
-            "case_family",
-            "run_name",
-            "loader_strategy",
-            "chunker_strategy",
-            "embedding_provider",
-            "retriever_strategy",
-            "reranker_strategy",
-            *score_columns,
-            "outputs.query",
-            "outputs.retrieved",
-            "outputs.retrieved_metadata",
-            "outputs.contexts",
-            "execution_time",
-        ]
-        if column in rows.columns
-    ]
-    st.markdown("#### Runs")
-    st.dataframe(
-        rows[display_columns] if display_columns else rows,
-        use_container_width=True,
-        hide_index=True,
-    )
+    metric_comparison = build_case_metric_comparison(rows)
+    if not metric_comparison.empty:
+        st.markdown("#### Metric scores")
+        st.dataframe(metric_comparison, use_container_width=True, hide_index=True)
+
+    with st.expander("Raw run rows"):
+        st.dataframe(rows, use_container_width=True, hide_index=True)
