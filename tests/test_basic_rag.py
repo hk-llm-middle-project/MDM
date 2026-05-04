@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 from langchain_core.documents import Document
 
-from config import PDF_PATH
+from config import INTAKE_MODEL, PDF_PATH, RERANKER_LLM_MODEL, ROUTER_MODEL
 from rag.chunker import chunk_text, split_documents
 from rag.chunkers import (
     BaseChunker,
@@ -33,6 +33,7 @@ from rag.pipeline.retriever import EnsembleRetrieverConfig
 from rag.pipeline.retriever import RETRIEVAL_STRATEGIES, retrieve
 from rag.service.conversation.app_service import answer_question, answer_question_with_intake
 from rag.service.conversation.app_service import answer_question_without_intake
+from rag.service.conversation.router import route_conversation_turn
 from rag.service.intake.filter_service import build_metadata_filters
 from rag.service.intake.intake_service import (
     evaluate_input_sufficiency,
@@ -386,6 +387,9 @@ class BasicRagTest(unittest.TestCase):
 
         self.assertEqual(pipeline_config.reranker_strategy, "llm-score")
         self.assertIsInstance(pipeline_config.reranker_config, LLMScoreRerankerConfig)
+
+    def test_llm_score_reranker_uses_dedicated_default_model(self):
+        self.assertEqual(LLMScoreRerankerConfig().model, RERANKER_LLM_MODEL)
 
     def test_rerank_raises_for_unknown_strategy(self):
         with self.assertRaises(ValueError):
@@ -1302,6 +1306,35 @@ class BasicRagTest(unittest.TestCase):
         self.assertFalse(decision.is_sufficient)
         self.assertTrue(decision.follow_up_questions)
         fake_llm.invoke.assert_not_called()
+
+    def test_evaluate_input_sufficiency_uses_dedicated_intake_model(self):
+        fake_llm = MagicMock()
+        fake_llm.invoke.return_value = MagicMock(
+            content=(
+                '{"party_type":"자동차","location":"교차로 사고",'
+                '"retrieval_query":"자동차 교차로 사고",'
+                '"confidence":{"party_type":1,"location":1,"retrieval_query":1}}'
+            )
+        )
+
+        with patch("rag.service.intake.intake_service.ChatOpenAI", return_value=fake_llm) as chat_mock:
+            evaluate_input_sufficiency("교차로에서 자동차끼리 사고가 났어요.")
+
+        chat_mock.assert_called_once_with(model=INTAKE_MODEL, temperature=0)
+
+    def test_route_conversation_turn_uses_dedicated_router_model(self):
+        fake_llm = MagicMock()
+        fake_llm.invoke.return_value = MagicMock(
+            content=(
+                '{"route_type":"accident_analysis","confidence":1,'
+                '"reason":"사고 분석 요청"}'
+            )
+        )
+
+        with patch("rag.service.conversation.router.ChatOpenAI", return_value=fake_llm) as chat_mock:
+            route_conversation_turn("교차로 사고 과실비율 알려줘", chat_history=[])
+
+        chat_mock.assert_called_once_with(model=ROUTER_MODEL, temperature=0)
 
     def test_build_metadata_filters_uses_party_type_and_location(self):
         filters = build_metadata_filters(

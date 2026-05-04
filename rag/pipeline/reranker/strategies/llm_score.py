@@ -8,7 +8,7 @@ from typing import Any
 from langchain_core.documents import Document
 from langchain_openai import ChatOpenAI
 
-from config import LLM_MODEL
+from config import RERANKER_LLM_MODEL
 from rag.pipeline.reranker.prompts import build_llm_score_reranker_prompt
 from rag.pipeline.reranker.strategies.common import build_scored_document, parse_json_response
 from rag.service.tracing import TraceContext
@@ -19,7 +19,7 @@ class LLMScoreRerankerConfig:
     """LLM이 문서별 관련도를 점수화하는 리랭커 설정."""
 
     llm: Any | None = None
-    model: str = LLM_MODEL
+    model: str = RERANKER_LLM_MODEL
     temperature: float = 0.0
 
 

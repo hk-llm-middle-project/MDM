@@ -7,7 +7,7 @@ from typing import Any
 
 from langchain_openai import ChatOpenAI
 
-from config import LLM_MODEL
+from config import ROUTER_MODEL
 from rag.service.common.json_utils import extract_json_object
 from rag.service.conversation.prompts import build_route_prompt
 from rag.service.conversation.schema import RouteDecision, RouteType
@@ -65,7 +65,7 @@ def route_conversation_turn(
     trace_context: TraceContext | None = None,
 ) -> RouteDecision:
     """현재 입력을 일반 대화 또는 사고 분석 흐름으로 분류합니다."""
-    router_llm = llm or ChatOpenAI(model=LLM_MODEL, temperature=0)
+    router_llm = llm or ChatOpenAI(model=ROUTER_MODEL, temperature=0)
     try:
         prompt = build_route_prompt(question, chat_history, intake_state)
         config = trace_context.langchain_config("mdm.route") if trace_context else None

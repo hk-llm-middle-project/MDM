@@ -51,7 +51,10 @@ ENSEMBLE_ID_KEY = "chunk_id"
 DEFAULT_EMBEDDING_PROVIDER = "bge"
 OPENAI_EMBEDDING_MODEL = "text-embedding-3-small"
 GOOGLE_EMBEDDING_MODEL = "models/gemini-embedding-001"
-LLM_MODEL = "gpt-4o-mini"
+LLM_MODEL = "gpt-5-mini"
+INTAKE_MODEL = "gpt-4o-mini"
+ROUTER_MODEL = "gpt-4o-mini"
+RERANKER_LLM_MODEL = "gpt-5-mini"
 
 
 def _optional_env(name: str, default: str | None = None) -> str | None:
