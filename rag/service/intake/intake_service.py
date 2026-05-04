@@ -7,7 +7,7 @@ from typing import Any
 
 from langchain_openai import ChatOpenAI
 
-from config import LLM_MODEL
+from config import INTAKE_MODEL
 from rag.service.common.json_utils import extract_json_object
 from rag.service.intake.prompts import build_intake_prompt
 from rag.service.intake.query_normalizer import enrich_intake_decision
@@ -169,7 +169,7 @@ def evaluate_input_sufficiency(
             follow_up_questions=["사고 상황을 간단히 입력해주세요."],
         )
 
-    intake_llm = llm or ChatOpenAI(model=LLM_MODEL, temperature=0)
+    intake_llm = llm or ChatOpenAI(model=INTAKE_MODEL, temperature=0)
     prompt = build_intake_prompt(
         normalized_description,
         chat_history=chat_history,
