@@ -35,6 +35,11 @@ Only run through LangSmith when you explicitly need remote experiments/traces:
 uv run python evaluation/evaluate_retrieval_langsmith.py --langsmith
 ```
 
+LangSmith dataset names are fixed by the testset filename, for example
+`MDM retrieval testset - retrieval_eval`. Parser, chunker, embedder, retriever,
+and reranker choices stay on the experiment/run metadata so LangSmith can compare
+all runs in one dataset.
+
 List configured retrieval evaluation combinations:
 
 ```bash

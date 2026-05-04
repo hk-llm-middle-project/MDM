@@ -197,19 +197,34 @@ class RetrievalLangSmithEvalTest(unittest.TestCase):
         self.assertEqual(frame.loc[0, "inference_type"], "explicit_keyword")
         self.assertEqual(frame.loc[0, "feedback.keyword_coverage"], 1.0)
 
-    def test_default_dataset_name_includes_loader_chunker_and_embedding(self):
+    def test_default_dataset_name_is_fixed_by_testset_file(self):
         module = load_retrieval_eval_module()
 
         dataset_name = module.make_dataset_name(
             Path("data/testsets/langsmith/retrieval_eval.jsonl"),
-            loader_strategy="upstage",
-            embedding_provider="bge",
-            chunker_strategy="custom",
         )
 
         self.assertEqual(
             dataset_name,
-            "MDM retrieval testset - upstage-custom-bge - retrieval_eval",
+            "MDM retrieval testset - retrieval_eval",
+        )
+
+    def test_dataset_name_for_run_does_not_append_matrix_run_name(self):
+        module = load_retrieval_eval_module()
+        args = Namespace(
+            testset_path=Path("data/testsets/langsmith/retrieval_eval.jsonl"),
+            dataset_name="Shared retrieval dataset",
+        )
+        run = {
+            "name": "upstage-custom-bge",
+            "loader_strategy": "upstage",
+            "chunker_strategy": "custom",
+            "embedding_provider": "bge",
+        }
+
+        self.assertEqual(
+            module.dataset_name_for_run(args, run, matrix_mode=True),
+            "Shared retrieval dataset",
         )
 
     def test_load_matrix_resolves_named_preset_runs(self):

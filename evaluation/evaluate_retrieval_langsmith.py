@@ -83,7 +83,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--dataset-name",
         default=None,
-        help="LangSmith dataset name. Matrix mode appends each run name to this prefix.",
+        help=(
+            "LangSmith dataset name override. By default, the dataset name is fixed "
+            "by the testset filename so matrix runs share one comparable dataset."
+        ),
     )
     parser.add_argument(
         "--matrix-path",
@@ -403,17 +406,8 @@ def load_jsonl(path: Path, max_examples: int = 0) -> list[dict[str, Any]]:
     return rows
 
 
-def make_dataset_name(
-    path: Path,
-    loader_strategy: str,
-    embedding_provider: str,
-    chunker_strategy: str,
-) -> str:
-    return (
-        f"{DEFAULT_DATASET_PREFIX} - "
-        f"{loader_strategy}-{chunker_strategy}-{embedding_provider} - "
-        f"{path.stem}"
-    )
+def make_dataset_name(path: Path) -> str:
+    return f"{DEFAULT_DATASET_PREFIX} - {path.stem}"
 
 
 def build_examples(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -899,13 +893,8 @@ def dataset_name_for_run(
     matrix_mode: bool,
 ) -> str:
     if args.dataset_name:
-        return f"{args.dataset_name} - {run['name']}" if matrix_mode else args.dataset_name
-    return make_dataset_name(
-        args.testset_path,
-        run["loader_strategy"],
-        run["embedding_provider"],
-        run["chunker_strategy"],
-    )
+        return args.dataset_name
+    return make_dataset_name(args.testset_path)
 
 
 def safe_filename(value: str) -> str:
