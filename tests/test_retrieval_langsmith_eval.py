@@ -3,6 +3,7 @@ import json
 import os
 import sys
 import tempfile
+import threading
 import unittest
 from argparse import Namespace
 from pathlib import Path
@@ -116,6 +117,35 @@ class RetrievalLangSmithEvalTest(unittest.TestCase):
         self.assertEqual(frame.loc[0, "outputs.query"], "테스트 질문")
         self.assertEqual(frame.loc[0, "feedback.diagram_id_hit"], 1)
         self.assertEqual(frame.loc[0, "feedback.critical_error"], 0)
+
+    def test_evaluate_local_rows_can_run_targets_concurrently_and_preserve_order(self):
+        module = load_retrieval_eval_module()
+        barrier = threading.Barrier(2, timeout=1)
+
+        def target(inputs):
+            barrier.wait()
+            return {
+                "query": inputs["question"],
+                "retrieved": [],
+                "retrieved_metadata": [],
+                "contexts": [],
+            }
+
+        rows = [
+            {"id": "case-1", "question": "첫 번째"},
+            {"id": "case-2", "question": "두 번째"},
+        ]
+
+        frame = module.evaluate_local_rows(
+            rows=rows,
+            target=target,
+            evaluators=[],
+            max_concurrency=2,
+        )
+
+        self.assertEqual(frame["example_id"].tolist(), ["case-1", "case-2"])
+        self.assertEqual(frame["error"].tolist(), [None, None])
+        self.assertEqual(frame["outputs.query"].tolist(), ["첫 번째", "두 번째"])
 
     def test_build_examples_maps_extended_testset_contract(self):
         module = load_retrieval_eval_module()
@@ -400,6 +430,51 @@ class RetrievalLangSmithEvalTest(unittest.TestCase):
             )
 
         get_or_create_dataset.assert_not_called()
+
+    def test_local_run_passes_max_concurrency_to_local_evaluator(self):
+        module = load_retrieval_eval_module()
+        args = Namespace(
+            testset_path=Path("data/testsets/langsmith/retrieval_eval.jsonl"),
+            dataset_name=None,
+            retriever_strategy="similarity",
+            reranker_strategy="none",
+            k=5,
+            candidate_k=0,
+            max_concurrency=4,
+            upload_only=False,
+            langsmith=False,
+            output_dir=Path("evaluation/results/langsmith"),
+            fail_on_missing_vectorstore=False,
+        )
+        run = {
+            "name": "upstage-custom-bge",
+            "loader_strategy": "upstage",
+            "chunker_strategy": "custom",
+            "embedding_provider": "bge",
+        }
+
+        with (
+            patch.object(module, "get_vectorstore_dir", return_value=Path("vectorstore")),
+            patch.object(module, "vectorstore_exists", return_value=True),
+            patch.object(module, "build_retrieval_target", return_value=Mock()),
+            patch.object(module, "evaluate_local_rows") as evaluate_local_rows,
+            patch.object(module, "save_experiment_dataframe") as save_experiment_dataframe,
+        ):
+            evaluate_local_rows.return_value = Mock()
+            save_experiment_dataframe.return_value = {
+                "csv": Path("result.csv"),
+                "summary_json": Path("result.summary.json"),
+            }
+
+            module.run_retrieval_experiment(
+                args=args,
+                client=None,
+                rows=[{"question": "테스트"}],
+                run=run,
+                matrix_mode=False,
+            )
+
+        self.assertEqual(evaluate_local_rows.call_args.kwargs["max_concurrency"], 4)
 
     def test_save_experiment_results_writes_csv_and_summary_json(self):
         module = load_retrieval_eval_module()
