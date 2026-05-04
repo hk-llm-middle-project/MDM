@@ -510,7 +510,9 @@ def _actual_value_for_reference(row: pd.Series, reference_column: str) -> str:
 
     if reference_column == "reference.expected_keywords":
         comment = row.get("keyword_coverage_comment") or row.get("feedback.keyword_coverage.comment")
-        if _has_display_value(comment):
+        comment = row.get("keyword_coverage_comment")
+        if _is_empty_scalar(comment):
+            comment = row.get("feedback.keyword_coverage.comment")
             return _format_display_value(comment)
 
     suffix = reference_column.removeprefix("reference.")
