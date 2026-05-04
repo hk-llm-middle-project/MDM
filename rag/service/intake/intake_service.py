@@ -66,11 +66,7 @@ def normalize_metadata_response(data: dict[str, Any]) -> IntakeDecision:
 
     party_type = raw_party_type if raw_party_type in PARTY_TYPES else None
     location = raw_location if raw_location in LOCATIONS else None
-    retrieval_query = (
-        raw_retrieval_query.strip()
-        if isinstance(raw_retrieval_query, str) and raw_retrieval_query.strip()
-        else None
-    )
+    retrieval_query = normalize_optional_text(raw_retrieval_query)
     has_retrieval_query_confidence = "retrieval_query" in confidence_data
     if (
         retrieval_query is not None
@@ -129,11 +125,7 @@ def normalize_query_slots(data: object) -> QuerySlots:
         return QuerySlots()
 
     def value(name: str) -> str | None:
-        raw_value = data.get(name)
-        if not isinstance(raw_value, str):
-            return None
-        normalized = raw_value.strip()
-        return normalized or None
+        return normalize_optional_text(data.get(name))
 
     return QuerySlots(
         road_control=value("road_control"),
@@ -145,6 +137,16 @@ def normalize_query_slots(data: object) -> QuerySlots:
         road_priority=value("road_priority"),
         special_condition=value("special_condition"),
     )
+
+
+def normalize_optional_text(value: object) -> str | None:
+    """LLM이 문자열로 보낸 결측 표기를 실제 None으로 정리합니다."""
+    if not isinstance(value, str):
+        return None
+    normalized = value.strip()
+    if not normalized or normalized.lower() in {"null", "none", "n/a", "unknown"}:
+        return None
+    return normalized
 
 
 def evaluate_input_sufficiency(
