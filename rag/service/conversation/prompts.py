@@ -9,7 +9,7 @@ from rag.service.intake.schema import IntakeState
 from rag.service.session.schema import ChatMessage
 
 
-ROUTER_HISTORY_LIMIT = 6
+ROUTER_HISTORY_LIMIT = 2
 
 
 def _format_chat_history(chat_history: Sequence[ChatMessage] | None) -> str:

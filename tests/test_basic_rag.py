@@ -1504,7 +1504,15 @@ class BasicRagTest(unittest.TestCase):
         )
 
     def test_answer_question_passes_intake_metadata_to_analysis(self):
-        metadata = UserSearchMetadata(party_type="자동차", location="교차로 사고")
+        metadata = UserSearchMetadata(
+            party_type="자동차",
+            location="교차로 사고",
+            query_slots=QuerySlots(
+                relation="상대차량이 측면에서 진입",
+                a_movement="직진",
+                b_movement="직진",
+            ),
+        )
         with (
             patch(
                 "rag.service.conversation.app_service.evaluate_input_sufficiency",
@@ -1529,7 +1537,15 @@ class BasicRagTest(unittest.TestCase):
         )
 
     def test_answer_question_passes_loader_and_embedding_strategy_to_analysis(self):
-        metadata = UserSearchMetadata(party_type="자동차", location="교차로 사고")
+        metadata = UserSearchMetadata(
+            party_type="자동차",
+            location="교차로 사고",
+            query_slots=QuerySlots(
+                relation="상대차량이 측면에서 진입",
+                a_movement="직진",
+                b_movement="직진",
+            ),
+        )
         with (
             patch(
                 "rag.service.conversation.app_service.evaluate_input_sufficiency",
@@ -1558,7 +1574,15 @@ class BasicRagTest(unittest.TestCase):
         )
 
     def test_answer_question_passes_chunker_strategy_to_analysis(self):
-        metadata = UserSearchMetadata(party_type="자동차", location="교차로 사고")
+        metadata = UserSearchMetadata(
+            party_type="자동차",
+            location="교차로 사고",
+            query_slots=QuerySlots(
+                relation="상대차량이 측면에서 진입",
+                a_movement="직진",
+                b_movement="직진",
+            ),
+        )
         with (
             patch(
                 "rag.service.conversation.app_service.evaluate_input_sufficiency",
