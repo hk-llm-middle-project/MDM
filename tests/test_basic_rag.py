@@ -24,6 +24,7 @@ from rag.pipeline.retrieval import RetrievalPipelineConfig, run_retrieval_pipeli
 from rag.pipeline.reranker import (
     RERANKER_STRATEGIES,
     CohereRerankerConfig,
+    CrossEncoderRerankerConfig,
     FlashrankRerankerConfig,
     LLMScoreRerankerConfig,
     rerank,
@@ -433,6 +434,94 @@ class BasicRagTest(unittest.TestCase):
             k=2,
             strategy="flashrank",
             strategy_config=pipeline_config.reranker_config,
+        )
+
+    def test_run_retrieval_pipeline_skips_cross_encoder_prewarm_in_subprocess_mode(self):
+        events = []
+        candidate_documents = [Document(page_content="candidate")]
+        components = build_retrieval_components(MagicMock())
+        pipeline_config = RetrievalPipelineConfig(
+            reranker_strategy="cross-encoder",
+            reranker_config=CrossEncoderRerankerConfig(model_name="test-model"),
+            candidate_k=5,
+            final_k=1,
+        )
+
+        def fake_prewarm(model_name):
+            events.append(("prewarm", model_name))
+
+        def fake_retrieve(**kwargs):
+            events.append(("retrieve", kwargs["strategy"]))
+            return candidate_documents
+
+        def fake_rerank(**kwargs):
+            events.append(("rerank", kwargs["strategy"]))
+            return kwargs["documents"][: kwargs["k"]]
+
+        with (
+            patch("rag.pipeline.retrieval.get_cross_encoder_model", side_effect=fake_prewarm),
+            patch("rag.pipeline.retrieval.retrieve", side_effect=fake_retrieve),
+            patch("rag.pipeline.retrieval.rerank", side_effect=fake_rerank),
+        ):
+            results = run_retrieval_pipeline(
+                components,
+                "query",
+                pipeline_config=pipeline_config,
+            )
+
+        self.assertEqual(results, candidate_documents)
+        self.assertEqual(
+            events,
+            [
+                ("retrieve", "vectorstore"),
+                ("rerank", "cross-encoder"),
+            ],
+        )
+
+    def test_run_retrieval_pipeline_prewarms_inprocess_cross_encoder_before_retrieve(self):
+        events = []
+        candidate_documents = [Document(page_content="candidate")]
+        components = build_retrieval_components(MagicMock())
+        pipeline_config = RetrievalPipelineConfig(
+            reranker_strategy="cross-encoder",
+            reranker_config=CrossEncoderRerankerConfig(
+                model_name="test-model",
+                use_subprocess=False,
+            ),
+            candidate_k=5,
+            final_k=1,
+        )
+
+        def fake_prewarm(model_name):
+            events.append(("prewarm", model_name))
+
+        def fake_retrieve(**kwargs):
+            events.append(("retrieve", kwargs["strategy"]))
+            return candidate_documents
+
+        def fake_rerank(**kwargs):
+            events.append(("rerank", kwargs["strategy"]))
+            return kwargs["documents"][: kwargs["k"]]
+
+        with (
+            patch("rag.pipeline.retrieval.get_cross_encoder_model", side_effect=fake_prewarm),
+            patch("rag.pipeline.retrieval.retrieve", side_effect=fake_retrieve),
+            patch("rag.pipeline.retrieval.rerank", side_effect=fake_rerank),
+        ):
+            results = run_retrieval_pipeline(
+                components,
+                "query",
+                pipeline_config=pipeline_config,
+            )
+
+        self.assertEqual(results, candidate_documents)
+        self.assertEqual(
+            events,
+            [
+                ("prewarm", "test-model"),
+                ("retrieve", "vectorstore"),
+                ("rerank", "cross-encoder"),
+            ],
         )
 
     def test_run_retrieval_pipeline_falls_back_without_filters_when_filtered_results_empty(self):

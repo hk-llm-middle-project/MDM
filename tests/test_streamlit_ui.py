@@ -1,5 +1,6 @@
 import unittest
 
+from langchain_core.documents import Document
 from main import (
     CHUNKER_STRATEGY_OPTIONS_BY_LOADER,
     DEFAULT_RERANKER_CANDIDATE_K,
@@ -14,9 +15,23 @@ from main import (
     get_chunker_strategy_options,
     normalize_chunker_strategy,
 )
-from rag.pipeline.reranker import CrossEncoderRerankerConfig, FlashrankRerankerConfig
+from rag.pipeline.reranker import (
+    CrossEncoderRerankerConfig,
+    FlashrankRerankerConfig,
+    LLMScoreRerankerConfig,
+)
+from rag.pipeline.reranker.strategies.cross_encoder import rerank_with_cross_encoder
 from rag.pipeline.retriever import EnsembleRetrieverConfig
 from rag.service.session.memory_store import MemoryConversationStore
+
+
+class FakeCrossEncoder:
+    def __init__(self):
+        self.pairs = []
+
+    def score(self, pairs):
+        self.pairs = pairs
+        return [0.2, 0.9]
 
 
 class StreamlitUiTest(unittest.TestCase):
@@ -55,7 +70,10 @@ class StreamlitUiTest(unittest.TestCase):
         self.assertNotIn("vectorstore", RETRIEVER_STRATEGY_OPTIONS)
 
     def test_reranker_strategy_options_expose_supported_app_choices(self):
-        self.assertEqual(RERANKER_STRATEGY_OPTIONS, ("none", "cross-encoder", "flashrank"))
+        self.assertEqual(
+            RERANKER_STRATEGY_OPTIONS,
+            ("none", "cross-encoder", "flashrank", "llm-score"),
+        )
 
     def test_chunker_strategy_options_are_filtered_by_loader(self):
         self.assertEqual(
@@ -116,6 +134,29 @@ class StreamlitUiTest(unittest.TestCase):
         self.assertEqual(config.candidate_k, DEFAULT_RERANKER_CANDIDATE_K)
         self.assertEqual(config.final_k, DEFAULT_RERANKER_FINAL_K)
 
+    def test_cross_encoder_reranker_scores_truncated_text_and_returns_original_document(self):
+        model = FakeCrossEncoder()
+        documents = [
+            Document(page_content="a" * 20, metadata={"id": "first"}),
+            Document(page_content="b" * 20, metadata={"id": "second"}),
+        ]
+
+        reranked = rerank_with_cross_encoder(
+            "query",
+            documents,
+            k=1,
+            strategy_config=CrossEncoderRerankerConfig(
+                model=model,
+                max_chars=5,
+                batch_size=2,
+            ),
+        )
+
+        self.assertEqual(model.pairs, [("query", "a" * 5), ("query", "b" * 5)])
+        self.assertEqual(reranked[0].page_content, "b" * 20)
+        self.assertEqual(reranked[0].metadata["id"], "second")
+        self.assertEqual(reranked[0].metadata["rerank_score"], 0.9)
+
     def test_build_pipeline_config_uses_flashrank_reranker_with_ensemble(self):
         config = build_pipeline_config(
             "ensemble",
@@ -127,6 +168,14 @@ class StreamlitUiTest(unittest.TestCase):
         self.assertIsInstance(config.retriever_config, EnsembleRetrieverConfig)
         self.assertEqual(config.reranker_strategy, "flashrank")
         self.assertIsInstance(config.reranker_config, FlashrankRerankerConfig)
+        self.assertEqual(config.candidate_k, DEFAULT_RERANKER_CANDIDATE_K)
+        self.assertEqual(config.final_k, DEFAULT_RERANKER_FINAL_K)
+
+    def test_build_pipeline_config_uses_llm_score_reranker(self):
+        config = build_pipeline_config("similarity", reranker_strategy="llm-score")
+
+        self.assertEqual(config.reranker_strategy, "llm-score")
+        self.assertIsInstance(config.reranker_config, LLMScoreRerankerConfig)
         self.assertEqual(config.candidate_k, DEFAULT_RERANKER_CANDIDATE_K)
         self.assertEqual(config.final_k, DEFAULT_RERANKER_FINAL_K)
 

@@ -20,7 +20,11 @@ from config import (
 )
 from rag.embeddings import EMBEDDING_STRATEGIES
 from rag.pipeline.retrieval import RetrievalPipelineConfig
-from rag.pipeline.reranker import CrossEncoderRerankerConfig, FlashrankRerankerConfig
+from rag.pipeline.reranker import (
+    CrossEncoderRerankerConfig,
+    FlashrankRerankerConfig,
+    LLMScoreRerankerConfig,
+)
 from rag.pipeline.retriever import EnsembleRetrieverConfig, RETRIEVAL_STRATEGIES
 from rag.service.analysis.answer_schema import RetrievedContext
 from rag.service.conversation.app_service import answer_question_with_intake
@@ -42,7 +46,7 @@ RETRIEVER_STRATEGY_OPTIONS = tuple(
     for strategy in RETRIEVAL_STRATEGIES
     if strategy != "vectorstore"
 )
-RERANKER_STRATEGY_OPTIONS = ("none", "cross-encoder", "flashrank")
+RERANKER_STRATEGY_OPTIONS = ("none", "cross-encoder", "flashrank", "llm-score")
 USER_ID = "local"
 PROJECT_ROOT = Path(__file__).resolve().parent
 
@@ -370,6 +374,13 @@ def build_pipeline_config(
             "final_k": DEFAULT_RERANKER_FINAL_K,
             "reranker_strategy": "flashrank",
             "reranker_config": FlashrankRerankerConfig(),
+        }
+    elif reranker_strategy == "llm-score":
+        reranker_kwargs = {
+            "candidate_k": DEFAULT_RERANKER_CANDIDATE_K,
+            "final_k": DEFAULT_RERANKER_FINAL_K,
+            "reranker_strategy": "llm-score",
+            "reranker_config": LLMScoreRerankerConfig(),
         }
 
     if retriever_strategy not in ENSEMBLE_RETRIEVER_STRATEGIES:

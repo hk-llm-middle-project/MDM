@@ -83,4 +83,5 @@ dependencies = [
     "chardet<6",
     "jq>=1.11.0",
     "ipython>=9.10.1",
+    "sentence-transformers>=5.4.1",
 ]
