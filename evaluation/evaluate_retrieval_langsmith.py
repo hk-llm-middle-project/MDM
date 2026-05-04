@@ -52,8 +52,15 @@ DEFAULT_RERANKER_STRATEGY = "none"
 DEFAULT_K = 5
 RETRIEVER_STRATEGY_CHOICES = tuple(RETRIEVAL_STRATEGIES)
 RERANKER_STRATEGY_CHOICES = tuple(
-    strategy for strategy in ("none", "cross-encoder", "flashrank")
+    strategy for strategy in ("none", "cross-encoder", "flashrank", "llm-score")
     if strategy in RERANKER_STRATEGIES
+)
+RERANKER_STRATEGY_ALIASES = {
+    "cross_encoder": "cross-encoder",
+    "llm_score": "llm-score",
+}
+RERANKER_STRATEGY_INPUT_CHOICES = tuple(
+    [*RERANKER_STRATEGY_CHOICES, *RERANKER_STRATEGY_ALIASES]
 )
 CONTENT_PREVIEW_CHARS = 500
 EXAMPLE_METADATA_FIELDS = (
@@ -134,8 +141,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--reranker-strategy",
         default=DEFAULT_RERANKER_STRATEGY,
-        choices=RERANKER_STRATEGY_CHOICES,
-        help="Reranker strategy exposed in Streamlit, e.g. none, cross-encoder, flashrank.",
+        choices=RERANKER_STRATEGY_INPUT_CHOICES,
+        help=(
+            "Reranker strategy exposed in Streamlit, e.g. none, cross-encoder, "
+            "flashrank, llm-score. Underscore aliases are accepted."
+        ),
     )
     parser.add_argument(
         "--retriever-strategies",
@@ -217,7 +227,12 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Fail matrix runs instead of skipping combinations whose vectorstore is not built.",
     )
-    return parser.parse_args()
+    args = parser.parse_args()
+    args.reranker_strategy = normalize_strategy_value(
+        args.reranker_strategy,
+        "reranker",
+    )
+    return args
 
 
 def should_run_matrix(args: argparse.Namespace) -> bool:
@@ -251,7 +266,11 @@ def resolve_strategy_values(
         return list(choices)
 
     selected = _dedupe_preserve_order(
-        [part.strip() for part in value.split(",") if part.strip()]
+        [
+            normalize_strategy_value(part.strip(), label)
+            for part in value.split(",")
+            if part.strip()
+        ]
     )
     if not selected:
         return [default_value]
@@ -264,6 +283,12 @@ def resolve_strategy_values(
             f"Available {label} strategies: {available}"
         )
     return selected
+
+
+def normalize_strategy_value(value: str, label: str) -> str:
+    if label == "reranker":
+        return RERANKER_STRATEGY_ALIASES.get(value, value)
+    return value
 
 
 def resolve_strategy_combinations(args: argparse.Namespace) -> list[dict[str, str]]:
@@ -524,6 +549,11 @@ def get_or_create_dataset(
 def sanitize_metadata(metadata: dict[str, Any]) -> dict[str, Any]:
     sanitized: dict[str, Any] = {}
     for key, value in metadata.items():
+        if hasattr(value, "item"):
+            try:
+                value = value.item()
+            except (AttributeError, TypeError, ValueError):
+                pass
         if isinstance(value, str | int | float | bool) or value is None:
             sanitized[key] = value
         else:

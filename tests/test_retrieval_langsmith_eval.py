@@ -57,6 +57,23 @@ class RetrievalLangSmithEvalTest(unittest.TestCase):
         self.assertEqual(tuple(module.RERANKER_STRATEGY_CHOICES), RERANKER_STRATEGY_OPTIONS)
         self.assertIn("ensemble_parent", module.RETRIEVER_STRATEGY_CHOICES)
         self.assertIn("cross-encoder", module.RERANKER_STRATEGY_CHOICES)
+        self.assertIn("llm-score", module.RERANKER_STRATEGY_CHOICES)
+
+    def test_reranker_strategy_accepts_underscore_aliases(self):
+        module = load_retrieval_eval_module()
+
+        with patch.object(
+            sys,
+            "argv",
+            [
+                "evaluate_retrieval_langsmith.py",
+                "--reranker-strategy",
+                "llm_score",
+            ],
+        ):
+            args = module.parse_args()
+
+        self.assertEqual(args.reranker_strategy, "llm-score")
 
     def test_langsmith_flag_is_required_for_remote_evaluation_mode(self):
         module = load_retrieval_eval_module()
@@ -334,7 +351,7 @@ class RetrievalLangSmithEvalTest(unittest.TestCase):
                 "--retriever-strategies",
                 "vectorstore,ensemble_parent",
                 "--reranker-strategies",
-                "none,cross-encoder",
+                "none,cross_encoder,llm_score",
             ],
         ):
             args = module.parse_args()
@@ -344,8 +361,10 @@ class RetrievalLangSmithEvalTest(unittest.TestCase):
             [
                 {"retriever_strategy": "vectorstore", "reranker_strategy": "none"},
                 {"retriever_strategy": "vectorstore", "reranker_strategy": "cross-encoder"},
+                {"retriever_strategy": "vectorstore", "reranker_strategy": "llm-score"},
                 {"retriever_strategy": "ensemble_parent", "reranker_strategy": "none"},
                 {"retriever_strategy": "ensemble_parent", "reranker_strategy": "cross-encoder"},
+                {"retriever_strategy": "ensemble_parent", "reranker_strategy": "llm-score"},
             ],
         )
 
@@ -571,6 +590,20 @@ class RetrievalLangSmithEvalTest(unittest.TestCase):
         )
 
         self.assertEqual(metrics, {"critical_error": 0.5})
+
+    def test_sanitize_metadata_converts_numpy_scalar_scores_for_flashrank(self):
+        module = load_retrieval_eval_module()
+        import numpy as np
+
+        metadata = module.sanitize_metadata(
+            {
+                "diagram_id": "A",
+                "rerank_score": np.float32(0.25),
+            }
+        )
+
+        self.assertIsInstance(metadata["rerank_score"], float)
+        json.dumps(metadata)
 
     def test_build_retrieval_target_uses_chunker_strategy_for_vectorstore_dir(self):
         module = load_retrieval_eval_module()
