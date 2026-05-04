@@ -259,6 +259,85 @@ class DashboardTransformPlanTest(unittest.TestCase):
 
         self.assertEqual(rows["run_name"].tolist(), ["run-a", "run-b"])
 
+    def test_compare_runs_for_case_accepts_three_selected_runs(self) -> None:
+        examples = pd.DataFrame(
+            [
+                {"case_key": "retrieval_001", "run_name": "run-a", "critical_error": 0},
+                {"case_key": "retrieval_001", "run_name": "run-b", "critical_error": 1},
+                {"case_key": "retrieval_001", "run_name": "run-c", "critical_error": 0},
+                {"case_key": "retrieval_001", "run_name": "run-d", "critical_error": 1},
+            ]
+        )
+
+        rows = transforms.compare_runs_for_case(
+            examples,
+            "retrieval_001",
+            "run-c",
+            "run-a",
+            "run-b",
+        )
+
+        self.assertEqual(rows["run_name"].tolist(), ["run-c", "run-a", "run-b"])
+
+    def test_case_value_comparison_shows_expected_and_actual_values_by_run(self) -> None:
+        examples = pd.DataFrame(
+            [
+                {
+                    "case_key": "retrieval_001",
+                    "run_label": "run-a / ensemble_parent / none",
+                    "reference.expected_diagram_ids": '["보1"]',
+                    "outputs.retrieved_metadata": '[{"diagram_id":"보1","location":"횡단보도 내"}]',
+                },
+                {
+                    "case_key": "retrieval_001",
+                    "run_label": "run-b / ensemble_parent / cross-encoder",
+                    "reference.expected_diagram_ids": '["보1"]',
+                    "outputs.retrieved_metadata": '[{"diagram_id":"보10","location":"교차로"}]',
+                },
+            ]
+        )
+
+        comparison = transforms.build_case_value_comparison(examples)
+
+        self.assertEqual(
+            comparison.columns.tolist(),
+            [
+                "항목",
+                "예상 값",
+                "run-a / ensemble_parent / none",
+                "run-b / ensemble_parent / cross-encoder",
+            ],
+        )
+        self.assertEqual(comparison.loc[0, "항목"], "기대 diagram")
+        self.assertEqual(comparison.loc[0, "예상 값"], "보1")
+        self.assertEqual(comparison.loc[0, "run-a / ensemble_parent / none"], "보1")
+        self.assertEqual(comparison.loc[0, "run-b / ensemble_parent / cross-encoder"], "보10")
+
+    def test_case_metric_comparison_shows_scores_by_run(self) -> None:
+        examples = pd.DataFrame(
+            [
+                {
+                    "case_key": "retrieval_001",
+                    "run_label": "run-a / ensemble_parent / none",
+                    "diagram_id_hit": 1,
+                    "diagram_id_hit_comment": "expected_or_acceptable=['보1'], actual_topk=['보1']",
+                },
+                {
+                    "case_key": "retrieval_001",
+                    "run_label": "run-b / ensemble_parent / cross-encoder",
+                    "diagram_id_hit": 0,
+                    "diagram_id_hit_comment": "expected_or_acceptable=['보1'], actual_topk=['보10']",
+                },
+            ]
+        )
+
+        comparison = transforms.build_case_metric_comparison(examples)
+
+        self.assertEqual(comparison.loc[0, "metric"], "diagram_id_hit")
+        self.assertEqual(comparison.loc[0, "run-a / ensemble_parent / none"], "1")
+        self.assertEqual(comparison.loc[0, "run-b / ensemble_parent / cross-encoder"], "0")
+        self.assertIn("actual_topk=['보10']", comparison.loc[0, "run-b / ensemble_parent / cross-encoder comment"])
+
     def test_rank_combinations_sorts_critical_error_ascending(self) -> None:
         self.assertTrue(
             hasattr(transforms, "rank_combinations"),
@@ -290,6 +369,32 @@ class DashboardTransformPlanTest(unittest.TestCase):
         ranked = transforms.rank_combinations(summary, "diagram_id_hit")
 
         self.assertEqual(ranked["run_name"].tolist(), ["good", "bad"])
+
+    def test_metric_comparison_defaults_to_one_selected_metric(self) -> None:
+        from evaluation.dashboard.views import metric_comparison
+
+        self.assertEqual(
+            metric_comparison.default_metric_selection(
+                ["retrieval_relevance", "critical_error", "router_overall"]
+            ),
+            ["critical_error"],
+        )
+        self.assertEqual(
+            metric_comparison.default_metric_selection(
+                ["router_overall", "metadata_filter_overall"]
+            ),
+            ["router_overall"],
+        )
+
+    def test_metric_comparison_caption_includes_metric_description(self) -> None:
+        from evaluation.dashboard.views import metric_comparison
+
+        critical_caption = metric_comparison.metric_caption("critical_error")
+        router_caption = metric_comparison.metric_caption("router_overall")
+
+        self.assertIn("critical_error", critical_caption)
+        self.assertIn("낮을수록", critical_caption)
+        self.assertIn("router_overall", router_caption)
 
     def test_same_question_with_different_example_ids_stays_one_matrix_case(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -419,6 +524,14 @@ class DashboardTransformPlanTest(unittest.TestCase):
         self.assertEqual(breakdown.loc[0, "failed_count"], 2)
         self.assertEqual(breakdown.loc[0, "run_name"], "run-a")
         self.assertEqual(breakdown.loc[1, "failed_count"], 1)
+
+    def test_metric_descriptions_cover_failure_metrics(self) -> None:
+        for metric in transforms.METRIC_COLUMNS:
+            with self.subTest(metric=metric):
+                description = transforms.describe_metric(metric)
+                self.assertIn(metric, description)
+                self.assertIn("0", description)
+                self.assertIn("1", description)
 
     def test_app_tab_labels_match_dashboard_plan(self) -> None:
         from evaluation.dashboard import app

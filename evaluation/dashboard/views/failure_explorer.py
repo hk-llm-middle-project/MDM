@@ -8,6 +8,7 @@ import streamlit as st
 from evaluation.dashboard.transforms import (
     METRIC_COLUMNS,
     build_failure_breakdown,
+    describe_metric,
     filter_failed_examples,
 )
 
@@ -28,6 +29,7 @@ def render(examples: pd.DataFrame) -> None:
         metrics,
         index=metrics.index("critical_error") if "critical_error" in metrics else 0,
     )
+    st.caption(describe_metric(metric))
     failed = filter_failed_examples(examples, metric)
     breakdown = build_failure_breakdown(failed)
     if not breakdown.empty:
