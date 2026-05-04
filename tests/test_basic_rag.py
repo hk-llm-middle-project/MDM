@@ -1298,6 +1298,66 @@ class BasicRagTest(unittest.TestCase):
         self.assertIn("대로 소로 교차로", priority_query)
         self.assertIn("중앙선 침범 사고", centerline_query)
 
+    def test_normalize_metadata_response_treats_literal_null_as_missing(self):
+        decision = normalize_metadata_response(
+            {
+                "party_type": "자동차",
+                "location": "교차로 사고",
+                "retrieval_query": "null",
+                "query_slots": {
+                    "a_signal": "null",
+                    "b_signal": "None",
+                    "a_movement": "직진",
+                    "b_movement": "null",
+                },
+                "confidence": {
+                    "party_type": 1,
+                    "location": 1,
+                    "retrieval_query": 1,
+                },
+            }
+        )
+
+        self.assertIsNone(decision.search_metadata.retrieval_query)
+        self.assertIsNone(decision.search_metadata.query_slots.a_signal)
+        self.assertIsNone(decision.search_metadata.query_slots.b_signal)
+        self.assertEqual(decision.search_metadata.query_slots.a_movement, "직진")
+        self.assertIsNone(decision.search_metadata.query_slots.b_movement)
+
+    def test_normalize_retrieval_query_terms_removes_literal_null_tokens(self):
+        query = normalize_retrieval_query_terms(
+            "자전거를 같은 차로에서 뒤따르던 자동차가 추돌했어요.",
+            UserSearchMetadata(
+                party_type="자전거",
+                location="같은 방향 진행차량 상호간의 사고",
+                retrieval_query="null, null추돌 대 nullnull, 추돌사고",
+                query_slots=QuerySlots(
+                    a_movement="null",
+                    b_movement="추돌",
+                    special_condition="null",
+                    relation="상대차량이 맞은편에서 진입",
+                ),
+            ),
+        )
+
+        self.assertEqual(query, "추돌사고, 자전거 대 자동차")
+        self.assertNotIn("null", query)
+        self.assertNotIn("상대차량이 맞은편에서 진입", query)
+
+    def test_normalize_retrieval_query_terms_limits_vehicle_relation_to_car_cases(self):
+        pedestrian_query = normalize_retrieval_query_terms(
+            "보행자는 녹색불에 정상 횡단했고 차가 적색신호로 들어와 충격했습니다.",
+            UserSearchMetadata(
+                party_type="보행자",
+                location="횡단보도 내",
+                retrieval_query="녹색 대 적색, 보행자 정상 횡단, 횡단보도 내 사고",
+                query_slots=QuerySlots(relation="상대차량이 맞은편에서 진입"),
+            ),
+        )
+
+        self.assertIn("보행자 정상 횡단", pedestrian_query)
+        self.assertNotIn("상대차량이 맞은편에서 진입", pedestrian_query)
+
     def test_evaluate_input_sufficiency_rejects_empty_input_without_llm_call(self):
         fake_llm = MagicMock()
 

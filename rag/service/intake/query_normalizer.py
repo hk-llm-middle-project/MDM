@@ -36,6 +36,7 @@ def normalize_retrieval_query_terms(
     metadata: UserSearchMetadata,
 ) -> str | None:
     """LLM 검색 질의에 사고 유형 단서를 중복 없이 추가합니다."""
+    metadata = sanitize_search_metadata(metadata)
     slot_query = build_retrieval_query_from_slots(metadata.query_slots)
     base_query = metadata.retrieval_query
     if not base_query:
@@ -75,19 +76,25 @@ def build_retrieval_query_from_slots(slots: QuerySlots, max_terms: int = 4) -> s
 
 
 def build_signal_movement_pair(slots: QuerySlots) -> str | None:
-    if not (slots.a_signal and slots.a_movement and slots.b_signal and slots.b_movement):
+    a_signal = clean_optional_term(slots.a_signal)
+    b_signal = clean_optional_term(slots.b_signal)
+    a_movement = clean_optional_term(slots.a_movement)
+    b_movement = clean_optional_term(slots.b_movement)
+    if not (a_signal and a_movement and b_signal and b_movement):
         return None
     return (
-        f"{slots.a_signal}{normalize_movement_for_query(slots.a_movement)} 대 "
-        f"{slots.b_signal}{normalize_movement_for_query(slots.b_movement)}"
+        f"{a_signal}{normalize_movement_for_query(a_movement)} 대 "
+        f"{b_signal}{normalize_movement_for_query(b_movement)}"
     )
 
 
 def build_movement_pair(slots: QuerySlots) -> str | None:
-    if not (slots.a_movement and slots.b_movement):
+    a_raw_movement = clean_optional_term(slots.a_movement)
+    b_raw_movement = clean_optional_term(slots.b_movement)
+    if not (a_raw_movement and b_raw_movement):
         return None
-    a_movement = normalize_movement_for_query(slots.a_movement)
-    b_movement = normalize_movement_for_query(slots.b_movement)
+    a_movement = normalize_movement_for_query(a_raw_movement)
+    b_movement = normalize_movement_for_query(b_raw_movement)
     if a_movement == "추돌" or b_movement == "추돌":
         return "추돌사고"
     if a_movement == "진로변경" and b_movement == "진로변경":
@@ -105,6 +112,7 @@ def normalize_movement_for_query(movement: str) -> str:
 
 
 def build_road_priority_terms(road_priority: str | None) -> list[str]:
+    road_priority = clean_optional_term(road_priority)
     if not road_priority:
         return []
 
@@ -133,6 +141,8 @@ def normalize_relation_for_query(
     relation: str | None,
     road_priority: str | None,
 ) -> str | None:
+    relation = clean_optional_term(relation)
+    road_priority = clean_optional_term(road_priority)
     if not relation:
         return None
     normalized = normalize_spacing(relation)
@@ -177,12 +187,15 @@ def collect_retrieval_query_terms(
     if contains_any(text, ("도로가 아닌 장소", "도로로 우회전 진입", "도로로 진입")):
         terms.append("도로가 아닌 장소에서 도로로 진입")
 
-    if "맞은편" in user_input:
+    if metadata.party_type == "자동차" and "맞은편" in user_input:
         remove_terms.append("상대차량이 측면에서 진입")
         terms.append("상대차량이 맞은편에서 진입")
-    elif contains_any(user_input, ("측면", "서로 다른 방향")):
+    elif metadata.party_type == "자동차" and contains_any(user_input, ("측면", "서로 다른 방향")):
         terms.append("상대차량이 측면에서 진입")
-    elif contains_any(user_text, ("오른쪽 도로", "왼쪽 도로", "오른쪽 소로", "왼쪽 소로", "오른쪽 대로", "왼쪽 대로")):
+    elif metadata.party_type == "자동차" and contains_any(
+        user_text,
+        ("오른쪽 도로", "왼쪽 도로", "오른쪽 소로", "왼쪽 소로", "오른쪽 대로", "왼쪽 대로"),
+    ):
         remove_terms.append("상대차량이 맞은편에서 진입")
         terms.append("상대차량이 측면에서 진입")
 
@@ -366,16 +379,16 @@ def remove_query_terms(query: str, remove_terms: list[str]) -> str:
 
 
 def append_unique_terms(query: str, terms: list[str]) -> str:
-    parts = [part.strip() for part in query.split(",") if part.strip()]
+    parts = [part.strip() for part in query.split(",") if is_valid_query_term(part)]
     for term in terms:
-        if term and term not in parts and term not in query:
+        if is_valid_query_term(term) and term not in parts and term not in query:
             parts.append(term)
     return ", ".join(parts)
 
 
 def compact_retrieval_query(query: str, max_terms: int = 4) -> str:
     """검색 질의를 도표 제목형 핵심 표현 위주로 압축합니다."""
-    parts = [part.strip() for part in query.split(",") if part.strip()]
+    parts = [part.strip() for part in query.split(",") if is_valid_query_term(part)]
     selected: list[str] = []
 
     for selector in (
@@ -402,8 +415,9 @@ def compact_retrieval_query(query: str, max_terms: int = 4) -> str:
 
 
 def append_compact_term(parts: list[str], term: str) -> None:
-    if term and term not in parts:
-        parts.append(term)
+    normalized = clean_optional_term(term)
+    if normalized and is_valid_query_term(normalized) and normalized not in parts:
+        parts.append(normalized)
 
 
 def is_specific_case_term(term: str) -> bool:
@@ -465,7 +479,6 @@ def is_broad_query_term(term: str) -> bool:
     return term in {
         "자동차 대 자동차",
         "자동차 대 자전거",
-        "자전거 대 자동차",
         "양쪽 신호등 있는 교차로",
         "신호등 없는 교차로",
         "교차로 사고",
@@ -480,3 +493,44 @@ def contains_any(text: str, needles: tuple[str, ...]) -> bool:
 
 def normalize_spacing(text: str) -> str:
     return " ".join(text.split())
+
+
+def sanitize_search_metadata(metadata: UserSearchMetadata) -> UserSearchMetadata:
+    """정규화 전 LLM 결측 표기와 공백을 일관되게 정리합니다."""
+    slots = metadata.query_slots
+    party_type = clean_optional_term(metadata.party_type)
+    relation = clean_optional_term(slots.relation)
+    if party_type != "자동차":
+        relation = None
+    return UserSearchMetadata(
+        party_type=party_type,
+        location=clean_optional_term(metadata.location),
+        retrieval_query=clean_optional_term(metadata.retrieval_query),
+        query_slots=QuerySlots(
+            road_control=clean_optional_term(slots.road_control),
+            relation=relation,
+            a_signal=clean_optional_term(slots.a_signal),
+            b_signal=clean_optional_term(slots.b_signal),
+            a_movement=clean_optional_term(slots.a_movement),
+            b_movement=clean_optional_term(slots.b_movement),
+            road_priority=clean_optional_term(slots.road_priority),
+            special_condition=clean_optional_term(slots.special_condition),
+        ),
+    )
+
+
+def clean_optional_term(value: str | None) -> str | None:
+    if value is None:
+        return None
+    normalized = normalize_spacing(value)
+    if not normalized or normalized.lower() in {"null", "none", "n/a", "unknown"}:
+        return None
+    return normalized
+
+
+def is_valid_query_term(term: str | None) -> bool:
+    normalized = clean_optional_term(term)
+    if normalized is None:
+        return False
+    compact = normalized.replace(" ", "").lower()
+    return "null" not in compact and "none" not in compact
