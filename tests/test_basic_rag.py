@@ -1,8 +1,10 @@
 import os
+import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+from langchain_core.embeddings import Embeddings
 from langchain_core.documents import Document
 
 from config import INTAKE_MODEL, PDF_PATH, RERANKER_LLM_MODEL, ROUTER_MODEL
@@ -16,6 +18,7 @@ from rag.chunkers import (
     chunk_to_document,
 )
 from rag.embeddings import EMBEDDING_STRATEGIES, create_embeddings
+from rag.embeddings.cache import CachedQueryEmbeddings
 from rag.embeddings.strategies.bge import BGEM3Embeddings
 from rag.embeddings.strategies.google import GoogleGeminiEmbeddings
 from rag.indexer import build_vectorstore, vectorstore_exists
@@ -803,6 +806,125 @@ class BasicRagTest(unittest.TestCase):
     def test_create_embeddings_returns_bge_provider(self):
         with patch.dict(EMBEDDING_STRATEGIES, {"bge": lambda: "bge"}, clear=False):
             self.assertEqual(create_embeddings("bge"), "bge")
+
+    def test_create_embeddings_wraps_provider_with_query_cache(self):
+        class FakeEmbeddings(Embeddings):
+            def embed_documents(self, texts):
+                return [[1.0] for _ in texts]
+
+            def embed_query(self, text):
+                return [1.0]
+
+        with (
+            patch.dict(EMBEDDING_STRATEGIES, {"fake": FakeEmbeddings}, clear=False),
+            patch.dict("rag.embeddings.embeddings.EMBEDDING_MODEL_IDS", {"fake": "fake-model"}, clear=False),
+        ):
+            embeddings = create_embeddings("fake")
+
+        self.assertIsInstance(embeddings, CachedQueryEmbeddings)
+        self.assertEqual(embeddings.provider, "fake")
+        self.assertEqual(embeddings.model_id, "fake-model")
+
+    def test_cached_query_embeddings_reuses_query_embedding(self):
+        class CountingEmbeddings(Embeddings):
+            def __init__(self):
+                self.query_calls = 0
+                self.document_calls = 0
+
+            def embed_documents(self, texts):
+                self.document_calls += 1
+                return [[float(len(text))] for text in texts]
+
+            def embed_query(self, text):
+                self.query_calls += 1
+                return [float(len(text))]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            base = CountingEmbeddings()
+            embeddings = CachedQueryEmbeddings(
+                base,
+                provider="test",
+                model_id="model",
+                cache_dir=Path(temp_dir),
+            )
+
+            first = embeddings.embed_query("same query")
+            second = embeddings.embed_query("same query")
+            documents = embeddings.embed_documents(["a", "bb"])
+
+        self.assertEqual(first, [10.0])
+        self.assertEqual(second, [10.0])
+        self.assertEqual(documents, [[1.0], [2.0]])
+        self.assertEqual(base.query_calls, 1)
+        self.assertEqual(base.document_calls, 1)
+        self.assertEqual(embeddings.query_cache_misses, 1)
+        self.assertEqual(embeddings.query_cache_hits, 1)
+        self.assertTrue(embeddings.last_query_cache_hit)
+
+    def test_cached_query_embeddings_separates_provider_and_model(self):
+        class CountingEmbeddings(Embeddings):
+            def __init__(self, value):
+                self.value = value
+                self.query_calls = 0
+
+            def embed_documents(self, texts):
+                return [[self.value] for _ in texts]
+
+            def embed_query(self, text):
+                self.query_calls += 1
+                return [self.value]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            first_base = CountingEmbeddings(1.0)
+            second_base = CountingEmbeddings(2.0)
+            first = CachedQueryEmbeddings(
+                first_base,
+                provider="test",
+                model_id="model-a",
+                cache_dir=Path(temp_dir),
+            )
+            second = CachedQueryEmbeddings(
+                second_base,
+                provider="test",
+                model_id="model-b",
+                cache_dir=Path(temp_dir),
+            )
+
+            self.assertEqual(first.embed_query("same query"), [1.0])
+            self.assertEqual(second.embed_query("same query"), [2.0])
+            self.assertEqual(first.embed_query("same query"), [1.0])
+            self.assertEqual(second.embed_query("same query"), [2.0])
+
+        self.assertEqual(first_base.query_calls, 1)
+        self.assertEqual(second_base.query_calls, 1)
+
+    def test_cached_query_embeddings_can_be_disabled(self):
+        class CountingEmbeddings(Embeddings):
+            def __init__(self):
+                self.query_calls = 0
+
+            def embed_documents(self, texts):
+                return [[1.0] for _ in texts]
+
+            def embed_query(self, text):
+                self.query_calls += 1
+                return [float(self.query_calls)]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            base = CountingEmbeddings()
+            embeddings = CachedQueryEmbeddings(
+                base,
+                provider="test",
+                model_id="model",
+                cache_dir=Path(temp_dir),
+                enabled=False,
+            )
+
+            self.assertEqual(embeddings.embed_query("same query"), [1.0])
+            self.assertEqual(embeddings.embed_query("same query"), [2.0])
+
+        self.assertEqual(base.query_calls, 2)
+        self.assertIsNone(embeddings.last_query_cache_hit)
 
     def test_embedding_registry_includes_current_providers(self):
         self.assertIn("openai", EMBEDDING_STRATEGIES)
@@ -2073,6 +2195,53 @@ class BasicRagTest(unittest.TestCase):
         self.assertEqual(langchain_config["metadata"]["session_id"], "session-1")
         self.assertEqual(langchain_config["metadata"]["user_id"], "local")
         self.assertEqual(langchain_config["tags"], ["mdm", "pdfplumber", "bge"])
+
+    def test_analyze_question_logs_embedding_query_cache_hit(self):
+        from rag.service.analysis.analysis_service import analyze_question, logger
+
+        class FakeEmbeddingFunction:
+            enabled = True
+            last_query_cache_hit = False
+            query_cache_hits = 0
+            query_cache_misses = 0
+
+        class FakeVectorstore:
+            _embedding_function = FakeEmbeddingFunction()
+
+        fake_components = MagicMock()
+        fake_components.vectorstore = FakeVectorstore()
+        fake_embedding = fake_components.vectorstore._embedding_function
+        fake_document = Document(page_content="context")
+        fake_llm = MagicMock()
+        fake_llm.invoke.return_value = MagicMock(
+            content='{"fault_ratio_a":70,"fault_ratio_b":30,"response":"answer"}'
+        )
+
+        def fake_run_retrieval_pipeline(*args, **kwargs):
+            fake_embedding.query_cache_hits += 1
+            fake_embedding.last_query_cache_hit = True
+            return [fake_document]
+
+        with (
+            patch("rag.service.analysis.analysis_service.get_retrieval_components", return_value=fake_components),
+            patch(
+                "rag.service.analysis.analysis_service.run_retrieval_pipeline",
+                side_effect=fake_run_retrieval_pipeline,
+            ),
+            patch("rag.service.analysis.analysis_service.ChatOpenAI", return_value=fake_llm),
+            self.assertLogs(logger, level="INFO") as logs,
+        ):
+            answer, contexts = analyze_question("query", embedding_provider="openai")
+
+        self.assertEqual(answer, "answer")
+        self.assertEqual(contexts, ["context"])
+        self.assertTrue(
+            any(
+                "[embedding-query-cache] hit provider=openai query=query hits=1 misses=0"
+                in output
+                for output in logs.output
+            )
+        )
 
 
 if __name__ == "__main__":
