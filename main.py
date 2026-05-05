@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import logging
 from html import escape
 from io import BytesIO
 from pathlib import Path
@@ -64,6 +65,7 @@ USER_ID = "local"
 PROJECT_ROOT = Path(__file__).resolve().parent
 MARKDOWN_HEADING_RE = re.compile(r"^(#{1,6})\s+(?!■\s)(.+)$")
 MARKDOWN_IMAGE_RE = re.compile(r"!\[[^\]]*\]\(([^)]+)\)")
+logger = logging.getLogger(__name__)
 
 
 def ensure_active_session(store: ConversationStore) -> str:
@@ -851,6 +853,7 @@ def get_context_image_paths(context: dict[str, object]) -> list[str]:
     return image_paths
 
 
+@st.cache_data(show_spinner=False)
 def read_image_as_png_bytes(image_path: Path) -> bytes | None:
     try:
         with Image.open(image_path) as image:
@@ -982,8 +985,9 @@ def render_chat(
             answer = result.answer
             assistant_metadata = build_assistant_metadata(result, question)
             store.set_intake_state(USER_ID, active_session, result.intake_state)
-        except Exception as exc:
-            answer = f"오류가 발생했습니다: {type(exc).__name__}: {exc}"
+        except Exception:
+            logger.exception("Failed to answer question")
+            answer = "오류가 발생했습니다. 잠시 후 다시 시도해 주세요."
             assistant_metadata = {}
 
     store.append_message(
