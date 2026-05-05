@@ -14,6 +14,12 @@ from rag.pipeline.reranker.strategies.cross_encoder import (
 )
 from rag.pipeline.retriever import RetrievalComponents, StrategyConfig, retrieve
 from rag.pipeline.retriever.common import mark_retrieval_fallback
+from rag.service.progress import (
+    PROGRESS_RERANK,
+    ProgressCallback,
+    report_progress,
+    report_progress_detail,
+)
 from rag.service.tracing import TraceContext
 
 
@@ -72,6 +78,7 @@ def run_retrieval_pipeline(
     filters: dict[str, object] | None = None,
     pipeline_config: RetrievalPipelineConfig | None = None,
     trace_context: TraceContext | None = None,
+    progress_callback: ProgressCallback | None = None,
 ) -> list[Document]:
     """Retriever 결과에 선택적 reranker를 적용해 최종 문서를 반환합니다."""
     config = pipeline_config or RetrievalPipelineConfig()
@@ -117,4 +124,19 @@ def run_retrieval_pipeline(
     }
     if trace_context is not None:
         rerank_kwargs["trace_context"] = trace_context
-    return rerank(**rerank_kwargs)
+    if config.reranker_strategy != "none":
+        report_progress(progress_callback, PROGRESS_RERANK)
+        report_progress_detail(
+            progress_callback,
+            (
+                f"리랭커: {config.reranker_strategy}, "
+                f"후보 {len(candidate_documents)}개 → 최종 {config.final_k}개"
+            ),
+        )
+    reranked_documents = rerank(**rerank_kwargs)
+    if config.reranker_strategy != "none":
+        report_progress_detail(
+            progress_callback,
+            f"정렬 결과: {len(reranked_documents)}개",
+        )
+    return reranked_documents

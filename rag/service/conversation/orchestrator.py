@@ -11,6 +11,13 @@ from rag.service.conversation.pipelines.general_chat import answer_general_chat
 from rag.service.conversation.router import route_conversation_turn
 from rag.service.conversation.schema import RouteType, TurnResultType
 from rag.service.intake.schema import IntakeState
+from rag.service.progress import (
+    PROGRESS_ANSWER,
+    PROGRESS_ROUTE,
+    ProgressCallback,
+    report_progress,
+    report_progress_detail,
+)
 from rag.service.session.schema import ChatMessage
 from rag.service.tracing import TraceContext
 
@@ -43,9 +50,11 @@ def answer_conversation_turn(
     analyzer,
     router_llm: Any | None = None,
     general_chat_llm: Any | None = None,
+    progress_callback: ProgressCallback | None = None,
 ) -> AnswerResult:
     """라우팅 판단에 따라 일반 대화 또는 사고 분석 파이프를 실행합니다."""
     current_state = intake_state or IntakeState()
+    report_progress(progress_callback, PROGRESS_ROUTE)
     route = route_conversation_turn(
         question,
         chat_history,
@@ -53,8 +62,17 @@ def answer_conversation_turn(
         llm=router_llm,
         trace_context=trace_context,
     )
+    report_progress_detail(
+        progress_callback,
+        f"대화 의도: {route.route_type.value}",
+    )
+    report_progress_detail(
+        progress_callback,
+        f"라우터 신뢰도: {route.confidence:.2f}",
+    )
 
     if route.route_type == RouteType.GENERAL_CHAT:
+        report_progress(progress_callback, PROGRESS_ANSWER)
         return AnswerResult(
             answer=answer_general_chat(
                 question,
@@ -79,6 +97,7 @@ def answer_conversation_turn(
         trace_context=trace_context,
         intake_evaluator=intake_evaluator,
         analyzer=analyzer,
+        progress_callback=progress_callback,
     )
     return AnswerResult(
         answer=pipeline_result.answer,

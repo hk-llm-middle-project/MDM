@@ -237,6 +237,57 @@ class ConversationPipelineTest(unittest.TestCase):
         self.assertFalse(result.needs_more_input)
         analyzer.assert_called_once()
 
+    def test_accident_analysis_reports_user_visible_progress(self):
+        router_llm = FakeLLM(
+            '{"route_type":"accident_analysis","confidence":0.97,"reason":"사고 분석"}'
+        )
+        metadata = UserSearchMetadata(
+            party_type="자동차",
+            location="같은 방향 진행차량 상호간의 사고",
+            retrieval_query="후행차 추돌",
+            query_slots=QuerySlots(special_condition="추돌사고"),
+        )
+        intake = MagicMock(
+            return_value=IntakeDecision(
+                is_sufficient=True,
+                normalized_description="정규화된 설명",
+                search_metadata=metadata,
+            )
+        )
+        analyzer = MagicMock(return_value=("answer", ["context"]))
+        progress_events: list[str] = []
+        progress_details: list[str] = []
+
+        class FakeProgress:
+            def __call__(self, label: str) -> None:
+                progress_events.append(label)
+
+            def detail(self, detail: str) -> None:
+                progress_details.append(detail)
+
+        result = answer_conversation_turn(
+            "앞차가 급정지해서 뒤에서 박았어",
+            chat_history=[],
+            intake_evaluator=intake,
+            analyzer=analyzer,
+            router_llm=router_llm,
+            progress_callback=FakeProgress(),
+        )
+
+        self.assertEqual(result.result_type, TurnResultType.ACCIDENT_RAG)
+        self.assertEqual(
+            progress_events[:3],
+            [
+                "대화 의도를 판단하는 중",
+                "사고 단서를 추출하는 중",
+                "추가로 필요한 정보가 있는지 확인하는 중",
+            ],
+        )
+        self.assertIn("대화 의도: accident_analysis", progress_details)
+        self.assertIn("사고 대상: 자동차", progress_details)
+        self.assertIn("사고 유형: 같은 방향 진행차량 상호간의 사고", progress_details)
+        self.assertIn("추가 정보: 충분", progress_details)
+
 
 if __name__ == "__main__":
     unittest.main()
