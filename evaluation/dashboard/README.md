@@ -19,6 +19,25 @@ metadata. The dashboard treats `run_name / retriever_strategy /
 reranker_strategy` as the visible run label so repeated parser/chunker/embedder
 runs with different retrieval strategies do not collapse into one column.
 
+Each result-set folder can override dashboard defaults with a sibling
+`dashboard.json` file:
+
+```json
+{
+  "metric_comparison": {
+    "group_by": "nickname",
+    "metrics": [
+      "diagram_id_hit",
+      "retrieval_relevance",
+      "critical_error",
+      "keyword_coverage",
+      "near_miss_not_above_expected",
+      "execution_time"
+    ]
+  }
+}
+```
+
 Useful local evaluation commands:
 
 ```bash

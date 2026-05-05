@@ -17,7 +17,9 @@ data/embedding_cache/
 .tmp_tests/
 .tmp_unittest/
 tests/results/
-evaluation/results/
+evaluation/results/**
+!evaluation/results/**/
+!evaluation/results/**/dashboard.json
 
 # Parser experiment image artifacts
 experiments/parser/llamaparser/**/images/
