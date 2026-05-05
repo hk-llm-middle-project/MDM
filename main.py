@@ -59,6 +59,7 @@ RETRIEVER_STRATEGY_OPTIONS = tuple(
 RERANKER_STRATEGY_OPTIONS = ("none", "cross-encoder", "flashrank", "llm-score")
 USER_ID = "local"
 PROJECT_ROOT = Path(__file__).resolve().parent
+MAX_DONUT_PERCENT = 99
 MARKDOWN_HEADING_RE = re.compile(r"^(#{1,6})\s+(?!■\s)(.+)$")
 MARKDOWN_IMAGE_RE = re.compile(r"!\[[^\]]*\]\(([^)]+)\)")
 logger = logging.getLogger(__name__)
@@ -373,16 +374,7 @@ def build_fault_ratio_metadata(
     }
 
 
-def estimate_match_percent(question: str, content: str, metadata: dict[str, object]) -> int:
-    """점수 metadata가 없을 때 화면 표시용 일치율을 보수적으로 추정합니다."""
-    for key in ("rerank_score", "score", "similarity_score"):
-        value = metadata.get(key)
-        if isinstance(value, int | float):
-            if 0 <= value <= 1:
-                return round(value * 100)
-            if 1 < value <= 100:
-                return round(value)
-
+def estimate_keyword_match_percent(question: str, content: str) -> int:
     question_terms = {
         token.strip(".,!?()[]{}:;\"'").lower()
         for token in question.split()
@@ -393,12 +385,47 @@ def estimate_match_percent(question: str, content: str, metadata: dict[str, obje
 
     content_lower = content.lower()
     matched = sum(1 for term in question_terms if term in content_lower)
-    return min(100, round((matched / len(question_terms)) * 100))
+    return min(MAX_DONUT_PERCENT, round((matched / len(question_terms)) * MAX_DONUT_PERCENT))
+
+
+def estimate_rerank_match_percent(metadata: dict[str, object]) -> int | None:
+    for key in ("rerank_score", "score", "similarity_score"):
+        value = metadata.get(key)
+        if isinstance(value, int | float):
+            if 0 <= value <= 1:
+                return min(MAX_DONUT_PERCENT, round(value * MAX_DONUT_PERCENT))
+            if 1 < value <= MAX_DONUT_PERCENT:
+                return round(value)
+            if MAX_DONUT_PERCENT < value <= 100:
+                return MAX_DONUT_PERCENT
+    return None
+
+
+def read_rerank_score(metadata: dict[str, object]) -> float | None:
+    value = metadata.get("rerank_score")
+    if isinstance(value, int | float):
+        return float(value)
+    return None
+
+
+def estimate_match_percent(
+    question: str,
+    content: str,
+    metadata: dict[str, object],
+    reranker_strategy: str = DEFAULT_RERANKER_STRATEGY,
+) -> int:
+    """점수 metadata가 없을 때 화면 표시용 일치율을 보수적으로 추정합니다."""
+    if reranker_strategy in {"cross-encoder", "llm-score"}:
+        rerank_percent = estimate_rerank_match_percent(metadata)
+        if rerank_percent is not None:
+            return rerank_percent
+    return estimate_keyword_match_percent(question, content)
 
 
 def build_retrieved_context_metadata(
     retrieved_contexts: list[RetrievedContext],
     question: str = "",
+    reranker_strategy: str = DEFAULT_RERANKER_STRATEGY,
 ) -> list[dict[str, object]]:
     """검색 근거 조각과 이미지를 다시 보여줄 최소 metadata를 만듭니다."""
     rendered_contexts: list[dict[str, object]] = []
@@ -409,17 +436,15 @@ def build_retrieved_context_metadata(
                 question,
                 context.content,
                 context.metadata,
+                reranker_strategy,
             ),
         }
-        image_paths: list[str] = []
+        rerank_score = read_rerank_score(context.metadata)
+        if rerank_score is not None:
+            rendered_context["rerank_score"] = rerank_score
         metadata_image_path = context.metadata.get("image_path")
         if isinstance(metadata_image_path, str) and metadata_image_path:
-            image_paths.append(metadata_image_path)
-        for image_path in extract_markdown_image_paths(context.content):
-            if image_path not in image_paths:
-                image_paths.append(image_path)
-        if image_paths:
-            rendered_context["image_paths"] = image_paths
+            rendered_context["image_path"] = metadata_image_path
         for key in ("image_path", "source", "page", "diagram_id"):
             value = context.metadata.get(key)
             if isinstance(value, str | int):
@@ -428,12 +453,21 @@ def build_retrieved_context_metadata(
     return rendered_contexts
 
 
-def build_assistant_metadata(result, question: str = "") -> dict[str, object]:
+def build_assistant_metadata(
+    result,
+    question: str = "",
+    reranker_strategy: str = DEFAULT_RERANKER_STRATEGY,
+) -> dict[str, object]:
     """assistant 메시지 렌더링에 필요한 부가 정보를 저장합니다."""
     metadata = build_fault_ratio_metadata(result.fault_ratio_a, result.fault_ratio_b)
-    retrieved_contexts = build_retrieved_context_metadata(result.retrieved_contexts, question)
+    retrieved_contexts = build_retrieved_context_metadata(
+        result.retrieved_contexts,
+        question,
+        reranker_strategy,
+    )
     if retrieved_contexts:
         metadata["retrieved_contexts"] = retrieved_contexts
+    metadata["reranker_strategy"] = reranker_strategy
     return metadata
 
 
@@ -456,22 +490,6 @@ def read_retrieved_context_metadata(metadata: dict[str, object]) -> list[dict[st
     if not isinstance(contexts, list):
         return []
     return [context for context in contexts if isinstance(context, dict)]
-
-
-def extract_markdown_image_paths(markdown_text: str) -> list[str]:
-    image_paths: list[str] = []
-    for match in MARKDOWN_IMAGE_RE.finditer(markdown_text):
-        image_path = match.group(1).strip()
-        if not image_path:
-            continue
-        if image_path.startswith("<") and ">" in image_path:
-            image_path = image_path[1 : image_path.index(">")]
-        else:
-            image_path = image_path.split()[0].strip("<>")
-        if image_path.startswith("/image/placeholder"):
-            continue
-        image_paths.append(image_path)
-    return image_paths
 
 
 def strip_markdown_images(markdown_text: str) -> str:
@@ -579,14 +597,6 @@ def render_app_css() -> None:
   font-size: 2.05rem;
   line-height: 1.26;
   font-weight: 850;
-}
-.main-heading {
-  color: inherit;
-  opacity: 0.36;
-  font-size: 1.48rem;
-  line-height: 1.25;
-  margin: 0 0 1.15rem;
-  font-weight: 900;
 }
 .fault-card {
   margin: 0.25rem 0 1.15rem;
@@ -797,8 +807,8 @@ def render_header() -> None:
     st.markdown(
         """
 <div class="top-title">
-  <h1>Who’s at Fault?</h1>
-  <p>Car Accident Fault Ratio Analysis RAG System</p>
+  <h1>몇 대 몇? 예상과실 비율 RAG 시스템</h1>
+  <p>사고 사례를 바탕으로 과실 비율 해석해주는 도우미</p>
 </div>
 """,
         unsafe_allow_html=True,
@@ -892,7 +902,6 @@ def render_previous_answers(messages) -> None:
 
 
 def render_answer_area(metadata: dict[str, object], answer: str | None, messages=None) -> None:
-    st.markdown('<h2 class="main-heading">몇 대 몇: 예상과실 비율 RAG 시스템</h2>', unsafe_allow_html=True)
     render_fault_ratio(*read_fault_ratio_metadata(metadata))
     messages = messages or []
     render_question_history(messages)
@@ -912,7 +921,39 @@ def context_match_percent(context: dict[str, object]) -> int:
     value = context.get("match_percent", 0)
     if not isinstance(value, int):
         return 0
-    return max(0, min(100, value))
+    return max(0, min(MAX_DONUT_PERCENT, value))
+
+
+def context_rerank_score(context: dict[str, object]) -> float | None:
+    value = context.get("rerank_score")
+    if isinstance(value, int | float):
+        return float(value)
+    return None
+
+
+def normalize_reference_scores(
+    reference_items: list[tuple[str, dict[str, object], Path]],
+) -> None:
+    scores = [
+        score
+        for _, context, _ in reference_items
+        if (score := context_rerank_score(context)) is not None
+    ]
+    if not scores:
+        return
+
+    max_score = max(scores)
+    if max_score <= 0:
+        return
+
+    for _, context, _ in reference_items:
+        score = context_rerank_score(context)
+        if score is None:
+            continue
+        context["match_percent"] = max(
+            0,
+            min(MAX_DONUT_PERCENT, round((score / max_score) * MAX_DONUT_PERCENT)),
+        )
 
 
 def top_ranked_contexts(contexts: list[dict[str, object]], limit: int = 3) -> list[dict[str, object]]:
@@ -923,18 +964,38 @@ def top_ranked_contexts(contexts: list[dict[str, object]], limit: int = 3) -> li
     )[:limit]
 
 
-def render_donut_panel(contexts: list[dict[str, object]]) -> None:
-    st.markdown('<div class="right-title">● Match Rate</div>', unsafe_allow_html=True)
+def ranked_reference_items(
+    contexts: list[dict[str, object]],
+    limit: int = 3,
+) -> list[tuple[str, dict[str, object], Path]]:
     rank_labels = ("1st", "2nd", "3rd")
-    ranked_contexts = top_ranked_contexts(contexts, limit=3)
-    percentages = [
-        context_match_percent(ranked_contexts[index]) if index < len(ranked_contexts) else 0
-        for index in range(3)
-    ]
+    items: list[tuple[str, dict[str, object], Path]] = []
+    seen_images: set[str] = set()
+    for context in top_ranked_contexts(contexts, limit=limit):
+        for image_path in get_context_image_paths(context):
+            resolved_image_path = resolve_image_path(image_path, context.get("source"))
+            if resolved_image_path is None:
+                continue
+            resolved_image_key = str(resolved_image_path)
+            if resolved_image_key in seen_images:
+                continue
+            seen_images.add(resolved_image_key)
+            rank_label = rank_labels[len(items)]
+            items.append((rank_label, context, resolved_image_path))
+            break
+        if len(items) >= limit:
+            break
+    return items
 
+
+def render_donut_panel(reference_items: list[tuple[str, dict[str, object], Path]]) -> None:
+    if not reference_items:
+        return
+
+    st.markdown('<div class="right-title">● Reference Match</div>', unsafe_allow_html=True)
     donut_html = ['<div class="donut-grid">']
-    for percent, rank_label in zip(percentages, rank_labels, strict=True):
-        safe_percent = max(0, min(100, int(percent)))
+    for rank_label, context, _ in reference_items:
+        safe_percent = context_match_percent(context)
         donut_html.append(
             f"""
 <div class="donut-item">
@@ -948,21 +1009,10 @@ def render_donut_panel(contexts: list[dict[str, object]]) -> None:
 
 
 def get_context_image_paths(context: dict[str, object]) -> list[str]:
-    image_paths: list[str] = []
     image_path = context.get("image_path")
     if isinstance(image_path, str) and image_path:
-        image_paths.append(image_path)
-
-    stored_image_paths = context.get("image_paths")
-    if isinstance(stored_image_paths, list):
-        for stored_image_path in stored_image_paths:
-            if (
-                isinstance(stored_image_path, str)
-                and stored_image_path
-                and stored_image_path not in image_paths
-            ):
-                image_paths.append(stored_image_path)
-    return image_paths
+        return [image_path]
+    return []
 
 
 @st.cache_data(show_spinner=False)
@@ -979,28 +1029,12 @@ def read_image_as_png_bytes(image_path: Path) -> bytes | None:
         return None
 
 
-def render_reference_images(contexts: list[dict[str, object]]) -> None:
-    rank_labels = ("1st", "2nd", "3rd")
-    resolved_images: list[tuple[str, Path]] = []
-    seen_images: set[str] = set()
-    ranked_contexts = top_ranked_contexts(contexts, limit=3)
-    for rank_label, context in zip(rank_labels, ranked_contexts, strict=False):
-        for image_path in get_context_image_paths(context):
-            resolved_image_path = resolve_image_path(image_path, context.get("source"))
-            if resolved_image_path is None:
-                continue
-            resolved_image_key = str(resolved_image_path)
-            if resolved_image_key in seen_images:
-                continue
-            seen_images.add(resolved_image_key)
-            resolved_images.append((rank_label, resolved_image_path))
-            break
-
-    if not resolved_images:
+def render_reference_images(reference_items: list[tuple[str, dict[str, object], Path]]) -> None:
+    if not reference_items:
         return
 
     st.markdown('<div class="right-title">● Reference Images</div>', unsafe_allow_html=True)
-    for index, (rank_label, image_path) in enumerate(resolved_images, start=1):
+    for index, (rank_label, _, image_path) in enumerate(reference_items, start=1):
         image_bytes = read_image_as_png_bytes(image_path)
         if image_bytes is None:
             continue
@@ -1024,8 +1058,11 @@ def render_reference_images(contexts: list[dict[str, object]]) -> None:
 
 def render_right_panel(metadata: dict[str, object]) -> None:
     contexts = read_retrieved_context_metadata(metadata)
-    render_donut_panel(contexts)
-    render_reference_images(contexts)
+    reference_items = ranked_reference_items(contexts, limit=3)
+    if metadata.get("reranker_strategy") == "cross-encoder":
+        normalize_reference_scores(reference_items)
+    render_donut_panel(reference_items)
+    render_reference_images(reference_items)
 
 
 def render_chat(
@@ -1152,7 +1189,11 @@ def render_chat(
                 trace_context=trace_context,
             )
             answer = result.answer
-            assistant_metadata = build_assistant_metadata(result, pending_question)
+            assistant_metadata = build_assistant_metadata(
+                result,
+                pending_question,
+                request_reranker_strategy,
+            )
             store.set_intake_state(USER_ID, active_session, result.intake_state)
         except Exception:
             logger.exception("Failed to answer question")
@@ -1173,7 +1214,7 @@ def render_chat(
 def main():
     load_dotenv()
     st.set_page_config(
-        page_title="Who’s at Fault?",
+        page_title="MDM",
         page_icon="🚗",
         layout="wide",
     )
