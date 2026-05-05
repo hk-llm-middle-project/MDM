@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+from collections.abc import Callable
 import logging
 from html import escape
 from io import BytesIO
@@ -1023,10 +1024,19 @@ def render_previous_answers(messages) -> None:
             st.markdown(add_heading_markers(strip_markdown_images(message.content)))
 
 
-def render_answer_area(metadata: dict[str, object], answer: str | None, messages=None) -> None:
+def render_answer_area(
+    metadata: dict[str, object],
+    answer: str | None,
+    messages=None,
+    *,
+    progress_reporter_factory: Callable[[], ProgressReporter] | None = None,
+) -> ProgressReporter | None:
     render_fault_ratio(*read_fault_ratio_metadata(metadata))
     messages = messages or []
     render_question_history(messages)
+    progress_reporter = (
+        progress_reporter_factory() if progress_reporter_factory is not None else None
+    )
     render_previous_answers(messages)
     if answer:
         st.markdown('<div class="answer-panel">', unsafe_allow_html=True)
@@ -1037,6 +1047,7 @@ def render_answer_area(metadata: dict[str, object], answer: str | None, messages
             '<div class="empty-answer">■ 사고 상황을 입력하면 과실비율 분석 결과가 여기에 표시됩니다.</div>',
             unsafe_allow_html=True,
         )
+    return progress_reporter
 
 
 def context_match_percent(context: dict[str, object]) -> int:
@@ -1205,10 +1216,26 @@ def render_chat(
         (message.content for message in reversed(messages) if message.role == "assistant"),
         None,
     )
+    pending_request = st.session_state.get("pending_request")
+    has_pending_request = (
+        isinstance(pending_request, dict)
+        and pending_request.get("session_id") == active_session
+    )
+    progress_reporter_factory = (
+        (lambda: create_progress_reporter(get_debug_progress_enabled()))
+        if has_pending_request
+        else None
+    )
+    progress_reporter = None
 
     left, right = st.columns([0.62, 0.38], gap="large")
     with left:
-        render_answer_area(assistant_metadata, last_answer, messages)
+        progress_reporter = render_answer_area(
+            assistant_metadata,
+            last_answer,
+            messages,
+            progress_reporter_factory=progress_reporter_factory,
+        )
     with right:
         render_right_panel(assistant_metadata)
 
@@ -1229,7 +1256,6 @@ def render_chat(
         }
         st.rerun()
 
-    pending_request = st.session_state.get("pending_request")
     if not isinstance(pending_request, dict):
         return
     if pending_request.get("session_id") != active_session:
@@ -1289,7 +1315,8 @@ def render_chat(
         },
     )
 
-    progress_reporter = create_progress_reporter(get_debug_progress_enabled())
+    if progress_reporter is None:
+        progress_reporter = create_progress_reporter(get_debug_progress_enabled())
     try:
         result = answer_question_with_intake(
             pending_question,

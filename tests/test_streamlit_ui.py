@@ -1,4 +1,5 @@
 import os
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
@@ -17,6 +18,8 @@ from main import (
     delete_session_and_select_fallback,
     get_chunker_strategy_options,
     normalize_chunker_strategy,
+    render_answer_area,
+    render_chat,
 )
 from config import get_debug_progress_enabled
 from rag.pipeline.reranker import (
@@ -26,6 +29,8 @@ from rag.pipeline.reranker import (
 )
 from rag.pipeline.reranker.strategies.cross_encoder import rerank_with_cross_encoder
 from rag.pipeline.retriever import EnsembleRetrieverConfig
+from rag.service.intake.schema import IntakeState
+from rag.service.session.schema import ChatMessage
 from rag.service.session.memory_store import MemoryConversationStore
 
 
@@ -84,6 +89,70 @@ class FakeStreamlit:
         status_box = FakeStatusBox()
         self.status_boxes.append(status_box)
         return status_box
+
+
+class FakeColumn:
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        return False
+
+
+class FakeSessionState(dict):
+    def __getattr__(self, name):
+        try:
+            return self[name]
+        except KeyError as error:
+            raise AttributeError(name) from error
+
+    def __setattr__(self, name, value):
+        self[name] = value
+
+
+class FakeChatStreamlit:
+    def __init__(self):
+        self.session_state = FakeSessionState(
+            active_session="session-1",
+            pending_request={
+                "session_id": "session-1",
+                "question": "야간 사고였어",
+            },
+        )
+        self.columns_calls = []
+
+    def columns(self, spec, gap=None):
+        self.columns_calls.append({"spec": spec, "gap": gap})
+        return [FakeColumn(), FakeColumn()]
+
+    def chat_input(self, label):
+        return None
+
+    def rerun(self):
+        raise RuntimeError("rerun")
+
+
+class FakeChatStore:
+    def __init__(self):
+        self.messages = [
+            ChatMessage(role="user", content="기존 사고 설명"),
+            ChatMessage(role="assistant", content="기존 답변", metadata={}),
+            ChatMessage(role="user", content="야간 사고였어"),
+        ]
+        self.intake_state = IntakeState()
+        self.appended_messages = []
+
+    def get_messages(self, user_id, session_id):
+        return list(self.messages)
+
+    def append_message(self, user_id, session_id, role, content, metadata=None):
+        self.appended_messages.append((role, content, metadata or {}))
+
+    def get_intake_state(self, user_id, session_id):
+        return self.intake_state
+
+    def set_intake_state(self, user_id, session_id, state):
+        self.intake_state = state
 
 
 class StreamlitUiTest(unittest.TestCase):
@@ -336,6 +405,68 @@ class StreamlitUiTest(unittest.TestCase):
             fake_st.status_boxes[0].updates[-1],
             {"state": "complete", "expanded": False},
         )
+
+    def test_render_answer_area_places_pending_progress_after_question_history(self):
+        events = []
+        fake_progress = SimpleNamespace(
+            update=lambda label: None,
+            detail=lambda detail: None,
+            complete=lambda: None,
+            error=lambda: None,
+        )
+
+        def record_progress():
+            events.append("progress")
+            return fake_progress
+
+        with (
+            patch("main.render_fault_ratio", side_effect=lambda *args: events.append("fault")),
+            patch("main.render_question_history", side_effect=lambda *args: events.append("questions")),
+            patch("main.render_previous_answers", side_effect=lambda *args: events.append("previous")),
+            patch("main.st.markdown", side_effect=lambda *args, **kwargs: events.append("markdown")),
+        ):
+            reporter = render_answer_area(
+                {},
+                "기존 답변",
+                [ChatMessage(role="user", content="Q1")],
+                progress_reporter_factory=record_progress,
+            )
+
+        self.assertIs(reporter, fake_progress)
+        self.assertLess(events.index("questions"), events.index("progress"))
+        self.assertLess(events.index("progress"), events.index("previous"))
+
+    def test_render_chat_uses_progress_reporter_created_inside_answer_area(self):
+        fake_progress = SimpleNamespace(
+            update=lambda label: None,
+            detail=lambda detail: None,
+            complete=lambda: None,
+            error=lambda: None,
+        )
+        fake_result = SimpleNamespace(
+            answer="새 답변",
+            fault_ratio_a=None,
+            fault_ratio_b=None,
+            retrieved_contexts=[],
+            intake_state=IntakeState(),
+        )
+
+        def return_progress_from_answer_area(*args, **kwargs):
+            return kwargs["progress_reporter_factory"]()
+
+        with (
+            patch("main.st", FakeChatStreamlit()),
+            patch("main.render_answer_area", side_effect=return_progress_from_answer_area),
+            patch("main.render_right_panel"),
+            patch("main.create_progress_reporter", return_value=fake_progress),
+            patch("main.get_debug_progress_enabled", return_value=False),
+            patch("main.answer_question_with_intake", return_value=fake_result) as answer_mock,
+        ):
+            with self.assertRaises(RuntimeError):
+                render_chat(FakeChatStore())
+
+        self.assertIs(answer_mock.call_args.kwargs["progress_callback"], fake_progress)
+
 
 if __name__ == "__main__":
     unittest.main()
