@@ -1,308 +1,337 @@
-# mdm
+# 1. 서비스 소개
 
-자동차 사고 과실 비율 인정 기준 PDF를 기반으로 질의응답하는 RAG 시스템 실험 프로젝트다.  
-현재 목표는 아래 흐름을 단순하게 구현하는 것이다.
+![web-image](img/web-page-example.png)
 
-```text
-문서 로드 -> 청킹 -> 임베딩 -> 저장 -> 검색 -> 평가
-```
+## 1) MDM이란?
 
-## 프로젝트 개요
+`MDM(몇대몇)`은 **자동차 사고 과실비율 인정 기준 PDF**를 기반으로 사고 상황을 분석하고, 관련 기준 문서의 근거를 함께 제시하는 `RAG 기반 사고 과실 분석 서비스`입니다.
 
-- 도메인: 자동차 사고 과실 비율 인정 기준
+사용자는 사고 상황을 자연어로 입력할 수 있습니다. 시스템은 입력이 부족하면 추가 질문을 통해 사고 정보를 보강하고, 문서 검색과 재순위화 과정을 거쳐 관련 과실 기준을 찾아 답변합니다. 단순 질의응답을 넘어, 사고 유형 후보·근거 문서·참고 이미지·검색 결과를 함께 보여주어 사용자가 판단 근거를 확인할 수 있도록 설계했습니다.
+
+### `MDM` 핵심 가치
+
+- *Grounded Answer* : 자동차 사고 과실비율 인정 기준 문서에 기반한 답변 생성
+- *Better Intake* : 사고 상황이 모호할 때 추가 질문과 질의 정규화로 검색 품질 개선
+- *Comparable RAG* : Parser, Chunker, Retriever, Reranker 조합을 평가하고 비교 가능한 구조
+- *Traceable Result* : LangSmith 추적과 로컬 대시보드로 검색·판단 품질을 검증
+
+## 2) 개발 기간
+
+- 2026-04-23 ~ 2026-05-05
+
+## 3) 산출물 모아보기
+
+
+**평가 및 대시보드**
+
+- [Evaluation Dashboard README](evaluation/dashboard/README.md)
+- Retrieval 평가 스크립트: [evaluation/evaluate_retrieval_langsmith.py](evaluation/evaluate_retrieval_langsmith.py)
+- Decision 평가 스크립트: [evaluation/evaluate_decision_suites.py](evaluation/evaluate_decision_suites.py)
+- 평가 결과: `evaluation/results/`
+
+**데이터**
+
 - 기준 문서: `data/raw/230630_자동차사고 과실비율 인정기준_최종.pdf`
-- 목적: 문서 기반 질문에 답하고, 답변 근거를 함께 보여주는 RAG MVP 만들기
+- 테스트셋: `data/testsets/`
+- 문서 이미지: `data/images/`
+- 파싱/청킹 캐시: `data/llama_md/`, `data/upstage_output/`, `data/chunks/`
 
-## 폴더 구조
+## 4) 팀 소개
 
-```text
-mdm/
-├─ main.py
-├─ config.py
-├─ rag/
-│  ├─ __init__.py
-│  ├─ loader/
-│  │  ├─ __init__.py
-│  │  ├─ loader.py
-│  │  └─ strategies/
-│  ├─ chunker.py
-│  ├─ indexer.py
-│  ├─ service/
-│  │  ├─ conversation/
-│  │  │  ├─ app_service.py
-│  │  │  ├─ orchestrator.py
-│  │  │  ├─ router.py
-│  │  │  └─ pipelines/
-│  │  ├─ analysis/
-│  │  │  ├─ analysis_service.py
-│  │  │  ├─ prompt.py
-│  │  │  └─ answer_schema.py
-│  │  ├─ presentation/
-│  │  │  └─ result_service.py
-│  │  ├─ vectorstore/
-│  │  │  └─ service.py
-│  │  └─ intake/
-│  │     ├─ intake_service.py
-│  │     ├─ prompts.py
-│  │     └─ schema.py
-│  ├─ pipeline/
-│  │  ├─ retrieval.py
-│  │  ├─ retriever/
-│  │  └─ reranker/
-│  └─ evaluator.py
-├─ data/
-│  ├─ raw/
-│  │  └─ 230630_자동차사고 과실비율 인정기준_최종.pdf
-│  └─ vectorstore/
-└─ docs/
-   └─ rag-quick-guide.md
-```
+- 김시안
+  - Upstage 기반 문서 전처리 및 파싱, 청킹 구현
+  - Streamlit 기반 사용자 화면 개선
+  - 과실 분석 화면 재설계 및 참고 문서 매칭 표시 개선
+  - 모드 프리셋, 참고 문서 랭킹, 검색 결과 UI 개선
+  - Ensemble/Parent Retrieval 제어 UI 구현
+  - 팀 프로젝트 발표자 역할
 
-## 파일 역할
+- 이은성
+  - 멀티턴 RAG 및 Intake 파이프라인 구현
+  - 사고 질의 정규화, 검색 슬롯 추출, 추가 질문 로직 개선
+  - 메타데이터 필터링, fallback 검색, Reranker 전략 개선
+  - LLM 모델 분리, Redis 세션 저장소, SQLite 쿼리 임베딩 캐시 구현
 
-### [main.py](main.py)
+- 조준용
+  - PDF 파싱·문서 로더·청킹 파이프라인 구현
+  - LlamaParse, pdfplumber 기반 문서 전처리 전략 구축
+  - Fixed, Recursive, Markdown, Case-boundary, Semantic Chunker 구현
+  - 페이지 메타데이터 생성, Chunk Cache, Vectorstore 경로 및 임베딩 Provider 전략 구현
+  - LangSmith 기반 Retrieval/Decision 평가 체계 구축
+  - 평가 매트릭스 확장, 로컬 평가 병렬화, 평가 결과 산출물 관리
+  - 평가 대시보드 모듈화 및 결과 비교 화면 개선
+  - Parser/Chunker/Embedder/Retriever/Reranker 조합 비교 기능 구현
 
-Streamlit UI 실행 진입점이다.  
-앱 설정, 세션 상태, 사이드바, 채팅 화면 렌더링만 맡는다.
+- 공통
+  - 테스트셋 구축 및 평가 데이터 정리
+  - README 및 실험 문서 보완
+  - 리뷰 피드백 반영, 버그 수정, 품질 안정화
 
-### [config.py](config.py)
+## 5) 기능 소개
 
-환경 변수와 공통 설정을 모아두는 파일이다.
+### (1) 사고 상황 Intake
 
-- PDF 경로
-- 벡터스토어 저장 경로
-- 로더 전략별 벡터스토어 저장 경로
-- LlamaParse markdown 저장 경로
-- 기본 문서 로더 전략
-- chunk size / overlap
-- top-k
-- 임베딩 모델명
-- LLM 모델명
+**부족한 사고 정보를 먼저 정리**
 
-### [rag/loader/](rag/loader/)
+사용자가 사고 상황을 입력하면 Intake 단계에서 사고 장소, 진행 방향, 차선, 충돌 상황 등 검색에 필요한 정보를 구조화합니다. 입력이 부족하거나 모호하면 추가 질문을 생성하고, 검색에 적합한 형태로 질의를 정규화합니다.
 
-PDF 문서를 읽고 텍스트와 메타데이터를 정리하는 로더 전략 패키지다.
+### (2) 문서 기반 과실 분석
 
-- `pdfplumber` 기본 로더 전략
-- `llamaparser` / `llama-parse` LlamaParse 로더 전략
-- 페이지 단위 텍스트 또는 markdown 추출
-- `source`, `page`, `parser` 메타데이터 부여
-- LlamaParse 결과를 `data/llama_md/main_pdf/`에 페이지별 markdown으로 저장
-- LlamaParse 전략은 기존 markdown이 있으면 API를 다시 호출하지 않고 해당 파일로 문서를 재구성
+**기준 문서에 근거한 답변 생성**
 
-### [rag/chunker.py](rag/chunker.py)
+자동차 사고 과실비율 인정 기준 PDF에서 관련 사고 유형과 문서 조각을 검색한 뒤, LLM이 검색된 근거만을 바탕으로 답변합니다. 답변에는 사고 유형 후보, 판단 근거, 참고 문서가 함께 표시됩니다.
 
-로드한 문서를 검색 가능한 단위로 나눈다.
+### (3) 다양한 검색 전략
 
-- 문단 또는 고정 길이 청킹
-- overlap 적용
-- 로더에서 부여한 메타데이터 보존
-- 의미 단위가 최대한 유지되도록 분할
+**실험 가능한 RAG 파이프라인**
 
-### [rag/indexer.py](rag/indexer.py)
+Parser, Chunker, Embedding Provider, Retriever, Reranker를 분리해 조합별 실험이 가능합니다.
 
-청크를 임베딩하고 벡터스토어에 저장한다.
+- Loader: `pdfplumber`, `llamaparser`, `upstage`
+- Chunker: `fixed`, `recursive`, `markdown`, `case-boundary`, `semantic`, `custom`
+- Embedding: `OpenAI`, `Google`, `BGE`
+- Retriever: dense, parent, ensemble, ensemble parent
+- Reranker: none, cross-encoder, flashrank, LLM score
 
-- 임베딩 생성
-- Chroma 또는 FAISS 저장
-- 재색인 처리
+### (4) Streamlit 분석 UI
 
-### [rag/service/conversation/app_service.py](rag/service/conversation/app_service.py)
+**채팅형 사고 분석과 검색 결과 확인**
 
-사용자 흐름을 조율하는 애플리케이션 서비스다.
+Streamlit UI에서 세션을 생성하고 사고 상황을 입력할 수 있습니다. 사이드바에서는 `fast`, `thinking`, `pro` 모드 프리셋을 선택하고, Loader/Chunker/Retriever/Reranker 설정을 조정할 수 있습니다. 분석 결과 화면에서는 과실 비율, 참고 근거, 검색 문서, 관련 이미지를 확인할 수 있습니다.
 
-- 입력 처리 흐름의 대표 진입점
-- 분석 서비스 호출
-- 기존 UI와 평가 스크립트가 사용하는 답변 API 유지
+### (5) 평가 대시보드
 
-### [rag/service/analysis/analysis_service.py](rag/service/analysis/analysis_service.py)
+**RAG 조합별 품질 비교**
 
-사고 질의를 분석하고 RAG 답변을 생성한다.
+LangSmith 평가 결과와 로컬 CSV/JSON 산출물을 기반으로 조합별 성능을 비교합니다. 검색 적중률, 문서 관련성, 키워드 커버리지, 실패 케이스, 실행 시간 등을 확인해 어떤 파이프라인 구성이 더 안정적인지 판단할 수 있습니다.
 
-- 검색 파이프라인 실행
-- 검색 컨텍스트 조립
-- 답변 프롬프트 생성
-- LLM 호출
+## 6) 프리셋 결정 실험
 
-### [rag/service/presentation/result_service.py](rag/service/presentation/result_service.py)
+Streamlit UI의 `fast`, `thinking`, `pro` 모드는 평가 결과를 기준으로 정했습니다. 핵심 지표는 `critical_error`와 `execution_time`입니다. `critical_error`는 기대한 `diagram`, `party_type`, `location` 중 치명적인 retrieval mismatch가 있는지 보는 지표이며 낮을수록 좋습니다. `execution_time`은 row별 평균 실행 시간이며 낮을수록 빠릅니다.
 
-분석 결과를 화면이나 평가에서 쓰기 좋은 형태로 정리한다.
+### (1) Embedding Provider 비교
 
-- 답변 표시 형식 정리
-- 검색 문서 조각 첨부
-- 이후 예상 사고유형, 과실비율, 주의사항 화면 모델 확장
+![Embedding Provider Comparison](img/eval-embedding-provider-comparison.png)
 
-### [rag/service/vectorstore/service.py](rag/service/vectorstore/service.py)
+동일 조건에서 `google`, `bge`, `openai` 임베딩을 비교했을 때 `Google embedding`이 가장 낮은 `critical_error`와 가장 높은 `diagram_id_hit`을 보였습니다. 이후 프리셋은 임베딩 차이로 인한 변수를 줄이고 검색기·리랭커 조합을 공정하게 비교하기 위해 `upstage-custom-google` 조합으로 통일했습니다.
 
-앱 프로세스에서 재사용할 벡터스토어와 검색 컴포넌트를 준비한다.
+### (2) Reranker none 기준 비교
 
-- 선택한 로더 전략에 맞는 벡터스토어 로드
-- 필요 시 PDF 로드, 청킹, 색인 생성
-- `pdfplumber`와 `llamaparser` 색인 결과 분리
-- 실행 중 캐시 정책
+![Reranker None Comparison](img/eval-reranker-none-comparison.png)
 
-### [rag/service/intake/](rag/service/intake/)
+리랭커를 사용하지 않는 `none` 기준에서는 `upstage-custom-google / ensemble / none` 조합이 가장 낮은 `critical_error`를 보였습니다. 다만 `parent / none`은 약간 더 높은 오류를 감수하는 대신 실행 시간이 매우 짧아 실시간 응답용 후보로 유지했습니다.
 
-사고 입력 수집과 충분성 판단을 담당한다.
+- `upstage-custom-google / ensemble / none`: `critical_error 0.06`, `execution_time 3 sec`
+- `upstage-custom-google / parent / none`: `critical_error 0.2`, `execution_time 0.06 sec`
 
-- 입력 충분성 판단 결과 구조
-- 추가 질문 후보
-- 분석용 사고 설명 정규화
+### (3) LLM Score 기준 비교
 
-### [rag/pipeline/retrieval.py](rag/pipeline/retrieval.py)
+![LLM Score Comparison](img/eval-reranker-llm-score-comparison.png)
 
-검색과 reranker를 묶어 최종 컨텍스트 문서를 만든다.
+`llm-score` 기준에서는 `llamaparser / bge / parent` 또는 `ensemble_parent`도 좋은 결과를 보였지만, 최종 프리셋에서는 임베딩을 Google로 통일하는 B안을 선택했습니다. 이 기준에서 `upstage-custom-google / ensemble_parent / llm-score`는 `critical_error 0`을 달성했고, 실행 시간은 약 `44.2 sec`로 가장 느리지만 품질 우선 모드에 적합했습니다.
 
-- retriever 전략 실행
-- reranker 전략 실행
-- candidate/final top-k 조정
+### (4) Cross Encoder 기준 비교
 
-### [rag/pipeline/retriever/](rag/pipeline/retriever/)
+`cross-encoder` 기준에서는 `upstage / google / ensemble_parent / cross-encoder` 조합이 안정적인 품질과 중간 수준의 실행 시간을 보였습니다. `critical_error 0.2`, `execution_time 24.4 sec`로 `llm-score`보다 빠르고 `none`보다 정교한 재정렬을 제공해 균형형 모드로 선택했습니다.
 
-질문을 받아 관련 청크를 검색한다.
+### 최종 프리셋
 
-- 쿼리 임베딩
-- similarity search
-- top-k 결과 반환
+| 모드 | 선택 조합 | 결정 기준 |
+|---|---|---|
+| `Fast` | `upstage-custom-google / parent / none` | 가장 빠른 응답. `critical_error 0.2`, `execution_time 0.06 sec` |
+| `Fast` | `upstage-custom-google / ensemble / none` | 리랭커 없이 가장 낮은 오류. `critical_error 0.06`, `execution_time 3 sec` |
+| `Thinking` | `upstage-custom-google / ensemble_parent / cross-encoder` | 품질과 속도의 균형. `critical_error 0.2`, `execution_time 24.4 sec` |
+| `Pro` | `upstage-custom-google / ensemble_parent / llm-score` | 품질 최우선. `critical_error 0`, `execution_time 44.2 sec` |
 
-### [rag/pipeline/reranker/](rag/pipeline/reranker/)
+정리하면, `Fast`는 리랭킹 비용을 제거해 응답 속도를 우선하고, `Thinking`은 cross-encoder로 문서 순위를 보정해 속도와 품질을 절충합니다. `Pro`는 LLM 기반 재평가를 사용해 실행 시간은 길지만 치명 오류를 최소화하는 품질 우선 모드입니다.
 
-검색 후보 문서의 순서를 다시 매긴다.
+## 7) 기술 스택
 
-- no-op reranker
-- Flashrank/Cohere/LLM score 기반 reranker
-- 최종 문서 수 제한
+**Language & Runtime**
 
-### [rag/evaluator.py](rag/evaluator.py)
+- Python 3.11+
+- uv
 
-검색과 답변 품질을 점검하는 모듈이다.
+**RAG / LLM**
 
-- 샘플 질문셋 기반 테스트
-- 검색 적중 여부 확인
-- 답변 정확도와 출처 확인
-- 문서 밖 질문에 대한 거절 품질 확인
+- LangChain
+- LangSmith
+- OpenAI
+- Upstage
+- LlamaParse
+- BGE Embedding
+- Cross Encoder / Flashrank / LLM Score Reranker
 
-### [docs/rag-quick-guide.md](docs/rag-quick-guide.md)
+**Vectorstore & Cache**
 
-허접 버전 RAG를 만들 때 무엇을 우선 봐야 하는지 정리한 메모다.  
-설계 기준이나 구현 체크리스트로 참고하면 된다.
+- Chroma
+- Redis
+- SQLite Query Embedding Cache
 
-## 데이터 경로
+**Parsing & Data**
 
-- 원본 문서: [data/raw/230630_자동차사고 과실비율 인정기준_최종.pdf](data/raw/230630_%EC%9E%90%EB%8F%99%EC%B0%A8%EC%82%AC%EA%B3%A0%20%EA%B3%BC%EC%8B%A4%EB%B9%84%EC%9C%A8%20%EC%9D%B8%EC%A0%95%EA%B8%B0%EC%A4%80_%EC%B5%9C%EC%A2%85.pdf)
-- 벡터스토어 저장 위치: `data/vectorstore/`
-- pdfplumber 벡터스토어: `data/vectorstore/pdfplumber/`
-- LlamaParse 벡터스토어: `data/vectorstore/llamaparser/`
-- LlamaParse markdown 저장 위치: `data/llama_md/main_pdf/`
+- pdfplumber
+- PyMuPDF
+- LlamaParse
+- Upstage Document Parse
 
-`data/vectorstore/`는 로컬 색인 결과물이 저장되는 위치이며 `.gitignore`에 포함되어 있다.
+**UI**
 
-LlamaParse 전략의 색인 우선순위는 아래 순서다.
+- Streamlit
 
-1. `data/vectorstore/llamaparser/`에 기존 DB가 있으면 그대로 사용한다.
-2. DB가 없고 `data/llama_md/main_pdf/*.md`가 있으면 markdown 파일로 청킹과 임베딩을 진행한다.
-3. DB와 markdown 파일이 모두 없을 때만 PDF를 LlamaParse로 파싱하고, 페이지별 markdown을 저장한다.
+# 2. 설계
 
-## 구현 기준
+## 1) 아키텍처
 
-이 프로젝트는 아래 원칙으로 MVP를 만든다.
+![MDM RAG Architecture](img/mdm-rag-architecture.png)
 
-- 처음엔 문서 1개로 시작한다.
-- 문서 로더는 전략으로 분리해 `pdfplumber`와 `LlamaParse`를 바꿔 쓸 수 있게 한다.
-- 검색은 복잡하게 가지 않고 벡터 검색 + `top-k`부터 시작한다.
-- 청크 메타데이터에 `source`, `page`, `parser`를 남긴다.
-- 답변은 문맥 기반으로만 하게 하고, 근거가 없으면 모른다고 하게 만든다.
-- 결과에는 출처를 같이 보여준다.
-- "잘 되는 느낌"이 아니라 샘플 질문셋으로 평가한다.
-
-## 추천 구현 순서
-
-1. `rag/loader/`에서 PDF 로더 전략 구현
-2. `chunker.py`에서 청킹 구현
-3. `indexer.py`에서 임베딩 및 저장 구현
-4. `retriever.py`에서 검색 구현
-5. `main.py`에서 전체 흐름 연결
-6. `evaluator.py`에서 샘플 질문 평가 추가
-
-## 참고
-
-- RAG 체크리스트 문서: [docs/rag-quick-guide.md](docs/rag-quick-guide.md)
-
-## Git 컨벤션
-
-이 프로젝트는 초반 MVP 단계이므로 복잡한 규칙보다 일관성을 우선한다.
-
-### 브랜치 규칙
-
-- 기본 브랜치는 `master`를 사용한다.
-- 기능 작업은 가능하면 작업 브랜치를 따서 진행한다.
-- 브랜치 이름은 아래 형식을 권장한다.
+MDM은 문서 처리와 사용자 질의 처리를 분리한 RAG 구조입니다. 오프라인에서는 기준 PDF를 파싱, 청킹, 임베딩해 Vectorstore에 저장하고, 온라인에서는 사용자 입력을 Router와 Intake로 정리한 뒤 Retriever와 Reranker를 거쳐 근거 기반 답변을 생성합니다. Parser, Chunker, Embedding, Retriever, Reranker를 전략 레이어로 분리해 조합별 실험과 품질 비교가 가능하도록 설계했습니다.
 
 ```text
-feature/<short-name>
-fix/<short-name>
-docs/<short-name>
-refactor/<short-name>
-test/<short-name>
+사용자 입력
+   ↓
+Intake / Router
+   ↓
+질의 정규화 및 검색 슬롯 추출
+   ↓
+Loader → Chunker → Embedding → Vectorstore
+   ↓
+Retriever → Reranker
+   ↓
+LLM Answer Generation
+   ↓
+Streamlit UI / LangSmith Trace / Evaluation Dashboard
 ```
 
-예:
+### 오프라인 문서 처리 흐름
 
-- `feature/pdf-loader`
-- `fix/chunk-overlap-bug`
-- `docs/update-readme`
+![Offline Ingestion Pipeline](img/offline-ingestion-pipeline.png)
 
-### 커밋 메시지 규칙
+기준 PDF를 로드한 뒤 `pdfplumber`, `LlamaParse`, `Upstage` 중 선택한 파서로 문서 구조와 메타데이터를 추출합니다. 이후 청킹 전략을 적용하고 임베딩을 생성해 ChromaDB에 저장합니다. 이 단계에서 생성된 청크, 메타데이터, 임베딩은 온라인 검색의 기준 데이터로 사용됩니다.
 
-커밋 메시지는 한 줄만 봐도 무엇을 했는지 알 수 있게 쓴다.
+### 온라인 질의 처리 흐름
 
-권장 형식:
+![Online Query Pipeline](img/online-query-pipeline.png)
+
+사용자 입력은 Router를 통해 일반 대화와 사고 분석 경로로 나뉩니다. 사고 분석 경로에서는 Intake, 질의 정규화, 메타데이터 필터링, 검색, 재순위화, 답변 생성을 순서대로 수행하며, LangSmith Trace와 평가 결과를 통해 단계별 품질을 확인합니다.
+
+### Retriever & Reranker 전략 구조
+
+![Retriever and Reranker Strategy Architecture](img/retriever-reranker-architecture.png)
+
+검색기와 리랭커는 공통 인터페이스와 설정 기반 wiring으로 분리되어 있습니다. 따라서 기존 파이프라인을 크게 수정하지 않고 `similarity`, `parent`, `ensemble_parent`, `multiquery` 같은 검색 전략과 `none`, `flashrank`, `cross-encoder`, `llm-score` 같은 재순위화 전략을 교체하며 정확도, 속도, 비용의 trade-off를 비교할 수 있습니다.
+
+## 2) 주요 모듈
+
+- [main.py](main.py): Streamlit 채팅 UI 진입점
+- [config.py](config.py): 기본 모델, 경로, Retriever/Reranker 설정 관리
+- [rag/loader/](rag/loader): PDF 파서별 문서 로더 전략
+- [rag/chunkers/](rag/chunkers): 청킹 전략 구현
+- [rag/embeddings/](rag/embeddings): 임베딩 Provider 및 쿼리 캐시
+- [rag/pipeline/retriever/](rag/pipeline/retriever): 검색 전략 구현
+- [rag/pipeline/reranker/](rag/pipeline/reranker): 검색 후보 재순위화
+- [rag/service/intake/](rag/service/intake): 사고 정보 수집, 정규화, 추가 질문
+- [rag/service/conversation/](rag/service/conversation): 대화 흐름 및 라우팅
+- [rag/service/analysis/](rag/service/analysis): 검색 기반 사고 분석 및 답변 생성
+- [evaluation/](evaluation): Retrieval/Decision 평가와 대시보드
+
+## 3) 데이터 흐름
+
+1. 기준 PDF를 Parser 전략에 따라 문서로 변환합니다.
+2. 문서를 Chunker 전략에 따라 검색 가능한 단위로 나눕니다.
+3. 청크를 임베딩해 Vectorstore에 저장합니다.
+4. 사용자의 사고 설명을 Intake 단계에서 구조화하고 검색 질의로 정규화합니다.
+5. Retriever가 후보 문서를 찾고 Reranker가 최종 근거 문서를 선별합니다.
+6. LLM이 근거 문서 기반으로 과실 분석 답변을 생성합니다.
+7. 결과는 Streamlit UI에 표시되고 LangSmith 및 로컬 평가 결과로 검증됩니다.
+
+# 3. 설치 및 사용법
+
+## 1) 환경 설정
+
+```bash
+git clone https://github.com/hk-llm-middle-project/MDM.git
+cd MDM
+uv sync
+cp .env.example .env
+```
+
+`.env`에는 사용하는 Provider에 맞게 API Key를 설정합니다.
+
+```text
+OPENAI_API_KEY=
+LANGSMITH_API_KEY=
+LLAMA_CLOUD_API_KEY=
+GOOGLE_API_KEY=
+BGE_API_KEY=
+BGE_BASE_URL=
+```
+
+## 2) Redis 실행
+
+멀티턴 세션 저장을 Redis로 사용할 경우 아래 명령어로 실행합니다.
+
+```bash
+docker compose up -d redis
+```
+
+메모리 기반 세션 저장소만 사용할 경우 `.env`에서 `SESSION_STORE_BACKEND=memory`로 설정하면 됩니다.
+
+## 3) Streamlit 앱 실행
+
+```bash
+uv run streamlit run main.py
+```
+
+## 4) 평가 실행
+
+Retrieval 평가:
+
+```bash
+uv run python evaluation/evaluate_retrieval_langsmith.py --preset all
+```
+
+Decision 평가:
+
+```bash
+uv run python evaluation/evaluate_decision_suites.py --suite all
+```
+
+평가 대시보드:
+
+```bash
+uv run streamlit run evaluation/dashboard/app.py
+```
+
+# 4. 협업
+
+## 1) Git 브랜치
+
+- `master`: 기본 브랜치
+- `dev`: 통합 개발 브랜치
+- `dev-lee`: Intake, 대화 흐름, RAG 서비스, 캐시 및 세션 관리
+- `dev-cho`: 문서 파싱, 청킹, 임베딩, 평가 및 대시보드
+- `dev-ann`: Streamlit UI/UX 및 검색 결과 표시 개선
+
+## 2) Commit 메시지
 
 ```text
 type: summary
 ```
 
-사용할 `type` 예시:
+사용한 주요 타입:
 
 - `feat`: 기능 추가
 - `fix`: 버그 수정
 - `docs`: 문서 수정
-- `refactor`: 동작 변경 없는 구조 개선
+- `refactor`: 구조 개선
 - `test`: 테스트 추가/수정
-- `chore`: 설정, 의존성, 기타 작업
+- `chore`: 설정, 의존성, 산출물 정리
 
-예:
 
-```text
-feat: add pdf loader for accident ratio guide
-fix: preserve page metadata during chunking
-docs: document rag project structure in readme
-chore: ignore local vectorstore artifacts
-```
+## 3) 품질 관리
 
-### 커밋 단위
-
-- 하나의 커밋에는 하나의 의도를 담는다.
-- 문서 수정과 기능 수정은 가능하면 분리한다.
-- 동작 변경이 있으면 관련 설정이나 문서도 같이 반영한다.
-- 의미 없는 중간 커밋보다는 나중에 봐도 이해되는 커밋을 남긴다.
-
-### PR 규칙
-
-원격 저장소를 쓰게 되면 PR은 아래 기준으로 작성한다.
-
-- 제목만 보고 변경 목적이 보여야 한다.
-- 본문에는 `무엇을`, `왜`, `어떻게 확인했는지`를 짧게 적는다.
-- 큰 PR 하나보다 작은 PR 여러 개가 낫다.
-- 리뷰어가 바로 확인할 수 있게 테스트 방법이나 실행 예시를 남긴다.
-
-### .gitignore 원칙
-
-아래와 같은 로컬 파일은 커밋하지 않는다.
-
-- `.env`
-- `.venv/`
-- `data/vectorstore/`
-- 개인 실험 산출물, 캐시 파일, 로컬 로그
-
-민감 정보나 로컬 실행 결과는 저장소에 올리지 않는 것을 기본 원칙으로 한다.
+- LangSmith Trace로 질의별 검색·답변 흐름을 추적합니다.
+- Retrieval/Decision 평가 스크립트로 파이프라인 조합별 품질을 비교합니다.
+- 평가 결과는 `evaluation/results/`에 CSV와 summary JSON으로 저장합니다.
+- Streamlit 대시보드에서 실패 케이스와 지표를 확인하며 개선합니다.
