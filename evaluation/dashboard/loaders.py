@@ -52,7 +52,11 @@ class DashboardResults:
     summary: pd.DataFrame
     examples: pd.DataFrame
     metrics: pd.DataFrame
+    config: dict[str, Any] | None = None
     warnings: tuple[str, ...] = ()
+
+
+DASHBOARD_CONFIG_FILENAMES = ("dashboard.json", ".dashboard.json")
 
 
 def _read_summary(path: Path) -> dict[str, Any]:
@@ -122,10 +126,39 @@ def discover_result_bundles(
     return bundles
 
 
+def _read_dashboard_config(
+    result_dir: Path,
+    warning_messages: list[str] | None = None,
+) -> dict[str, Any] | None:
+    """Read optional per-result-set dashboard configuration."""
+
+    for filename in DASHBOARD_CONFIG_FILENAMES:
+        config_path = result_dir / filename
+        if not config_path.exists():
+            continue
+        try:
+            payload = json.loads(config_path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+            message = f"Skipping invalid dashboard config {config_path.name}: {exc}"
+            logger.warning(message)
+            if warning_messages is not None:
+                warning_messages.append(message)
+            return None
+        if not isinstance(payload, dict):
+            message = f"Skipping invalid dashboard config {config_path.name}: JSON object required"
+            logger.warning(message)
+            if warning_messages is not None:
+                warning_messages.append(message)
+            return None
+        return payload
+    return None
+
+
 def load_results(result_dir: Path) -> DashboardResults:
     """Load all dashboard tables from a local result directory."""
 
     warnings: list[str] = []
+    config = _read_dashboard_config(result_dir, warning_messages=warnings)
     try:
         bundles = discover_result_bundles(result_dir, warning_messages=warnings)
     except OSError as exc:
@@ -133,6 +166,7 @@ def load_results(result_dir: Path) -> DashboardResults:
             summary=pd.DataFrame(),
             examples=pd.DataFrame(),
             metrics=pd.DataFrame(),
+            config=config,
             warnings=(str(exc),),
         )
 
@@ -147,5 +181,6 @@ def load_results(result_dir: Path) -> DashboardResults:
         summary=summary,
         examples=examples,
         metrics=metrics,
+        config=config,
         warnings=tuple(warnings),
     )

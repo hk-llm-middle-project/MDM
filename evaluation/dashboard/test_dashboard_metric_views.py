@@ -14,7 +14,11 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from evaluation.dashboard import transforms
-from evaluation.dashboard.loaders import discover_result_bundles, discover_result_sets
+from evaluation.dashboard.loaders import (
+    discover_result_bundles,
+    discover_result_sets,
+    load_results,
+)
 from evaluation.dashboard.test_dashboard_support import write_json
 
 
@@ -89,6 +93,135 @@ class DashboardMetricViewTest(unittest.TestCase):
         self.assertEqual(
             metric_comparison.default_group_by_index(options),
             options.index("retriever_reranker"),
+        )
+
+
+    def test_metric_comparison_uses_intake_folder_defaults(self) -> None:
+        from evaluation.dashboard.views import metric_comparison
+
+        available = [
+            "critical_error",
+            "intake_is_sufficient",
+            "party_type_match",
+            "location_match",
+            "missing_fields_match",
+            "follow_up_contains",
+            "forbidden_filter_absent",
+            "intake_overall",
+        ]
+        options = ["run_label", "nickname", "retriever_reranker"]
+
+        self.assertEqual(
+            metric_comparison.default_metric_selection(available, "intake"),
+            [
+                "intake_is_sufficient",
+                "party_type_match",
+                "location_match",
+                "missing_fields_match",
+                "follow_up_contains",
+                "forbidden_filter_absent",
+                "intake_overall",
+            ],
+        )
+        self.assertEqual(
+            metric_comparison.default_group_by_index(options, "intake"),
+            options.index("nickname"),
+        )
+
+    def test_metric_comparison_uses_folder_config_defaults(self) -> None:
+        from evaluation.dashboard.views import metric_comparison
+
+        available = [
+            "diagram_id_hit",
+            "retrieval_relevance",
+            "critical_error",
+            "keyword_coverage",
+            "near_miss_not_above_expected",
+            "execution_time",
+            "intake_overall",
+        ]
+        options = ["run_label", "nickname", "retriever_reranker"]
+        config = {
+            "metrics": [
+                "diagram_id_hit",
+                "retrieval_relevance",
+                "critical_error",
+                "keyword_coverage",
+                "near_miss_not_above_expected",
+                "execution_time",
+            ],
+            "group_by": "nickname",
+        }
+
+        self.assertEqual(
+            metric_comparison.default_metric_selection(
+                available,
+                "compare-cache-final",
+                config,
+            ),
+            [
+                "diagram_id_hit",
+                "retrieval_relevance",
+                "critical_error",
+                "keyword_coverage",
+                "near_miss_not_above_expected",
+                "execution_time",
+            ],
+        )
+        self.assertEqual(
+            metric_comparison.default_group_by_index(
+                options,
+                "compare-cache-final",
+                config,
+            ),
+            options.index("nickname"),
+        )
+
+    def test_load_results_reads_dashboard_config(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_json(
+                root / "dashboard.json",
+                {
+                    "metric_comparison": {
+                        "metrics": ["critical_error", "execution_time"],
+                        "group_by": "nickname",
+                    }
+                },
+            )
+            write_json(
+                root / "run-a.summary.json",
+                {
+                    "nickname": "Fast",
+                    "run_name": "run-a",
+                    "loader_strategy": "llamaparser",
+                    "chunker_strategy": "case-boundary",
+                    "embedding_provider": "bge",
+                    "metrics": {"critical_error": 0.0, "execution_time": 1.2},
+                },
+            )
+
+            results = load_results(root)
+
+        self.assertEqual(
+            results.config,
+            {
+                "metric_comparison": {
+                    "metrics": ["critical_error", "execution_time"],
+                    "group_by": "nickname",
+                }
+            },
+        )
+
+    def test_metric_comparison_does_not_treat_with_intake_as_intake_suite(self) -> None:
+        from evaluation.dashboard.views import metric_comparison
+
+        self.assertEqual(
+            metric_comparison.default_metric_selection(
+                ["critical_error", "intake_overall"],
+                "with_intake",
+            ),
+            ["critical_error"],
         )
 
     def test_metric_comparison_defaults_to_nickname_when_present(self) -> None:

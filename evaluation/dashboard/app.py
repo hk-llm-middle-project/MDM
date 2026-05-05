@@ -120,6 +120,10 @@ def main() -> None:
     summary = results.summary
     examples = results.examples
     metrics = results.metrics
+    dashboard_config = results.config or {}
+    metric_comparison_config = dashboard_config.get("metric_comparison")
+    if not isinstance(metric_comparison_config, dict):
+        metric_comparison_config = None
 
     with st.sidebar:
         selected_loaders = st.multiselect(
@@ -199,7 +203,12 @@ def main() -> None:
     with tabs[1]:
         decision_suites.render(summary, examples, metrics)
     with tabs[2]:
-        metric_comparison.render(summary, metrics)
+        metric_comparison.render(
+            summary,
+            metrics,
+            selected_result_set,
+            config=metric_comparison_config,
+        )
     with tabs[3]:
         metric_matrix.render(summary)
     with tabs[4]:
