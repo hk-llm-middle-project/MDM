@@ -1,0 +1,23 @@
+{
+  "experiment_name": "MDM structured_output eval - local",
+  "dataset_name": "MDM structured_output testset",
+  "testset_path": "/home/uuser/mdm/data/testsets/langsmith/structured_output_eval.jsonl",
+  "evaluation_suite": "structured_output",
+  "run_name": "structured_output-local",
+  "loader_strategy": null,
+  "chunker_strategy": null,
+  "embedding_provider": null,
+  "retriever_strategy": null,
+  "reranker_strategy": null,
+  "row_count": 15,
+  "metrics": {
+    "final_fault_ratio_match": 0.0,
+    "cannot_determine_match": 0.0,
+    "required_evidence_coverage": 0.0,
+    "party_role_coverage": 0.0,
+    "applicable_modifier_coverage": 0.0,
+    "non_applicable_modifier_coverage": 0.0,
+    "reference_diagram_hit": 0.0,
+    "structured_output_overall": 0.0
+  }
+}

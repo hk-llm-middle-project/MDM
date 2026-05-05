@@ -1,0 +1,18 @@
+{
+  "experiment_name": "MDM router eval - local",
+  "dataset_name": "MDM router testset",
+  "testset_path": "/home/uuser/mdm/data/testsets/langsmith/router_eval.jsonl",
+  "evaluation_suite": "router",
+  "run_name": "router-local",
+  "loader_strategy": null,
+  "chunker_strategy": null,
+  "embedding_provider": null,
+  "retriever_strategy": null,
+  "reranker_strategy": null,
+  "row_count": 15,
+  "metrics": {
+    "route_type_match": 1.0,
+    "reason_category_match": 0.0,
+    "router_overall": 0.5
+  }
+}

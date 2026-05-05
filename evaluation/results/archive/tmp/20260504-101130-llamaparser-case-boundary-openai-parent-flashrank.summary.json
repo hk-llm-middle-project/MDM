@@ -1,0 +1,25 @@
+{
+  "experiment_name": "MDM retrieval eval - llamaparser-case-boundary-openai-parent-flashrank-local",
+  "dataset_name": "MDM retrieval testset - retrieval_eval",
+  "testset_path": "/home/uuser/mdm/data/testsets/langsmith/retrieval_eval.jsonl",
+  "evaluation_suite": "retrieval",
+  "run_name": "llamaparser-case-boundary-openai",
+  "loader_strategy": "llamaparser",
+  "chunker_strategy": "case-boundary",
+  "embedding_provider": "openai",
+  "retriever_strategy": "parent",
+  "reranker_strategy": "flashrank",
+  "final_k": 5,
+  "candidate_k": 30,
+  "row_count": 30,
+  "metrics": {
+    "diagram_id_hit": 0.0,
+    "location_match": 1.0,
+    "party_type_match": 1.0,
+    "chunk_type_match": 1.0,
+    "keyword_coverage": 0.0,
+    "near_miss_not_above_expected": 0.0,
+    "retrieval_relevance": 0.6000000000000001,
+    "critical_error": 0.9666666666666667
+  }
+}

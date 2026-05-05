@@ -1,0 +1,13 @@
+{
+  "metric_comparison": {
+    "group_by": "run_label",
+    "metrics": [
+      "critical_error",
+      "diagram_id_hit",
+      "retrieval_relevance",
+      "keyword_coverage",
+      "near_miss_not_above_expected",
+      "execution_time"
+    ]
+  }
+}
