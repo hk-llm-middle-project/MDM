@@ -20,6 +20,7 @@ from config import (
     DEFAULT_ENSEMBLE_CANDIDATE_K,
     DEFAULT_ENSEMBLE_USE_CHUNK_ID,
     DEFAULT_LOADER_STRATEGY,
+    DEFAULT_MODE,
     DEFAULT_RERANKER_CANDIDATE_K,
     DEFAULT_RERANKER_FINAL_K,
     DEFAULT_RERANKER_STRATEGY,
@@ -27,6 +28,7 @@ from config import (
     ENSEMBLE_CANDIDATE_K_OPTIONS,
     ENSEMBLE_ID_KEY,
     ENSEMBLE_RETRIEVER_STRATEGIES,
+    MODE_PRESETS,
 )
 from rag.embeddings import EMBEDDING_STRATEGIES
 from rag.pipeline.reranker import (
@@ -55,12 +57,6 @@ RETRIEVER_STRATEGY_OPTIONS = tuple(
     strategy for strategy in RETRIEVAL_STRATEGIES if strategy != "vectorstore"
 )
 RERANKER_STRATEGY_OPTIONS = ("none", "cross-encoder", "flashrank", "llm-score")
-MODE_TO_RERANKER = {
-    "fast": "none",
-    "thinking": "cross-encoder",
-    "pro": "llm-score",
-}
-RERANKER_TO_MODE = {value: key for key, value in MODE_TO_RERANKER.items()}
 USER_ID = "local"
 PROJECT_ROOT = Path(__file__).resolve().parent
 MARKDOWN_HEADING_RE = re.compile(r"^(#{1,6})\s+(?!■\s)(.+)$")
@@ -108,6 +104,8 @@ def delete_session_and_select_fallback(store: ConversationStore, session_id: str
 def init_state(store: ConversationStore) -> None:
     if "active_session" not in st.session_state:
         st.session_state.active_session = ensure_active_session(store)
+    if "selected_mode" not in st.session_state:
+        apply_mode_preset(DEFAULT_MODE, store)
     if "loader_strategy" not in st.session_state:
         loader_strategy = store.get_loader_strategy(USER_ID) or DEFAULT_LOADER_STRATEGY
         if loader_strategy not in LOADER_STRATEGY_OPTIONS:
@@ -147,6 +145,25 @@ def normalize_chunker_strategy(chunker_strategy: str, loader_strategy: str) -> s
     return options[0]
 
 
+def apply_mode_preset(mode: str, store: ConversationStore | None = None) -> None:
+    preset = MODE_PRESETS.get(mode, MODE_PRESETS[DEFAULT_MODE])
+    loader_strategy = str(preset["loader_strategy"])
+    st.session_state.selected_mode = mode if mode in MODE_PRESETS else DEFAULT_MODE
+    st.session_state.loader_strategy = loader_strategy
+    st.session_state.chunker_strategy = normalize_chunker_strategy(
+        str(preset["chunker_strategy"]),
+        loader_strategy,
+    )
+    st.session_state.embedding_provider = str(preset["embedding_provider"])
+    st.session_state.retriever_strategy = str(preset["retriever_strategy"])
+    st.session_state.reranker_strategy = str(preset["reranker_strategy"])
+    st.session_state.ensemble_bm25_weight = float(preset["ensemble_bm25_weight"])
+    st.session_state.ensemble_candidate_k = int(preset["ensemble_candidate_k"])
+    st.session_state.ensemble_use_chunk_id = bool(preset["ensemble_use_chunk_id"])
+    if store is not None:
+        store.set_loader_strategy(USER_ID, loader_strategy)
+
+
 def render_sidebar(store: ConversationStore) -> tuple[str, str, str, str, float, int, bool, str]:
     st.sidebar.markdown('<div class="sidebar-title">Sessions</div>', unsafe_allow_html=True)
     if st.sidebar.button("New Session", use_container_width=True):
@@ -181,14 +198,18 @@ def render_sidebar(store: ConversationStore) -> tuple[str, str, str, str, float,
                 st.rerun()
 
     st.sidebar.markdown('<div class="mode-title">Mode</div>', unsafe_allow_html=True)
-    current_mode = RERANKER_TO_MODE.get(
-        st.session_state.get("reranker_strategy", DEFAULT_RERANKER_STRATEGY),
-        "fast",
-    )
-    for mode in MODE_TO_RERANKER:
-        button_label = mode if mode != current_mode else f"✓ {mode}"
-        if st.sidebar.button(button_label, key=f"mode-{mode}", use_container_width=True):
-            st.session_state.reranker_strategy = MODE_TO_RERANKER[mode]
+    current_mode = st.session_state.get("selected_mode", DEFAULT_MODE)
+    if current_mode not in MODE_PRESETS:
+        apply_mode_preset(DEFAULT_MODE, store)
+        current_mode = DEFAULT_MODE
+    for mode in MODE_PRESETS:
+        if st.sidebar.button(
+            mode,
+            key=f"mode-{mode}",
+            type="primary" if mode == current_mode else "secondary",
+            use_container_width=True,
+        ):
+            apply_mode_preset(mode, store)
             st.rerun()
 
     st.session_state.loader_strategy = st.session_state.get(
@@ -529,6 +550,17 @@ def render_app_css() -> None:
   font-weight: 900;
   letter-spacing: 0;
 }
+[data-testid="stSidebar"] button[kind="primary"],
+[data-testid="stSidebar"] button[data-testid="stBaseButton-primary"] {
+  border: 1px solid #dc2626 !important;
+  background: transparent !important;
+  color: inherit !important;
+  box-shadow: none !important;
+}
+[data-testid="stSidebar"] button[kind="primary"] p,
+[data-testid="stSidebar"] button[data-testid="stBaseButton-primary"] p {
+  font-weight: 900 !important;
+}
 .top-title {
   padding: 1.3rem 0 0.75rem;
   margin-bottom: 1rem;
@@ -605,6 +637,7 @@ def render_app_css() -> None:
   color: inherit;
   opacity: 0.54;
   margin-top: -0.25rem;
+  margin-bottom: 1.35rem;
   padding-top: 0;
   font-weight: 750;
 }
@@ -613,6 +646,11 @@ def render_app_css() -> None:
   grid-template-columns: repeat(3, minmax(74px, 1fr));
   gap: 1.05rem 0.9rem;
   margin: 0.4rem 0 1.2rem;
+}
+.donut-item {
+  display: grid;
+  justify-items: center;
+  gap: 0.45rem;
 }
 .donut {
   --percent: 0;
@@ -636,6 +674,12 @@ def render_app_css() -> None:
   font-size: 0.92rem;
   font-weight: 900;
 }
+.rank-label {
+  color: inherit;
+  font-size: 0.88rem;
+  font-weight: 900;
+  opacity: 0.82;
+}
 .right-title {
   margin: 0.25rem 0 0.65rem;
   color: inherit;
@@ -643,14 +687,62 @@ def render_app_css() -> None:
   font-weight: 900;
 }
 .reference-image {
-  margin: 0 0 0.95rem;
+  display: block;
+  margin: 0 0 0.35rem;
   animation: fadeSlideIn 420ms ease both;
+  cursor: zoom-in;
+}
+.reference-rank {
+  margin: 0 0 1rem;
+  color: inherit;
+  font-size: 0.9rem;
+  font-weight: 900;
+  opacity: 0.82;
+  text-align: center;
 }
 .reference-image img {
   display: block;
   width: 100%;
   height: auto;
   border-radius: 6px;
+}
+.reference-lightbox-toggle {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.reference-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: rgba(0, 0, 0, 0.78);
+  cursor: zoom-out;
+}
+.reference-lightbox-toggle:checked + .reference-image + .reference-rank + .reference-lightbox {
+  display: flex;
+}
+.reference-lightbox img {
+  display: block;
+  width: auto;
+  max-width: min(94vw, 1200px);
+  max-height: 90vh;
+  height: auto;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
+}
+.reference-lightbox-close {
+  position: absolute;
+  top: 1rem;
+  right: 1.2rem;
+  color: #ffffff;
+  font-size: 2rem;
+  line-height: 1;
+  font-weight: 900;
 }
 .question-history {
   margin: 0.2rem 0 1.2rem;
@@ -691,6 +783,7 @@ def render_app_css() -> None:
   border-radius: 999px;
 }
 [data-testid="stSpinner"] > div {
+  margin-top: 0.35rem;
   color: inherit;
   font-weight: 850;
 }
@@ -815,21 +908,40 @@ def render_answer_area(metadata: dict[str, object], answer: str | None, messages
         )
 
 
+def context_match_percent(context: dict[str, object]) -> int:
+    value = context.get("match_percent", 0)
+    if not isinstance(value, int):
+        return 0
+    return max(0, min(100, value))
+
+
+def top_ranked_contexts(contexts: list[dict[str, object]], limit: int = 3) -> list[dict[str, object]]:
+    return sorted(
+        contexts,
+        key=context_match_percent,
+        reverse=True,
+    )[:limit]
+
+
 def render_donut_panel(contexts: list[dict[str, object]]) -> None:
     st.markdown('<div class="right-title">● Match Rate</div>', unsafe_allow_html=True)
-    percentages = []
-    for index in range(5):
-        if index < len(contexts):
-            value = contexts[index].get("match_percent", 0)
-            percentages.append(value if isinstance(value, int) else 0)
-        else:
-            percentages.append(0)
+    rank_labels = ("1st", "2nd", "3rd")
+    ranked_contexts = top_ranked_contexts(contexts, limit=3)
+    percentages = [
+        context_match_percent(ranked_contexts[index]) if index < len(ranked_contexts) else 0
+        for index in range(3)
+    ]
 
     donut_html = ['<div class="donut-grid">']
-    for percent in percentages:
+    for percent, rank_label in zip(percentages, rank_labels, strict=True):
         safe_percent = max(0, min(100, int(percent)))
         donut_html.append(
-            f'<div class="donut" style="--percent: {safe_percent};" data-label="{safe_percent}%"></div>'
+            f"""
+<div class="donut-item">
+  <div class="donut" style="--percent: {safe_percent};" data-label="{safe_percent}%"></div>
+  <div class="rank-label">{rank_label}</div>
+</div>
+"""
         )
     donut_html.append("</div>")
     st.markdown("".join(donut_html), unsafe_allow_html=True)
@@ -868,9 +980,11 @@ def read_image_as_png_bytes(image_path: Path) -> bytes | None:
 
 
 def render_reference_images(contexts: list[dict[str, object]]) -> None:
-    resolved_images: list[Path] = []
+    rank_labels = ("1st", "2nd", "3rd")
+    resolved_images: list[tuple[str, Path]] = []
     seen_images: set[str] = set()
-    for context in contexts:
+    ranked_contexts = top_ranked_contexts(contexts, limit=3)
+    for rank_label, context in zip(rank_labels, ranked_contexts, strict=False):
         for image_path in get_context_image_paths(context):
             resolved_image_path = resolve_image_path(image_path, context.get("source"))
             if resolved_image_path is None:
@@ -879,22 +993,30 @@ def render_reference_images(contexts: list[dict[str, object]]) -> None:
             if resolved_image_key in seen_images:
                 continue
             seen_images.add(resolved_image_key)
-            resolved_images.append(resolved_image_path)
+            resolved_images.append((rank_label, resolved_image_path))
+            break
 
     if not resolved_images:
         return
 
     st.markdown('<div class="right-title">● Reference Images</div>', unsafe_allow_html=True)
-    for image_path in resolved_images:
+    for index, (rank_label, image_path) in enumerate(resolved_images, start=1):
         image_bytes = read_image_as_png_bytes(image_path)
         if image_bytes is None:
             continue
         image_data = base64.b64encode(image_bytes).decode("ascii")
+        lightbox_id = f"reference-lightbox-{index}"
         st.markdown(
             f"""
-<div class="reference-image">
+<input id="{lightbox_id}" class="reference-lightbox-toggle" type="checkbox">
+<label class="reference-image" for="{lightbox_id}">
   <img src="data:image/png;base64,{image_data}" alt="Reference image">
-</div>
+</label>
+<div class="reference-rank">{rank_label}</div>
+<label class="reference-lightbox" for="{lightbox_id}">
+  <span class="reference-lightbox-close">×</span>
+  <img src="data:image/png;base64,{image_data}" alt="Expanded reference image">
+</label>
 """,
             unsafe_allow_html=True,
         )
@@ -932,23 +1054,11 @@ def render_chat(
         render_right_panel(assistant_metadata)
 
     question = st.chat_input("사고 내용을 입력하세요")
-    if not question:
-        return
-
-    trace_context = TraceContext(
-        thread_id=active_session,
-        session_id=active_session,
-        user_id=USER_ID,
-        tags=(
-            "streamlit",
-            "mdm",
-            loader_strategy,
-            chunker_strategy,
-            embedding_provider,
-            retriever_strategy,
-            reranker_strategy,
-        ),
-        metadata={
+    if question:
+        store.append_message(USER_ID, active_session, "user", question)
+        st.session_state.pending_request = {
+            "session_id": active_session,
+            "question": question,
             "loader_strategy": loader_strategy,
             "chunker_strategy": chunker_strategy,
             "embedding_provider": embedding_provider,
@@ -957,33 +1067,92 @@ def render_chat(
             "ensemble_candidate_k": ensemble_candidate_k,
             "ensemble_use_chunk_id": ensemble_use_chunk_id,
             "reranker_strategy": reranker_strategy,
+        }
+        st.rerun()
+
+    pending_request = st.session_state.get("pending_request")
+    if not isinstance(pending_request, dict):
+        return
+    if pending_request.get("session_id") != active_session:
+        return
+
+    pending_question = str(pending_request.get("question", ""))
+    request_loader_strategy = str(pending_request.get("loader_strategy", loader_strategy))
+    request_chunker_strategy = str(pending_request.get("chunker_strategy", chunker_strategy))
+    request_embedding_provider = str(
+        pending_request.get("embedding_provider", embedding_provider)
+    )
+    request_retriever_strategy = str(
+        pending_request.get("retriever_strategy", retriever_strategy)
+    )
+    request_ensemble_bm25_weight = float(
+        pending_request.get("ensemble_bm25_weight", ensemble_bm25_weight)
+    )
+    request_ensemble_candidate_k = int(
+        pending_request.get("ensemble_candidate_k", ensemble_candidate_k)
+    )
+    request_ensemble_use_chunk_id = bool(
+        pending_request.get("ensemble_use_chunk_id", ensemble_use_chunk_id)
+    )
+    request_reranker_strategy = str(
+        pending_request.get("reranker_strategy", reranker_strategy)
+    )
+    chat_history = list(messages)
+    if (
+        chat_history
+        and chat_history[-1].role == "user"
+        and chat_history[-1].content == pending_question
+    ):
+        chat_history = chat_history[:-1]
+
+    trace_context = TraceContext(
+        thread_id=active_session,
+        session_id=active_session,
+        user_id=USER_ID,
+        tags=(
+            "streamlit",
+            "mdm",
+            request_loader_strategy,
+            request_chunker_strategy,
+            request_embedding_provider,
+            request_retriever_strategy,
+            request_reranker_strategy,
+        ),
+        metadata={
+            "loader_strategy": request_loader_strategy,
+            "chunker_strategy": request_chunker_strategy,
+            "embedding_provider": request_embedding_provider,
+            "retriever_strategy": request_retriever_strategy,
+            "ensemble_bm25_weight": request_ensemble_bm25_weight,
+            "ensemble_candidate_k": request_ensemble_candidate_k,
+            "ensemble_use_chunk_id": request_ensemble_use_chunk_id,
+            "reranker_strategy": request_reranker_strategy,
         },
     )
 
-    store.append_message(USER_ID, active_session, "user", question)
     with st.spinner("키워드 추출 중"):
         try:
             result = answer_question_with_intake(
-                question,
+                pending_question,
                 intake_state=store.get_intake_state(
                     USER_ID,
                     active_session,
                 ),
-                loader_strategy=loader_strategy,
-                chunker_strategy=chunker_strategy,
-                chat_history=messages,
-                embedding_provider=embedding_provider,
+                loader_strategy=request_loader_strategy,
+                chunker_strategy=request_chunker_strategy,
+                chat_history=chat_history,
+                embedding_provider=request_embedding_provider,
                 pipeline_config=build_pipeline_config(
-                    retriever_strategy,
-                    ensemble_bm25_weight,
-                    ensemble_candidate_k,
-                    ensemble_use_chunk_id,
-                    reranker_strategy,
+                    request_retriever_strategy,
+                    request_ensemble_bm25_weight,
+                    request_ensemble_candidate_k,
+                    request_ensemble_use_chunk_id,
+                    request_reranker_strategy,
                 ),
                 trace_context=trace_context,
             )
             answer = result.answer
-            assistant_metadata = build_assistant_metadata(result, question)
+            assistant_metadata = build_assistant_metadata(result, pending_question)
             store.set_intake_state(USER_ID, active_session, result.intake_state)
         except Exception:
             logger.exception("Failed to answer question")
@@ -997,6 +1166,7 @@ def render_chat(
         answer,
         metadata=assistant_metadata,
     )
+    st.session_state.pop("pending_request", None)
     st.rerun()
 
 

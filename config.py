@@ -50,6 +50,39 @@ DEFAULT_ENSEMBLE_USE_CHUNK_ID = True
 ENSEMBLE_ID_KEY = "chunk_id"
 
 DEFAULT_EMBEDDING_PROVIDER = "bge"
+DEFAULT_MODE = "fast"
+MODE_PRESETS = {
+    "fast": {
+        "loader_strategy": "llamaparser",
+        "chunker_strategy": "case-boundary",
+        "embedding_provider": DEFAULT_EMBEDDING_PROVIDER,
+        "retriever_strategy": "ensemble",
+        "reranker_strategy": "none",
+        "ensemble_bm25_weight": 0.5,
+        "ensemble_candidate_k": DEFAULT_ENSEMBLE_CANDIDATE_K,
+        "ensemble_use_chunk_id": DEFAULT_ENSEMBLE_USE_CHUNK_ID,
+    },
+    "thinking": {
+        "loader_strategy": "llamaparser",
+        "chunker_strategy": "case-boundary",
+        "embedding_provider": DEFAULT_EMBEDDING_PROVIDER,
+        "retriever_strategy": "parent",
+        "reranker_strategy": "cross-encoder",
+        "ensemble_bm25_weight": DEFAULT_ENSEMBLE_BM25_WEIGHT,
+        "ensemble_candidate_k": DEFAULT_ENSEMBLE_CANDIDATE_K,
+        "ensemble_use_chunk_id": DEFAULT_ENSEMBLE_USE_CHUNK_ID,
+    },
+    "pro": {
+        "loader_strategy": "upstage",
+        "chunker_strategy": "custom",
+        "embedding_provider": DEFAULT_EMBEDDING_PROVIDER,
+        "retriever_strategy": "ensemble_parent",
+        "reranker_strategy": "llm-score",
+        "ensemble_bm25_weight": DEFAULT_ENSEMBLE_BM25_WEIGHT,
+        "ensemble_candidate_k": DEFAULT_ENSEMBLE_CANDIDATE_K,
+        "ensemble_use_chunk_id": DEFAULT_ENSEMBLE_USE_CHUNK_ID,
+    },
+}
 OPENAI_EMBEDDING_MODEL = "text-embedding-3-small"
 GOOGLE_EMBEDDING_MODEL = "models/gemini-embedding-001"
 LLM_MODEL = "gpt-5-mini"
