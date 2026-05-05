@@ -150,7 +150,7 @@ def evaluate_router_rows(
         expected_reason = row.get("expected_reason_category")
         reason_score = None
         if expected_reason and record["error"] is None:
-            reason_score = int(str(expected_reason) in str(outputs.get("reason") or ""))
+            reason_score = int(str(outputs.get("reason") or "").strip() == str(expected_reason).strip())
         elif expected_reason:
             reason_score = 0
         _score(record, "route_type_match", route_score)
