@@ -583,6 +583,97 @@ class BasicRagTest(unittest.TestCase):
         self.assertIs(first, second)
         bm25_mock.assert_called_once()
 
+    def test_ensemble_applies_metadata_filters_to_bm25_and_dense(self):
+        from rag.pipeline.retriever.strategies.ensemble import retrieve_with_ensemble
+
+        matching = Document(
+            page_content="자전거 교차로 사고",
+            metadata={"chunk_id": 1, "party_type": "자전거", "location": "교차로 사고"},
+        )
+        non_matching = Document(
+            page_content="자동차 교차로 사고",
+            metadata={"chunk_id": 2, "party_type": "자동차", "location": "교차로 사고"},
+        )
+        vectorstore = MagicMock()
+        dense_retriever = MagicMock(name="dense_retriever")
+        vectorstore.as_retriever.return_value = dense_retriever
+        components = build_retrieval_components(
+            vectorstore,
+            source_documents=[matching, non_matching],
+        )
+        filters = {"$and": [{"party_type": "자전거"}, {"location": "교차로 사고"}]}
+
+        with (
+            patch("rag.pipeline.retriever.strategies.ensemble._build_bm25_retriever") as bm25_mock,
+            patch("rag.pipeline.retriever.strategies.ensemble.EnsembleRetriever") as ensemble_mock,
+            patch("rag.pipeline.retriever.strategies.ensemble._invoke_retriever", return_value=[matching]),
+        ):
+            bm25_mock.return_value = MagicMock(name="bm25_retriever")
+            ensemble_mock.return_value = MagicMock(name="ensemble_retriever")
+
+            results = retrieve_with_ensemble(
+                components,
+                "query",
+                k=5,
+                filters=filters,
+            )
+
+        self.assertEqual(results, [matching])
+        bm25_documents = bm25_mock.call_args.args[0]
+        self.assertEqual(bm25_documents, [matching])
+        vectorstore.as_retriever.assert_called_once()
+        dense_search_kwargs = vectorstore.as_retriever.call_args.kwargs["search_kwargs"]
+        self.assertEqual(dense_search_kwargs["filter"], filters)
+
+    def test_ensemble_parent_merges_metadata_filter_with_child_filter(self):
+        from rag.pipeline.retriever.strategies.ensemble_parent import (
+            retrieve_with_ensemble_parent_documents,
+        )
+
+        parent = Document(
+            page_content="자전거 교차로 parent",
+            metadata={
+                "chunk_id": 10,
+                "chunk_type": "parent",
+                "diagram_id": "거5-1",
+                "party_type": "자전거",
+                "location": "교차로 사고",
+            },
+        )
+        child = Document(
+            page_content="자전거 교차로 child",
+            metadata={
+                "chunk_id": 11,
+                "parent_id": 10,
+                "chunk_type": "child",
+                "diagram_id": "거5-1",
+                "party_type": "자전거",
+                "location": "교차로 사고",
+            },
+        )
+        components = build_retrieval_components(
+            MagicMock(),
+            source_documents=[parent, child],
+        )
+        filters = {"party_type": "자전거"}
+
+        with patch(
+            "rag.pipeline.retriever.strategies.ensemble_parent.retrieve_with_ensemble",
+            return_value=[child],
+        ) as ensemble_mock:
+            results = retrieve_with_ensemble_parent_documents(
+                components,
+                "query",
+                k=3,
+                filters=filters,
+            )
+
+        self.assertEqual(results, [parent])
+        self.assertEqual(
+            ensemble_mock.call_args.kwargs["filters"],
+            {"$and": [{"party_type": "자전거"}, {"chunk_type": "child"}]},
+        )
+
     def test_vectorstore_exists_ignores_placeholder_files(self):
         self.assertFalse(vectorstore_exists(Path("missing-vectorstore")))
 
@@ -1298,6 +1389,91 @@ class BasicRagTest(unittest.TestCase):
         self.assertIn("대로 소로 교차로", priority_query)
         self.assertIn("중앙선 침범 사고", centerline_query)
 
+    def test_normalize_metadata_response_treats_literal_null_as_missing(self):
+        decision = normalize_metadata_response(
+            {
+                "party_type": "자동차",
+                "location": "교차로 사고",
+                "retrieval_query": "null",
+                "query_slots": {
+                    "a_signal": "null",
+                    "b_signal": "None",
+                    "a_movement": "직진",
+                    "b_movement": "null",
+                },
+                "confidence": {
+                    "party_type": 1,
+                    "location": 1,
+                    "retrieval_query": 1,
+                },
+            }
+        )
+
+        self.assertIsNone(decision.search_metadata.retrieval_query)
+        self.assertIsNone(decision.search_metadata.query_slots.a_signal)
+        self.assertIsNone(decision.search_metadata.query_slots.b_signal)
+        self.assertEqual(decision.search_metadata.query_slots.a_movement, "직진")
+        self.assertIsNone(decision.search_metadata.query_slots.b_movement)
+
+    def test_normalize_retrieval_query_terms_removes_literal_null_tokens(self):
+        query = normalize_retrieval_query_terms(
+            "자전거를 같은 차로에서 뒤따르던 자동차가 추돌했어요.",
+            UserSearchMetadata(
+                party_type="자전거",
+                location="같은 방향 진행차량 상호간의 사고",
+                retrieval_query="null, null추돌 대 nullnull, 추돌사고",
+                query_slots=QuerySlots(
+                    a_movement="null",
+                    b_movement="추돌",
+                    special_condition="null",
+                    relation="상대차량이 맞은편에서 진입",
+                ),
+            ),
+        )
+
+        self.assertEqual(query, "추돌사고, 자전거 대 자동차")
+        self.assertNotIn("null", query)
+        self.assertNotIn("상대차량이 맞은편에서 진입", query)
+
+    def test_normalize_retrieval_query_terms_limits_vehicle_relation_to_car_cases(self):
+        pedestrian_query = normalize_retrieval_query_terms(
+            "보행자는 녹색불에 정상 횡단했고 차가 적색신호로 들어와 충격했습니다.",
+            UserSearchMetadata(
+                party_type="보행자",
+                location="횡단보도 내",
+                retrieval_query="녹색 대 적색, 보행자 정상 횡단, 횡단보도 내 사고",
+                query_slots=QuerySlots(relation="상대차량이 맞은편에서 진입"),
+            ),
+        )
+
+        self.assertIn("보행자 정상 횡단", pedestrian_query)
+        self.assertNotIn("상대차량이 맞은편에서 진입", pedestrian_query)
+
+    def test_normalize_retrieval_query_terms_corrects_bicycle_left_turn_signal_pair(self):
+        query = normalize_retrieval_query_terms(
+            "녹색 직진 자전거와 맞은편 비보호 좌회전 자동차 사고",
+            UserSearchMetadata(
+                party_type="자동차",
+                location="교차로 사고",
+                retrieval_query=(
+                    "녹색 비보호 좌회전 대 맞은편 녹색 직진, "
+                    "녹색직진 대 적색직진, 비보호 좌회전 대 직진, "
+                    "녹색직진 대 적색비보호좌회전"
+                ),
+                query_slots=QuerySlots(
+                    a_signal="녹색",
+                    b_signal="적색",
+                    a_movement="직진",
+                    b_movement="비보호좌회전",
+                ),
+            ),
+        )
+
+        self.assertIn("녹색 비보호 좌회전 대 맞은편 녹색 직진", query)
+        self.assertIn("비보호 좌회전 대 직진", query)
+        self.assertNotIn("녹색직진 대 적색직진", query)
+        self.assertNotIn("녹색직진 대 적색비보호좌회전", query)
+
     def test_evaluate_input_sufficiency_rejects_empty_input_without_llm_call(self):
         fake_llm = MagicMock()
 
@@ -1504,7 +1680,15 @@ class BasicRagTest(unittest.TestCase):
         )
 
     def test_answer_question_passes_intake_metadata_to_analysis(self):
-        metadata = UserSearchMetadata(party_type="자동차", location="교차로 사고")
+        metadata = UserSearchMetadata(
+            party_type="자동차",
+            location="교차로 사고",
+            query_slots=QuerySlots(
+                relation="상대차량이 측면에서 진입",
+                a_movement="직진",
+                b_movement="직진",
+            ),
+        )
         with (
             patch(
                 "rag.service.conversation.app_service.evaluate_input_sufficiency",
@@ -1529,7 +1713,15 @@ class BasicRagTest(unittest.TestCase):
         )
 
     def test_answer_question_passes_loader_and_embedding_strategy_to_analysis(self):
-        metadata = UserSearchMetadata(party_type="자동차", location="교차로 사고")
+        metadata = UserSearchMetadata(
+            party_type="자동차",
+            location="교차로 사고",
+            query_slots=QuerySlots(
+                relation="상대차량이 측면에서 진입",
+                a_movement="직진",
+                b_movement="직진",
+            ),
+        )
         with (
             patch(
                 "rag.service.conversation.app_service.evaluate_input_sufficiency",
@@ -1558,7 +1750,15 @@ class BasicRagTest(unittest.TestCase):
         )
 
     def test_answer_question_passes_chunker_strategy_to_analysis(self):
-        metadata = UserSearchMetadata(party_type="자동차", location="교차로 사고")
+        metadata = UserSearchMetadata(
+            party_type="자동차",
+            location="교차로 사고",
+            query_slots=QuerySlots(
+                relation="상대차량이 측면에서 진입",
+                a_movement="직진",
+                b_movement="직진",
+            ),
+        )
         with (
             patch(
                 "rag.service.conversation.app_service.evaluate_input_sufficiency",

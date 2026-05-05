@@ -13,12 +13,21 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+from config import RETRIEVER_K
 from main import (
     CHUNKER_STRATEGY_OPTIONS_BY_LOADER,
+    DEFAULT_CHUNKER_STRATEGY,
+    DEFAULT_EMBEDDING_PROVIDER,
+    DEFAULT_ENSEMBLE_BM25_WEIGHT,
+    DEFAULT_ENSEMBLE_CANDIDATE_K,
+    DEFAULT_ENSEMBLE_USE_CHUNK_ID,
+    DEFAULT_LOADER_STRATEGY,
+    DEFAULT_RERANKER_STRATEGY,
     EMBEDDING_PROVIDER_OPTIONS,
     LOADER_STRATEGY_OPTIONS,
     RERANKER_STRATEGY_OPTIONS,
     RETRIEVER_STRATEGY_OPTIONS,
+    build_pipeline_config,
 )
 
 
@@ -33,7 +42,7 @@ def load_retrieval_eval_module():
 
 
 class RetrievalLangSmithEvalTest(unittest.TestCase):
-    def test_default_args_target_upstage_custom_langsmith_retrieval_eval(self):
+    def test_default_args_match_streamlit_initial_retrieval_settings(self):
         module = load_retrieval_eval_module()
 
         with patch.object(sys, "argv", ["evaluate_retrieval_langsmith.py"]):
@@ -43,11 +52,15 @@ class RetrievalLangSmithEvalTest(unittest.TestCase):
             args.testset_path,
             module.BASE_DIR / "data" / "testsets" / "langsmith" / "retrieval_eval.jsonl",
         )
-        self.assertEqual(args.loader_strategy, "upstage")
-        self.assertEqual(args.chunker_strategy, "custom")
-        self.assertEqual(args.embedding_provider, "bge")
+        self.assertEqual(args.loader_strategy, DEFAULT_LOADER_STRATEGY)
+        self.assertEqual(args.chunker_strategy, DEFAULT_CHUNKER_STRATEGY)
+        self.assertEqual(args.embedding_provider, DEFAULT_EMBEDDING_PROVIDER)
         self.assertEqual(args.retriever_strategy, "similarity")
-        self.assertEqual(args.reranker_strategy, "none")
+        self.assertEqual(args.reranker_strategy, DEFAULT_RERANKER_STRATEGY)
+        self.assertEqual(args.k, RETRIEVER_K)
+        self.assertEqual(args.ensemble_bm25_weight, DEFAULT_ENSEMBLE_BM25_WEIGHT)
+        self.assertEqual(args.ensemble_candidate_k, DEFAULT_ENSEMBLE_CANDIDATE_K)
+        self.assertEqual(args.ensemble_use_chunk_id, DEFAULT_ENSEMBLE_USE_CHUNK_ID)
         self.assertFalse(args.langsmith)
 
     def test_retriever_and_reranker_choices_follow_streamlit_options(self):
@@ -57,6 +70,23 @@ class RetrievalLangSmithEvalTest(unittest.TestCase):
         self.assertEqual(tuple(module.RERANKER_STRATEGY_CHOICES), RERANKER_STRATEGY_OPTIONS)
         self.assertIn("ensemble_parent", module.RETRIEVER_STRATEGY_CHOICES)
         self.assertIn("cross-encoder", module.RERANKER_STRATEGY_CHOICES)
+        self.assertIn("llm-score", module.RERANKER_STRATEGY_CHOICES)
+
+    def test_reranker_strategy_accepts_underscore_aliases(self):
+        module = load_retrieval_eval_module()
+
+        with patch.object(
+            sys,
+            "argv",
+            [
+                "evaluate_retrieval_langsmith.py",
+                "--reranker-strategy",
+                "llm_score",
+            ],
+        ):
+            args = module.parse_args()
+
+        self.assertEqual(args.reranker_strategy, "llm-score")
 
     def test_langsmith_flag_is_required_for_remote_evaluation_mode(self):
         module = load_retrieval_eval_module()
@@ -65,6 +95,32 @@ class RetrievalLangSmithEvalTest(unittest.TestCase):
             args = module.parse_args()
 
         self.assertTrue(args.langsmith)
+
+    def test_validate_run_args_rejects_out_of_range_ensemble_weight(self):
+        module = load_retrieval_eval_module()
+
+        with patch.object(
+            sys,
+            "argv",
+            ["evaluate_retrieval_langsmith.py", "--ensemble-bm25-weight", "1.5"],
+        ):
+            args = module.parse_args()
+
+        with self.assertRaisesRegex(ValueError, "ensemble-bm25-weight"):
+            module.validate_run_args(args)
+
+    def test_validate_run_args_rejects_non_positive_ensemble_candidate_k(self):
+        module = load_retrieval_eval_module()
+
+        with patch.object(
+            sys,
+            "argv",
+            ["evaluate_retrieval_langsmith.py", "--ensemble-candidate-k", "0"],
+        ):
+            args = module.parse_args()
+
+        with self.assertRaisesRegex(ValueError, "ensemble-candidate-k"):
+            module.validate_run_args(args)
 
     def test_configure_tracing_disables_langsmith_tracing_for_local_mode(self):
         module = load_retrieval_eval_module()
@@ -334,7 +390,7 @@ class RetrievalLangSmithEvalTest(unittest.TestCase):
                 "--retriever-strategies",
                 "vectorstore,ensemble_parent",
                 "--reranker-strategies",
-                "none,cross-encoder",
+                "none,cross_encoder,llm_score",
             ],
         ):
             args = module.parse_args()
@@ -344,8 +400,10 @@ class RetrievalLangSmithEvalTest(unittest.TestCase):
             [
                 {"retriever_strategy": "vectorstore", "reranker_strategy": "none"},
                 {"retriever_strategy": "vectorstore", "reranker_strategy": "cross-encoder"},
+                {"retriever_strategy": "vectorstore", "reranker_strategy": "llm-score"},
                 {"retriever_strategy": "ensemble_parent", "reranker_strategy": "none"},
                 {"retriever_strategy": "ensemble_parent", "reranker_strategy": "cross-encoder"},
+                {"retriever_strategy": "ensemble_parent", "reranker_strategy": "llm-score"},
             ],
         )
 
@@ -476,6 +534,55 @@ class RetrievalLangSmithEvalTest(unittest.TestCase):
 
         self.assertEqual(evaluate_local_rows.call_args.kwargs["max_concurrency"], 4)
 
+    def test_langsmith_run_passes_target_to_evaluate(self):
+        module = load_retrieval_eval_module()
+        args = Namespace(
+            testset_path=Path("data/testsets/langsmith/retrieval_eval.jsonl"),
+            dataset_name=None,
+            retriever_strategy="ensemble_parent",
+            reranker_strategy="none",
+            k=3,
+            candidate_k=0,
+            max_concurrency=1,
+            upload_only=False,
+            langsmith=True,
+            output_dir=Path("evaluation/results/langsmith"),
+            fail_on_missing_vectorstore=False,
+            no_local_results=True,
+            ensemble_bm25_weight=0.5,
+            ensemble_candidate_k=20,
+            ensemble_use_chunk_id=True,
+        )
+        run = {
+            "name": "upstage-custom-openai",
+            "loader_strategy": "upstage",
+            "chunker_strategy": "custom",
+            "embedding_provider": "openai",
+        }
+        dataset = Mock()
+        dataset.name = "MDM retrieval testset - retrieval_eval"
+        target = Mock()
+        results = Mock()
+        results.experiment_name = "MDM retrieval eval - upstage-custom-openai"
+
+        with (
+            patch.object(module, "get_vectorstore_dir", return_value=Path("vectorstore")),
+            patch.object(module, "vectorstore_exists", return_value=True),
+            patch.object(module, "get_or_create_dataset", return_value=dataset),
+            patch.object(module, "build_retrieval_target", return_value=target),
+            patch.object(module, "evaluate", return_value=results) as evaluate,
+        ):
+            module.run_retrieval_experiment(
+                args=args,
+                client=Mock(),
+                rows=[{"question": "테스트"}],
+                run=run,
+                matrix_mode=False,
+            )
+
+        self.assertIs(evaluate.call_args.args[0], target)
+        self.assertEqual(evaluate.call_args.kwargs["data"], dataset.name)
+
     def test_save_experiment_results_writes_csv_and_summary_json(self):
         module = load_retrieval_eval_module()
         import pandas as pd
@@ -512,7 +619,7 @@ class RetrievalLangSmithEvalTest(unittest.TestCase):
         self.assertEqual(summary["row_count"], 2)
         self.assertEqual(summary["retriever_strategy"], "similarity")
         self.assertEqual(summary["reranker_strategy"], "none")
-        self.assertEqual(summary["final_k"], 5)
+        self.assertEqual(summary["final_k"], module.DEFAULT_K)
         self.assertEqual(summary["metrics"]["diagram_id_hit"], 0.5)
         self.assertEqual(summary["metrics"]["critical_error"], 0.5)
 
@@ -572,6 +679,20 @@ class RetrievalLangSmithEvalTest(unittest.TestCase):
 
         self.assertEqual(metrics, {"critical_error": 0.5})
 
+    def test_sanitize_metadata_converts_numpy_scalar_scores_for_flashrank(self):
+        module = load_retrieval_eval_module()
+        import numpy as np
+
+        metadata = module.sanitize_metadata(
+            {
+                "diagram_id": "A",
+                "rerank_score": np.float32(0.25),
+            }
+        )
+
+        self.assertIsInstance(metadata["rerank_score"], float)
+        json.dumps(metadata)
+
     def test_build_retrieval_target_uses_chunker_strategy_for_vectorstore_dir(self):
         module = load_retrieval_eval_module()
         vectorstore_dir = Path("data/vectorstore/upstage/custom/bge")
@@ -627,6 +748,45 @@ class RetrievalLangSmithEvalTest(unittest.TestCase):
         self.assertEqual(seen_configs[0].final_k, 3)
         self.assertEqual(outputs["candidate_k"], 10)
         self.assertEqual(outputs["k"], 3)
+
+    def test_build_retrieval_target_matches_streamlit_ensemble_defaults(self):
+        module = load_retrieval_eval_module()
+        vectorstore_dir = Path("data/vectorstore/upstage/custom/openai")
+        seen_configs = []
+
+        def fake_run_retrieval_pipeline(**kwargs):
+            seen_configs.append(kwargs["pipeline_config"])
+            return []
+
+        with (
+            patch.object(module, "get_vectorstore_dir", return_value=vectorstore_dir),
+            patch.object(module, "vectorstore_exists", return_value=True),
+            patch.object(module, "load_vectorstore", return_value=object()),
+            patch.object(module, "build_retrieval_components", return_value=object()),
+            patch.object(module, "run_retrieval_pipeline", side_effect=fake_run_retrieval_pipeline),
+        ):
+            target = module.build_retrieval_target(
+                loader_strategy="upstage",
+                embedding_provider="openai",
+                chunker_strategy="custom",
+                retriever_strategy="ensemble_parent",
+                reranker_strategy="none",
+                k=module.DEFAULT_K,
+            )
+            outputs = target({"question": "테스트 질문"})
+
+        expected = build_pipeline_config("ensemble_parent")
+        actual = seen_configs[0]
+        self.assertEqual(actual.retriever_strategy, expected.retriever_strategy)
+        self.assertEqual(actual.final_k, expected.final_k)
+        self.assertEqual(actual.candidate_k, expected.candidate_k)
+        self.assertEqual(actual.retriever_config.weights, expected.retriever_config.weights)
+        self.assertEqual(actual.retriever_config.bm25_k, expected.retriever_config.bm25_k)
+        self.assertEqual(actual.retriever_config.dense_k, expected.retriever_config.dense_k)
+        self.assertEqual(actual.retriever_config.id_key, expected.retriever_config.id_key)
+        self.assertEqual(outputs["k"], expected.final_k)
+        self.assertEqual(outputs["ensemble_candidate_k"], expected.retriever_config.bm25_k)
+        self.assertEqual(outputs["ensemble_use_chunk_id"], True)
 
 
 if __name__ == "__main__":
