@@ -64,7 +64,7 @@ def format_display_value(value: Any) -> str:
 def format_score(value: Any) -> str:
     if not has_display_value(value):
         return ""
-    number = pd.to_numeric(pd.Series([value]), errors="coerce").iloc[0]
+    number = pd.to_numeric([value], errors="coerce")[0]
     if pd.isna(number):
         return format_display_value(value)
     if float(number).is_integer():

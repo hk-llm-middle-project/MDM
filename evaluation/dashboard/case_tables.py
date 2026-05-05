@@ -427,27 +427,24 @@ def _format_case_table_value(value: Any) -> str:
     return str(parsed)
 
 
-def _reference_columns_for_case_table(row_frame: pd.DataFrame) -> list[str]:
+def _reference_columns_for_case_table(row: pd.Series) -> list[str]:
     columns: list[str] = []
     for column in [
-        *[column for column in EXPECTED_VALUE_COLUMNS if column in row_frame.columns],
+        *[column for column in EXPECTED_VALUE_COLUMNS if column in row.index],
         *[
             column
-            for column in sorted(row_frame.columns)
+            for column in sorted(row.index)
             if column.startswith("reference.")
             and column not in EXPECTED_VALUE_COLUMNS
             and not column.startswith("reference.forbidden_")
             and _is_expected_reference_column(column)
         ],
     ]:
-        if row_frame[column].map(_has_display_value).any():
+        if _has_display_value(row.get(column)):
             columns.append(column)
             continue
-        actual_values = row_frame.apply(
-            lambda row: _actual_value_for_reference(row, column),
-            axis=1,
-        )
-        if actual_values.map(_has_display_value).any():
+        actual_value = _actual_value_for_reference(row, column)
+        if _has_display_value(actual_value):
             columns.append(column)
     return columns
 
@@ -474,12 +471,11 @@ def build_expected_actual_case_table(
     records: list[dict[str, Any]] = []
     value_columns: list[str] = []
     for _, row in selected.iterrows():
-        row_frame = pd.DataFrame([row])
         record: dict[str, Any] = {
             "query": _format_display_value(row.get("inputs.question")),
             "case_key": _format_display_value(row.get("case_key")),
         }
-        for reference_column in _reference_columns_for_case_table(row_frame):
+        for reference_column in _reference_columns_for_case_table(row):
             label = _case_table_label(reference_column)
             expected = _format_case_table_value(row.get(reference_column))
             actual = _format_case_table_value(
@@ -496,7 +492,7 @@ def build_expected_actual_case_table(
                     value_columns.append(column)
         for metric in METRIC_COLUMNS:
             if metric in row.index and _has_display_value(row.get(metric)):
-                record[metric] = pd.to_numeric(pd.Series([row.get(metric)]), errors="coerce").iloc[0]
+                record[metric] = pd.to_numeric([row.get(metric)], errors="coerce")[0]
         records.append(record)
 
     if not records:
@@ -513,11 +509,6 @@ CASE_TABLE_MATCH_STYLE = "background-color: #dcfce7; color: #166534;"
 CASE_TABLE_MISMATCH_STYLE = "background-color: #fee2e2; color: #991b1b;"
 
 
-def _case_table_comparable_value(value: Any) -> str:
-    formatted = _format_case_table_value(value)
-    return formatted.strip()
-
-
 def build_expected_actual_case_table_styles(table: pd.DataFrame) -> pd.DataFrame:
     """Return cell styles for selected run values in expected/actual case tables."""
 
@@ -528,8 +519,8 @@ def build_expected_actual_case_table_styles(table: pd.DataFrame) -> pd.DataFrame
         if expected_column not in table.columns:
             continue
         for index, row in table.iterrows():
-            expected = _case_table_comparable_value(row.get(expected_column))
-            actual = _case_table_comparable_value(row.get(actual_column))
+            expected = str(row.get(expected_column)).strip()
+            actual = str(row.get(actual_column)).strip()
             if expected == "-" and actual == "-":
                 continue
             style = (
