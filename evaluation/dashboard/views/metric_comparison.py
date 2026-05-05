@@ -63,6 +63,21 @@ def metric_caption(metric: str) -> str:
     return caption
 
 
+def default_metric_selection(available: list[str]) -> list[str]:
+    if not available:
+        return []
+    if "critical_error" in available:
+        return ["critical_error"]
+    return [available[0]]
+
+
+def metric_caption(metric: str) -> str:
+    caption = describe_metric(metric)
+    if metric == "critical_error":
+        return f"{caption} critical_error는 낮을수록 좋습니다."
+    return caption
+
+
 def render(summary: pd.DataFrame, metrics: pd.DataFrame) -> None:
     st.subheader("Metric Comparison")
     available = _available_metrics(summary)

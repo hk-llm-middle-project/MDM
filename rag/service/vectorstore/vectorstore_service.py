@@ -36,7 +36,7 @@ RECURSIVE_CHUNKER_STRATEGY = "recursive"
 MARKDOWN_CHUNKER_STRATEGY = "markdown"
 UPSTAGE_RAW_CHUNKER_STRATEGY = "raw"
 UPSTAGE_CUSTOM_CHUNKER_STRATEGY = "custom"
-UPSTAGE_LEGACY_CHUNKER_ALIASES = {DEFAULT_CHUNKER_STRATEGY, "native"}
+UPSTAGE_LEGACY_CHUNKER_ALIASES = {"fixed", "native"}
 
 
 def get_page_metadata_cache_path(loader_strategy: str):

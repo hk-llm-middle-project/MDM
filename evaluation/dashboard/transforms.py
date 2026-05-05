@@ -185,6 +185,138 @@ METRIC_DESCRIPTIONS = {
     ),
 }
 
+METRIC_DESCRIPTIONS = {
+    "diagram_id_hit": (
+        "`diagram_id_hit` - 평가: 기대 diagram_id 또는 허용 diagram_id가 검색 결과 metadata에 "
+        "포함됐는지 봅니다. 점수: 0=기대 diagram 미검색, 1=기대 diagram 검색."
+    ),
+    "location_match": (
+        "`location_match` - 평가: 기대 사고 장소가 검색 결과 metadata에 포함됐는지 봅니다. "
+        "점수: 0=장소 불일치, 1=장소 일치 또는 기대 장소 없음."
+    ),
+    "party_type_match": (
+        "`party_type_match` - 평가: 기대 당사자 유형이 검색 결과 metadata에 포함됐는지 봅니다. "
+        "점수: 0=당사자 유형 불일치, 1=당사자 유형 일치 또는 기대값 없음."
+    ),
+    "chunk_type_match": (
+        "`chunk_type_match` - 평가: 기대 chunk type이 검색 결과 metadata에 포함됐는지 봅니다. "
+        "점수: 0=chunk type 불일치, 1=chunk type 일치 또는 기대값 없음."
+    ),
+    "keyword_coverage": (
+        "`keyword_coverage` - 평가: 기대 키워드가 검색 결과 본문에 얼마나 포함됐는지 봅니다. "
+        "점수: 0=키워드 미포함, 1=모든 키워드 포함, 중간값=포함 비율."
+    ),
+    "near_miss_not_above_expected": (
+        "`near_miss_not_above_expected` - 평가: near-miss diagram이 기대 diagram보다 위에 "
+        "랭크되지 않았는지 봅니다. 점수: 0=near-miss가 우선되었거나 기대 diagram 없음, "
+        "1=기대 diagram이 near-miss보다 먼저 나옴."
+    ),
+    "retrieval_relevance": (
+        "`retrieval_relevance` - 평가: diagram/location/party/chunk/keyword 검색 체크의 평균입니다. "
+        "점수: 0=관련 검색 신호 없음, 1=모든 검색 신호 충족, 중간값=평균 충족률."
+    ),
+    "critical_error": (
+        "`critical_error` - 평가: 기대 diagram, party_type, location 중 치명적인 retrieval mismatch가 "
+        "있는지 봅니다. 점수: 0=치명 오류 없음, 1=치명 오류 있음."
+    ),
+    "intake_is_sufficient": (
+        "`intake_is_sufficient` - 평가: intake가 입력 충분/부족 여부를 기대값대로 판단했는지 봅니다. "
+        "점수: 0=판단 불일치, 1=판단 일치."
+    ),
+    "missing_fields_match": (
+        "`missing_fields_match` - 평가: intake가 찾아낸 누락 필드 목록이 기대값과 같은지 봅니다. "
+        "점수: 0=누락 필드 불일치, 1=누락 필드 일치."
+    ),
+    "follow_up_contains": (
+        "`follow_up_contains` - 평가: follow-up 질문에 기대 문구가 포함됐는지 봅니다. "
+        "점수: 0=기대 문구 누락, 1=기대 문구 포함."
+    ),
+    "forbidden_filter_absent": (
+        "`forbidden_filter_absent` - 평가: 만들면 안 되는 metadata filter가 빠져 있는지 봅니다. "
+        "점수: 0=금지 filter 포함, 1=금지 filter 없음."
+    ),
+    "intake_overall": (
+        "`intake_overall` - 평가: intake 관련 세부 점수의 평균입니다. "
+        "점수: 0=intake 조건 전부 실패, 1=intake 조건 전부 통과, 중간값=평균 통과율."
+    ),
+    "route_type_match": (
+        "`route_type_match` - 평가: router가 기대 route type을 선택했는지 봅니다. "
+        "점수: 0=route 불일치, 1=route 일치."
+    ),
+    "reason_category_match": (
+        "`reason_category_match` - 평가: router 판단 이유가 기대 reason category를 포함하는지 봅니다. "
+        "점수: 0=이유 category 불일치, 1=이유 category 일치."
+    ),
+    "router_overall": (
+        "`router_overall` - 평가: router 관련 세부 점수의 평균입니다. "
+        "점수: 0=router 조건 전부 실패, 1=router 조건 전부 통과, 중간값=평균 통과율."
+    ),
+    "metadata_filter_match": (
+        "`metadata_filter_match` - 평가: 생성된 metadata filter가 기대 filter와 같은지 봅니다. "
+        "점수: 0=filter 불일치, 1=filter 일치."
+    ),
+    "metadata_filter_overall": (
+        "`metadata_filter_overall` - 평가: metadata filter 일치와 금지 filter 부재 점수의 평균입니다. "
+        "점수: 0=filter 조건 실패, 1=filter 조건 통과, 중간값=평균 통과율."
+    ),
+    "state_sequence_match": (
+        "`state_sequence_match` - 평가: multiturn 대화의 turn별 intake state 변화가 기대 흐름과 "
+        "맞는지 봅니다. 점수: 0=state 흐름 불일치, 1=state 흐름 일치."
+    ),
+    "followup_questions_match": (
+        "`followup_questions_match` - 평가: turn별 follow-up 질문이 기대 내용을 포함하는지 봅니다. "
+        "점수: 0=질문 흐름 불일치, 1=질문 흐름 일치."
+    ),
+    "final_metadata_match": (
+        "`final_metadata_match` - 평가: multiturn 종료 시 최종 metadata가 기대값과 맞는지 봅니다. "
+        "점수: 0=최종 metadata 불일치, 1=최종 metadata 일치."
+    ),
+    "final_result_type_match": (
+        "`final_result_type_match` - 평가: multiturn 종료 결과 타입이 기대값과 맞는지 봅니다. "
+        "점수: 0=최종 result type 불일치, 1=최종 result type 일치."
+    ),
+    "turns_to_ready_match": (
+        "`turns_to_ready_match` - 평가: 분석 준비 상태가 된 turn 번호가 기대값과 맞는지 봅니다. "
+        "점수: 0=준비 turn 불일치, 1=준비 turn 일치."
+    ),
+    "multiturn_overall": (
+        "`multiturn_overall` - 평가: multiturn 관련 세부 점수의 평균입니다. "
+        "점수: 0=multiturn 조건 전부 실패, 1=multiturn 조건 전부 통과, 중간값=평균 통과율."
+    ),
+    "final_fault_ratio_match": (
+        "`final_fault_ratio_match` - 평가: 최종 과실비율이 기대 비율과 같은지 봅니다. "
+        "점수: 0=과실비율 불일치, 1=과실비율 일치."
+    ),
+    "cannot_determine_match": (
+        "`cannot_determine_match` - 평가: 판단 불가 여부가 기대값과 맞는지 봅니다. "
+        "점수: 0=판단 가능/불가 상태 불일치, 1=상태 일치."
+    ),
+    "required_evidence_coverage": (
+        "`required_evidence_coverage` - 평가: 답변/근거/metadata에 필수 evidence가 얼마나 포함됐는지 "
+        "봅니다. 점수: 0=필수 evidence 없음, 1=필수 evidence 전부 포함, 중간값=포함 비율."
+    ),
+    "party_role_coverage": (
+        "`party_role_coverage` - 평가: 기대 당사자 역할 설명이 답변/근거에 얼마나 포함됐는지 봅니다. "
+        "점수: 0=역할 근거 없음, 1=역할 근거 전부 포함, 중간값=포함 비율."
+    ),
+    "applicable_modifier_coverage": (
+        "`applicable_modifier_coverage` - 평가: 적용되어야 하는 수정요소가 답변/근거에 얼마나 "
+        "포함됐는지 봅니다. 점수: 0=적용 modifier 없음, 1=전부 포함, 중간값=포함 비율."
+    ),
+    "non_applicable_modifier_coverage": (
+        "`non_applicable_modifier_coverage` - 평가: 적용되지 않아야 하는 수정요소 설명이 답변/근거에 "
+        "얼마나 포함됐는지 봅니다. 점수: 0=비적용 modifier 근거 없음, 1=전부 포함, 중간값=포함 비율."
+    ),
+    "reference_diagram_hit": (
+        "`reference_diagram_hit` - 평가: structured output 생성 시 기대 reference diagram이 검색 "
+        "context에 포함됐는지 봅니다. 점수: 0=reference diagram 미검색, 1=reference diagram 검색."
+    ),
+    "structured_output_overall": (
+        "`structured_output_overall` - 평가: structured output 관련 세부 점수의 평균입니다. "
+        "점수: 0=structured output 조건 전부 실패, 1=조건 전부 통과, 중간값=평균 통과율."
+    ),
+}
+
 CASE_METADATA_COLUMNS = (
     "evaluation_suite",
     "suite",
@@ -513,6 +645,232 @@ def _actual_value_for_reference(row: pd.Series, reference_column: str) -> str:
         comment = row.get("keyword_coverage_comment")
         if _is_empty_scalar(comment):
             comment = row.get("feedback.keyword_coverage.comment")
+            return _format_display_value(comment)
+
+    suffix = reference_column.removeprefix("reference.")
+    normalized_suffix = suffix.removeprefix("expected_")
+    return _first_output_value(
+        row,
+        [
+            f"outputs.{suffix}",
+            f"outputs.{normalized_suffix}",
+            f"outputs.result.{normalized_suffix}",
+            f"outputs.metadata.{normalized_suffix}",
+        ],
+    )
+
+
+def case_question(rows: pd.DataFrame) -> str:
+    if rows.empty or "inputs.question" not in rows.columns:
+        return ""
+    for value in rows["inputs.question"]:
+        if _has_display_value(value):
+            return _format_display_value(value)
+    return ""
+
+
+def build_case_value_comparison(rows: pd.DataFrame) -> pd.DataFrame:
+    """Show one test case as expected values next to each run's actual values."""
+
+    base_columns = ["항목", "예상 값"]
+    if rows.empty:
+        return pd.DataFrame(columns=base_columns)
+
+    first = rows.iloc[0]
+    run_names = _run_names(rows)
+    records: list[dict[str, str]] = []
+    for reference_column in _reference_columns_with_values(rows):
+        record = {
+            "항목": _expected_label(reference_column),
+            "예상 값": _format_display_value(first.get(reference_column)),
+        }
+        for run_name, (_, row) in zip(run_names, rows.iterrows(), strict=True):
+            record[run_name] = _actual_value_for_reference(row, reference_column)
+        records.append(record)
+
+    if not records:
+        return pd.DataFrame(columns=[*base_columns, *run_names])
+    return pd.DataFrame.from_records(records)
+
+
+def build_case_metric_comparison(rows: pd.DataFrame) -> pd.DataFrame:
+    """Show metric scores and comments for one test case across runs."""
+
+    if rows.empty:
+        return pd.DataFrame(columns=["metric"])
+
+    run_names = _run_names(rows)
+    records: list[dict[str, str]] = []
+    for metric in [metric for metric in METRIC_COLUMNS if metric in rows.columns]:
+        scores = pd.to_numeric(rows[metric], errors="coerce")
+        if scores.isna().all():
+            continue
+        record = {"metric": metric}
+        comment_column = f"{metric}_comment"
+        for run_name, (_, row) in zip(run_names, rows.iterrows(), strict=True):
+            record[run_name] = _format_score(row.get(metric))
+            if comment_column in rows.columns and _has_display_value(row.get(comment_column)):
+                record[f"{run_name} comment"] = _format_display_value(row.get(comment_column))
+        records.append(record)
+
+    if not records:
+        return pd.DataFrame(columns=["metric", *run_names])
+    return pd.DataFrame.from_records(records)
+
+
+def _is_empty_scalar(value: Any) -> bool:
+    if value is None:
+        return True
+    if isinstance(value, str):
+        return value.strip().lower() in {"", "nan", "none", "null"}
+    if isinstance(value, (list, tuple, set, dict)):
+        return False
+    try:
+        return bool(pd.isna(value))
+    except (TypeError, ValueError):
+        return False
+
+
+def _parse_jsonish(value: Any) -> Any:
+    if _is_empty_scalar(value):
+        return None
+    if not isinstance(value, str):
+        return value
+
+    text = value.strip()
+    if not text:
+        return None
+    if text[0] not in "[{\"" and text.lower() not in {"true", "false", "null"}:
+        return value
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        return value
+
+
+def _has_display_value(value: Any) -> bool:
+    parsed = _parse_jsonish(value)
+    if parsed is None:
+        return False
+    if isinstance(parsed, (list, tuple, set, dict)):
+        return len(parsed) > 0
+    return not _is_empty_scalar(parsed)
+
+
+def _format_display_value(value: Any) -> str:
+    parsed = _parse_jsonish(value)
+    if parsed is None:
+        return ""
+    if isinstance(parsed, dict):
+        return json.dumps(parsed, ensure_ascii=False, sort_keys=True)
+    if isinstance(parsed, (list, tuple, set)):
+        values = [_format_display_value(item) for item in parsed]
+        return ", ".join(value for value in values if value)
+    if isinstance(parsed, float) and parsed.is_integer():
+        return str(int(parsed))
+    return str(parsed)
+
+
+def _format_score(value: Any) -> str:
+    if not _has_display_value(value):
+        return ""
+    number = pd.to_numeric([value], errors="coerce")[0]
+    if pd.isna(number):
+        return _format_display_value(value)
+    if float(number).is_integer():
+        return str(int(number))
+    return f"{float(number):.4f}".rstrip("0").rstrip(".")
+
+
+def _row_run_name(row: pd.Series, fallback_index: int) -> str:
+    for column in ("run_label", "run_name"):
+        value = row.get(column)
+        if _has_display_value(value):
+            return _format_display_value(value)
+    return f"run {fallback_index + 1}"
+
+
+def _run_names(rows: pd.DataFrame) -> list[str]:
+    names: list[str] = []
+    seen: dict[str, int] = {}
+    for index, row in rows.iterrows():
+        name = _row_run_name(row, len(names))
+        seen[name] = seen.get(name, 0) + 1
+        names.append(name if seen[name] == 1 else f"{name} #{seen[name]}")
+    return names
+
+
+def _reference_columns_with_values(rows: pd.DataFrame) -> list[str]:
+    preferred = [column for column in EXPECTED_VALUE_COLUMNS if column in rows.columns]
+    extra = [
+        column
+        for column in rows.columns
+        if column.startswith("reference.")
+        and column not in preferred
+        and column != "reference.reference"
+        and _is_expected_reference_column(column)
+    ]
+    output: list[str] = []
+    for column in [*preferred, *sorted(extra)]:
+        if rows[column].map(_has_display_value).any():
+            output.append(column)
+    return output
+
+
+def _is_expected_reference_column(column: str) -> bool:
+    suffix = column.removeprefix("reference.")
+    return suffix.startswith(("expected_", "acceptable_", "near_miss_", "required_", "forbidden_"))
+
+
+def _expected_label(column: str) -> str:
+    if column in EXPECTED_VALUE_LABELS:
+        return EXPECTED_VALUE_LABELS[column]
+    return column.removeprefix("reference.").replace("_", " ")
+
+
+def _metadata_records(row: pd.Series) -> list[dict[str, Any]]:
+    parsed = _parse_jsonish(row.get("outputs.retrieved_metadata"))
+    if isinstance(parsed, dict):
+        return [parsed]
+    if isinstance(parsed, list):
+        return [item for item in parsed if isinstance(item, dict)]
+    return []
+
+
+def _metadata_values(row: pd.Series, key: str) -> str:
+    values: list[str] = []
+    seen: set[str] = set()
+    for record in _metadata_records(row):
+        raw_value = record.get(key)
+        if isinstance(raw_value, list):
+            candidates = raw_value
+        else:
+            candidates = [raw_value]
+        for candidate in candidates:
+            formatted = _format_display_value(candidate)
+            if formatted and formatted not in seen:
+                values.append(formatted)
+                seen.add(formatted)
+    return ", ".join(values)
+
+
+def _first_output_value(row: pd.Series, candidates: Iterable[str]) -> str:
+    for column in candidates:
+        if column in row.index and _has_display_value(row.get(column)):
+            return _format_display_value(row.get(column))
+    return ""
+
+
+def _actual_value_for_reference(row: pd.Series, reference_column: str) -> str:
+    metadata_key = REFERENCE_ACTUAL_METADATA_KEYS.get(reference_column)
+    if metadata_key:
+        metadata_value = _metadata_values(row, metadata_key)
+        if metadata_value:
+            return metadata_value
+
+    if reference_column == "reference.expected_keywords":
+        comment = row.get("keyword_coverage_comment") or row.get("feedback.keyword_coverage.comment")
+        if _has_display_value(comment):
             return _format_display_value(comment)
 
     suffix = reference_column.removeprefix("reference.")

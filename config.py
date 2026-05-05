@@ -26,8 +26,8 @@ UPSTAGE_CUSTOM_DOCUMENTS_PATH = (
     UPSTAGE_MAIN_PDF_OUTPUT_DIR / "final" / "chunked_documents_final.table_clean.json"
 )
 UPSTAGE_FINAL_DOCUMENTS_PATH = UPSTAGE_CUSTOM_DOCUMENTS_PATH
-DEFAULT_LOADER_STRATEGY = "pdfplumber"
-DEFAULT_CHUNKER_STRATEGY = "fixed"
+DEFAULT_LOADER_STRATEGY = "upstage" # llamaparser
+DEFAULT_CHUNKER_STRATEGY = "custom" # case-boundary
 LOADER_VECTORSTORE_DIRS = {
     "pdfplumber": VECTORSTORE_DIR / "pdfplumber",
     "llamaparser": VECTORSTORE_DIR / "llamaparser",
@@ -38,7 +38,8 @@ LOADER_VECTORSTORE_DIRS = {
 CHUNK_SIZE = 500
 CHUNK_OVERLAP = 100
 INDEX_BATCH_SIZE = 100
-RETRIEVER_K = 3
+RETRIEVER_K = 5
+DEFAULT_RETRIEVER_STRATEGY = "ensemble_parent"
 DEFAULT_RERANKER_STRATEGY = "none"
 DEFAULT_RERANKER_CANDIDATE_K = 30
 DEFAULT_RERANKER_FINAL_K = 3
@@ -51,6 +52,39 @@ DEFAULT_ENSEMBLE_USE_CHUNK_ID = True
 ENSEMBLE_ID_KEY = "chunk_id"
 
 DEFAULT_EMBEDDING_PROVIDER = "bge"
+DEFAULT_MODE = "fast"
+MODE_PRESETS = {
+    "fast": {
+        "loader_strategy": "llamaparser",
+        "chunker_strategy": "case-boundary",
+        "embedding_provider": DEFAULT_EMBEDDING_PROVIDER,
+        "retriever_strategy": "ensemble",
+        "reranker_strategy": "none",
+        "ensemble_bm25_weight": 0.5,
+        "ensemble_candidate_k": DEFAULT_ENSEMBLE_CANDIDATE_K,
+        "ensemble_use_chunk_id": DEFAULT_ENSEMBLE_USE_CHUNK_ID,
+    },
+    "thinking": {
+        "loader_strategy": "llamaparser",
+        "chunker_strategy": "case-boundary",
+        "embedding_provider": DEFAULT_EMBEDDING_PROVIDER,
+        "retriever_strategy": "parent",
+        "reranker_strategy": "cross-encoder",
+        "ensemble_bm25_weight": DEFAULT_ENSEMBLE_BM25_WEIGHT,
+        "ensemble_candidate_k": DEFAULT_ENSEMBLE_CANDIDATE_K,
+        "ensemble_use_chunk_id": DEFAULT_ENSEMBLE_USE_CHUNK_ID,
+    },
+    "pro": {
+        "loader_strategy": "upstage",
+        "chunker_strategy": "custom",
+        "embedding_provider": DEFAULT_EMBEDDING_PROVIDER,
+        "retriever_strategy": "ensemble_parent",
+        "reranker_strategy": "llm-score",
+        "ensemble_bm25_weight": DEFAULT_ENSEMBLE_BM25_WEIGHT,
+        "ensemble_candidate_k": DEFAULT_ENSEMBLE_CANDIDATE_K,
+        "ensemble_use_chunk_id": DEFAULT_ENSEMBLE_USE_CHUNK_ID,
+    },
+}
 OPENAI_EMBEDDING_MODEL = "text-embedding-3-small"
 GOOGLE_EMBEDDING_MODEL = "models/gemini-embedding-001"
 EMBEDDING_QUERY_CACHE_SCHEMA_VERSION = "v1"
