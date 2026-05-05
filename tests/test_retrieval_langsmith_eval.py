@@ -41,6 +41,19 @@ def load_retrieval_eval_module():
     return module
 
 
+class FakeCacheEmbeddingFunction:
+    def __init__(self, enabled=True):
+        self.enabled = enabled
+        self.last_query_cache_hit = False
+        self.query_cache_hits = 0
+        self.query_cache_misses = 0
+
+
+class FakeVectorstore:
+    def __init__(self, embedding_function=None):
+        self._embedding_function = embedding_function or FakeCacheEmbeddingFunction()
+
+
 class RetrievalLangSmithEvalTest(unittest.TestCase):
     def test_default_args_match_streamlit_initial_retrieval_settings(self):
         module = load_retrieval_eval_module()
@@ -679,6 +692,39 @@ class RetrievalLangSmithEvalTest(unittest.TestCase):
 
         self.assertEqual(metrics, {"critical_error": 0.5})
 
+    def test_summarize_embedding_query_cache_handles_bool_strings(self):
+        module = load_retrieval_eval_module()
+        import pandas as pd
+
+        metrics = module.summarize_embedding_query_cache(
+            pd.DataFrame(
+                [
+                    {
+                        "outputs.embedding_query_cache_enabled": "False",
+                        "outputs.embedding_query_cache_hit": "False",
+                        "outputs.embedding_query_cache_hits": "0",
+                        "outputs.embedding_query_cache_misses": "1",
+                    },
+                    {
+                        "outputs.embedding_query_cache_enabled": "False",
+                        "outputs.embedding_query_cache_hit": "True",
+                        "outputs.embedding_query_cache_hits": "2",
+                        "outputs.embedding_query_cache_misses": "0",
+                    },
+                ]
+            )
+        )
+
+        self.assertEqual(
+            metrics,
+            {
+                "enabled": False,
+                "hit_rows": 1,
+                "hits": 2,
+                "misses": 1,
+            },
+        )
+
     def test_sanitize_metadata_converts_numpy_scalar_scores_for_flashrank(self):
         module = load_retrieval_eval_module()
         import numpy as np
@@ -700,7 +746,7 @@ class RetrievalLangSmithEvalTest(unittest.TestCase):
         with (
             patch.object(module, "get_vectorstore_dir", return_value=vectorstore_dir) as get_dir,
             patch.object(module, "vectorstore_exists", return_value=True),
-            patch.object(module, "load_vectorstore", return_value=object()),
+            patch.object(module, "load_vectorstore", return_value=FakeVectorstore()),
             patch.object(module, "build_retrieval_components", return_value=object()),
             patch.object(module, "run_retrieval_pipeline", return_value=[]),
         ):
@@ -729,7 +775,7 @@ class RetrievalLangSmithEvalTest(unittest.TestCase):
         with (
             patch.object(module, "get_vectorstore_dir", return_value=vectorstore_dir),
             patch.object(module, "vectorstore_exists", return_value=True),
-            patch.object(module, "load_vectorstore", return_value=object()),
+            patch.object(module, "load_vectorstore", return_value=FakeVectorstore()),
             patch.object(module, "build_retrieval_components", return_value=object()),
             patch.object(module, "run_retrieval_pipeline", side_effect=fake_run_retrieval_pipeline),
         ):
@@ -761,7 +807,7 @@ class RetrievalLangSmithEvalTest(unittest.TestCase):
         with (
             patch.object(module, "get_vectorstore_dir", return_value=vectorstore_dir),
             patch.object(module, "vectorstore_exists", return_value=True),
-            patch.object(module, "load_vectorstore", return_value=object()),
+            patch.object(module, "load_vectorstore", return_value=FakeVectorstore()),
             patch.object(module, "build_retrieval_components", return_value=object()),
             patch.object(module, "run_retrieval_pipeline", side_effect=fake_run_retrieval_pipeline),
         ):
@@ -787,6 +833,44 @@ class RetrievalLangSmithEvalTest(unittest.TestCase):
         self.assertEqual(outputs["k"], expected.final_k)
         self.assertEqual(outputs["ensemble_candidate_k"], expected.retriever_config.bm25_k)
         self.assertEqual(outputs["ensemble_use_chunk_id"], True)
+
+    def test_build_retrieval_target_records_embedding_query_cache_usage(self):
+        module = load_retrieval_eval_module()
+        vectorstore_dir = Path("data/vectorstore/upstage/custom/openai")
+        embedding_function = FakeCacheEmbeddingFunction(enabled=True)
+
+        def fake_run_retrieval_pipeline(**kwargs):
+            embedding_function.query_cache_hits += 1
+            embedding_function.last_query_cache_hit = True
+            return []
+
+        with (
+            patch.object(module, "get_vectorstore_dir", return_value=vectorstore_dir),
+            patch.object(module, "vectorstore_exists", return_value=True),
+            patch.object(
+                module,
+                "load_vectorstore",
+                return_value=FakeVectorstore(embedding_function),
+            ),
+            patch.object(module, "build_retrieval_components", return_value=object()),
+            patch.object(module, "run_retrieval_pipeline", side_effect=fake_run_retrieval_pipeline),
+            self.assertLogs(module.logger, level="INFO") as logs,
+        ):
+            target = module.build_retrieval_target(
+                loader_strategy="upstage",
+                embedding_provider="openai",
+                chunker_strategy="custom",
+                retriever_strategy="ensemble_parent",
+                reranker_strategy="none",
+                k=module.DEFAULT_K,
+            )
+            outputs = target({"question": "테스트 질문"})
+
+        self.assertTrue(outputs["embedding_query_cache_enabled"])
+        self.assertTrue(outputs["embedding_query_cache_hit"])
+        self.assertEqual(outputs["embedding_query_cache_hits"], 1)
+        self.assertEqual(outputs["embedding_query_cache_misses"], 0)
+        self.assertIn("[embedding-query-cache] hit provider=openai", logs.output[0])
 
 
 if __name__ == "__main__":

@@ -17,5 +17,5 @@ def extract_json_object(content: str) -> dict[str, Any]:
     match = re.search(r"\{.*\}", stripped, re.DOTALL)
     if not match:
         raise ValueError(f"JSON object not found in response: {content}")
-    return json.loads(match.group())
+    return json.loads(match.group(), strict=False)
 
