@@ -5,7 +5,8 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
-from evaluation.dashboard.transforms import METRIC_COLUMNS, rank_combinations
+from evaluation.dashboard.metrics import METRIC_COLUMNS
+from evaluation.dashboard.transforms import rank_combinations
 
 
 def _available_metrics(frame: pd.DataFrame) -> list[str]:

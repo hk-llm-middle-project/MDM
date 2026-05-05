@@ -1,0 +1,293 @@
+
+[RUN] --retriever-strategies similarity,ensemble,ensemble_parent --reranker-strategies cross-encoder
+Mon May  4 16:24:29 KST 2026
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event CollectionQueryEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event CollectionGetEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+[MATRIX] 1/3 upstage-custom-openai / similarity / cross-encoder
+[INFO] testset: /home/uuser/mdm/data/testsets/langsmith/retrieval_eval.jsonl
+[INFO] examples: 30
+[INFO] run: upstage-custom-openai
+[INFO] vectorstore: /home/uuser/mdm/data/vectorstore/upstage/custom/openai
+[INFO] loader_strategy: upstage
+[INFO] embedding_provider: openai
+[INFO] chunker_strategy: custom
+[INFO] retriever_strategy: similarity
+[INFO] reranker_strategy: cross-encoder
+[INFO] k: 3
+[INFO] ensemble_bm25_weight: 0.5
+[INFO] ensemble_candidate_k: 20
+[INFO] ensemble_use_chunk_id: True
+[INFO] candidate_k: 30
+[INFO] LangSmith skipped. Local result files were written.
+[INFO] local CSV: /home/uuser/mdm/evaluation/results/langsmith/20260504-162845-upstage-custom-openai-similarity-cross-encoder.csv
+[INFO] local summary: /home/uuser/mdm/evaluation/results/langsmith/20260504-162845-upstage-custom-openai-similarity-cross-encoder.summary.json
+[MATRIX] 2/3 upstage-custom-openai / ensemble / cross-encoder
+[INFO] testset: /home/uuser/mdm/data/testsets/langsmith/retrieval_eval.jsonl
+[INFO] examples: 30
+[INFO] run: upstage-custom-openai
+[INFO] vectorstore: /home/uuser/mdm/data/vectorstore/upstage/custom/openai
+[INFO] loader_strategy: upstage
+[INFO] embedding_provider: openai
+[INFO] chunker_strategy: custom
+[INFO] retriever_strategy: ensemble
+[INFO] reranker_strategy: cross-encoder
+[INFO] k: 3
+[INFO] ensemble_bm25_weight: 0.5
+[INFO] ensemble_candidate_k: 20
+[INFO] ensemble_use_chunk_id: True
+[INFO] candidate_k: 30
+[INFO] LangSmith skipped. Local result files were written.
+[INFO] local CSV: /home/uuser/mdm/evaluation/results/langsmith/20260504-163320-upstage-custom-openai-ensemble-cross-encoder.csv
+[INFO] local summary: /home/uuser/mdm/evaluation/results/langsmith/20260504-163320-upstage-custom-openai-ensemble-cross-encoder.summary.json
+[MATRIX] 3/3 upstage-custom-openai / ensemble_parent / cross-encoder
+[INFO] testset: /home/uuser/mdm/data/testsets/langsmith/retrieval_eval.jsonl
+[INFO] examples: 30
+[INFO] run: upstage-custom-openai
+[INFO] vectorstore: /home/uuser/mdm/data/vectorstore/upstage/custom/openai
+[INFO] loader_strategy: upstage
+[INFO] embedding_provider: openai
+[INFO] chunker_strategy: custom
+[INFO] retriever_strategy: ensemble_parent
+[INFO] reranker_strategy: cross-encoder
+[INFO] k: 3
+[INFO] ensemble_bm25_weight: 0.5
+[INFO] ensemble_candidate_k: 20
+[INFO] ensemble_use_chunk_id: True
+[INFO] candidate_k: 30
+[INFO] LangSmith skipped. Local result files were written.
+[INFO] local CSV: /home/uuser/mdm/evaluation/results/langsmith/20260504-164137-upstage-custom-openai-ensemble_parent-cross-encoder.csv
+[INFO] local summary: /home/uuser/mdm/evaluation/results/langsmith/20260504-164137-upstage-custom-openai-ensemble_parent-cross-encoder.summary.json
+
+[RUN] --retriever-strategies ensemble,ensemble_parent --reranker-strategies cross-encoder --ensemble-bm25-weight 0.9
+Mon May  4 16:41:38 KST 2026
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event CollectionGetEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event CollectionQueryEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+[MATRIX] 1/2 upstage-custom-openai / ensemble / cross-encoder
+[INFO] testset: /home/uuser/mdm/data/testsets/langsmith/retrieval_eval.jsonl
+[INFO] examples: 30
+[INFO] run: upstage-custom-openai
+[INFO] vectorstore: /home/uuser/mdm/data/vectorstore/upstage/custom/openai
+[INFO] loader_strategy: upstage
+[INFO] embedding_provider: openai
+[INFO] chunker_strategy: custom
+[INFO] retriever_strategy: ensemble
+[INFO] reranker_strategy: cross-encoder
+[INFO] k: 3
+[INFO] ensemble_bm25_weight: 0.9
+[INFO] ensemble_candidate_k: 20
+[INFO] ensemble_use_chunk_id: True
+[INFO] candidate_k: 30
+[INFO] LangSmith skipped. Local result files were written.
+[INFO] local CSV: /home/uuser/mdm/evaluation/results/langsmith/20260504-164617-upstage-custom-openai-ensemble-cross-encoder.csv
+[INFO] local summary: /home/uuser/mdm/evaluation/results/langsmith/20260504-164617-upstage-custom-openai-ensemble-cross-encoder.summary.json
+[MATRIX] 2/2 upstage-custom-openai / ensemble_parent / cross-encoder
+[INFO] testset: /home/uuser/mdm/data/testsets/langsmith/retrieval_eval.jsonl
+[INFO] examples: 30
+[INFO] run: upstage-custom-openai
+[INFO] vectorstore: /home/uuser/mdm/data/vectorstore/upstage/custom/openai
+[INFO] loader_strategy: upstage
+[INFO] embedding_provider: openai
+[INFO] chunker_strategy: custom
+[INFO] retriever_strategy: ensemble_parent
+[INFO] reranker_strategy: cross-encoder
+[INFO] k: 3
+[INFO] ensemble_bm25_weight: 0.9
+[INFO] ensemble_candidate_k: 20
+[INFO] ensemble_use_chunk_id: True
+[INFO] candidate_k: 30
+[INFO] LangSmith skipped. Local result files were written.
+[INFO] local CSV: /home/uuser/mdm/evaluation/results/langsmith/20260504-165430-upstage-custom-openai-ensemble_parent-cross-encoder.csv
+[INFO] local summary: /home/uuser/mdm/evaluation/results/langsmith/20260504-165430-upstage-custom-openai-ensemble_parent-cross-encoder.summary.json
+
+[RUN] --retriever-strategies ensemble,ensemble_parent --reranker-strategies cross-encoder --ensemble-bm25-weight 0.4
+Mon May  4 16:54:31 KST 2026
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event CollectionGetEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event CollectionQueryEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+[MATRIX] 1/2 upstage-custom-openai / ensemble / cross-encoder
+[INFO] testset: /home/uuser/mdm/data/testsets/langsmith/retrieval_eval.jsonl
+[INFO] examples: 30
+[INFO] run: upstage-custom-openai
+[INFO] vectorstore: /home/uuser/mdm/data/vectorstore/upstage/custom/openai
+[INFO] loader_strategy: upstage
+[INFO] embedding_provider: openai
+[INFO] chunker_strategy: custom
+[INFO] retriever_strategy: ensemble
+[INFO] reranker_strategy: cross-encoder
+[INFO] k: 3
+[INFO] ensemble_bm25_weight: 0.4
+[INFO] ensemble_candidate_k: 20
+[INFO] ensemble_use_chunk_id: True
+[INFO] candidate_k: 30
+[INFO] LangSmith skipped. Local result files were written.
+[INFO] local CSV: /home/uuser/mdm/evaluation/results/langsmith/20260504-165901-upstage-custom-openai-ensemble-cross-encoder.csv
+[INFO] local summary: /home/uuser/mdm/evaluation/results/langsmith/20260504-165901-upstage-custom-openai-ensemble-cross-encoder.summary.json
+[MATRIX] 2/2 upstage-custom-openai / ensemble_parent / cross-encoder
+[INFO] testset: /home/uuser/mdm/data/testsets/langsmith/retrieval_eval.jsonl
+[INFO] examples: 30
+[INFO] run: upstage-custom-openai
+[INFO] vectorstore: /home/uuser/mdm/data/vectorstore/upstage/custom/openai
+[INFO] loader_strategy: upstage
+[INFO] embedding_provider: openai
+[INFO] chunker_strategy: custom
+[INFO] retriever_strategy: ensemble_parent
+[INFO] reranker_strategy: cross-encoder
+[INFO] k: 3
+[INFO] ensemble_bm25_weight: 0.4
+[INFO] ensemble_candidate_k: 20
+[INFO] ensemble_use_chunk_id: True
+[INFO] candidate_k: 30
+[INFO] LangSmith skipped. Local result files were written.
+[INFO] local CSV: /home/uuser/mdm/evaluation/results/langsmith/20260504-170704-upstage-custom-openai-ensemble_parent-cross-encoder.csv
+[INFO] local summary: /home/uuser/mdm/evaluation/results/langsmith/20260504-170704-upstage-custom-openai-ensemble_parent-cross-encoder.summary.json
+
+[RUN] --retriever-strategies ensemble,ensemble_parent --reranker-strategies cross-encoder --ensemble-bm25-weight 0.3
+Mon May  4 17:07:05 KST 2026
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event CollectionGetEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event CollectionQueryEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+[MATRIX] 1/2 upstage-custom-openai / ensemble / cross-encoder
+[INFO] testset: /home/uuser/mdm/data/testsets/langsmith/retrieval_eval.jsonl
+[INFO] examples: 30
+[INFO] run: upstage-custom-openai
+[INFO] vectorstore: /home/uuser/mdm/data/vectorstore/upstage/custom/openai
+[INFO] loader_strategy: upstage
+[INFO] embedding_provider: openai
+[INFO] chunker_strategy: custom
+[INFO] retriever_strategy: ensemble
+[INFO] reranker_strategy: cross-encoder
+[INFO] k: 3
+[INFO] ensemble_bm25_weight: 0.3
+[INFO] ensemble_candidate_k: 20
+[INFO] ensemble_use_chunk_id: True
+[INFO] candidate_k: 30
+[INFO] LangSmith skipped. Local result files were written.
+[INFO] local CSV: /home/uuser/mdm/evaluation/results/langsmith/20260504-171136-upstage-custom-openai-ensemble-cross-encoder.csv
+[INFO] local summary: /home/uuser/mdm/evaluation/results/langsmith/20260504-171136-upstage-custom-openai-ensemble-cross-encoder.summary.json
+[MATRIX] 2/2 upstage-custom-openai / ensemble_parent / cross-encoder
+[INFO] testset: /home/uuser/mdm/data/testsets/langsmith/retrieval_eval.jsonl
+[INFO] examples: 30
+[INFO] run: upstage-custom-openai
+[INFO] vectorstore: /home/uuser/mdm/data/vectorstore/upstage/custom/openai
+[INFO] loader_strategy: upstage
+[INFO] embedding_provider: openai
+[INFO] chunker_strategy: custom
+[INFO] retriever_strategy: ensemble_parent
+[INFO] reranker_strategy: cross-encoder
+[INFO] k: 3
+[INFO] ensemble_bm25_weight: 0.3
+[INFO] ensemble_candidate_k: 20
+[INFO] ensemble_use_chunk_id: True
+[INFO] candidate_k: 30
+[INFO] LangSmith skipped. Local result files were written.
+[INFO] local CSV: /home/uuser/mdm/evaluation/results/langsmith/20260504-171930-upstage-custom-openai-ensemble_parent-cross-encoder.csv
+[INFO] local summary: /home/uuser/mdm/evaluation/results/langsmith/20260504-171930-upstage-custom-openai-ensemble_parent-cross-encoder.summary.json
+
+[RUN] --retriever-strategies ensemble,ensemble_parent --reranker-strategies cross-encoder --ensemble-bm25-weight 0.1818181818
+Mon May  4 17:19:30 KST 2026
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event CollectionGetEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event CollectionQueryEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+[MATRIX] 1/2 upstage-custom-openai / ensemble / cross-encoder
+[INFO] testset: /home/uuser/mdm/data/testsets/langsmith/retrieval_eval.jsonl
+[INFO] examples: 30
+[INFO] run: upstage-custom-openai
+[INFO] vectorstore: /home/uuser/mdm/data/vectorstore/upstage/custom/openai
+[INFO] loader_strategy: upstage
+[INFO] embedding_provider: openai
+[INFO] chunker_strategy: custom
+[INFO] retriever_strategy: ensemble
+[INFO] reranker_strategy: cross-encoder
+[INFO] k: 3
+[INFO] ensemble_bm25_weight: 0.1818181818
+[INFO] ensemble_candidate_k: 20
+[INFO] ensemble_use_chunk_id: True
+[INFO] candidate_k: 30
+[INFO] LangSmith skipped. Local result files were written.
+[INFO] local CSV: /home/uuser/mdm/evaluation/results/langsmith/20260504-172357-upstage-custom-openai-ensemble-cross-encoder.csv
+[INFO] local summary: /home/uuser/mdm/evaluation/results/langsmith/20260504-172357-upstage-custom-openai-ensemble-cross-encoder.summary.json
+[MATRIX] 2/2 upstage-custom-openai / ensemble_parent / cross-encoder
+[INFO] testset: /home/uuser/mdm/data/testsets/langsmith/retrieval_eval.jsonl
+[INFO] examples: 30
+[INFO] run: upstage-custom-openai
+[INFO] vectorstore: /home/uuser/mdm/data/vectorstore/upstage/custom/openai
+[INFO] loader_strategy: upstage
+[INFO] embedding_provider: openai
+[INFO] chunker_strategy: custom
+[INFO] retriever_strategy: ensemble_parent
+[INFO] reranker_strategy: cross-encoder
+[INFO] k: 3
+[INFO] ensemble_bm25_weight: 0.1818181818
+[INFO] ensemble_candidate_k: 20
+[INFO] ensemble_use_chunk_id: True
+[INFO] candidate_k: 30
+[INFO] LangSmith skipped. Local result files were written.
+[INFO] local CSV: /home/uuser/mdm/evaluation/results/langsmith/20260504-173155-upstage-custom-openai-ensemble_parent-cross-encoder.csv
+[INFO] local summary: /home/uuser/mdm/evaluation/results/langsmith/20260504-173155-upstage-custom-openai-ensemble_parent-cross-encoder.summary.json
+
+[RUN] --retriever-strategies ensemble,ensemble_parent --reranker-strategies cross-encoder --ensemble-bm25-weight 0.1
+Mon May  4 17:31:56 KST 2026
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event CollectionGetEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event CollectionQueryEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+[MATRIX] 1/2 upstage-custom-openai / ensemble / cross-encoder
+[INFO] testset: /home/uuser/mdm/data/testsets/langsmith/retrieval_eval.jsonl
+[INFO] examples: 30
+[INFO] run: upstage-custom-openai
+[INFO] vectorstore: /home/uuser/mdm/data/vectorstore/upstage/custom/openai
+[INFO] loader_strategy: upstage
+[INFO] embedding_provider: openai
+[INFO] chunker_strategy: custom
+[INFO] retriever_strategy: ensemble
+[INFO] reranker_strategy: cross-encoder
+[INFO] k: 3
+[INFO] ensemble_bm25_weight: 0.1
+[INFO] ensemble_candidate_k: 20
+[INFO] ensemble_use_chunk_id: True
+[INFO] candidate_k: 30
+[INFO] LangSmith skipped. Local result files were written.
+[INFO] local CSV: /home/uuser/mdm/evaluation/results/langsmith/20260504-173623-upstage-custom-openai-ensemble-cross-encoder.csv
+[INFO] local summary: /home/uuser/mdm/evaluation/results/langsmith/20260504-173623-upstage-custom-openai-ensemble-cross-encoder.summary.json
+[MATRIX] 2/2 upstage-custom-openai / ensemble_parent / cross-encoder
+[INFO] testset: /home/uuser/mdm/data/testsets/langsmith/retrieval_eval.jsonl
+[INFO] examples: 30
+[INFO] run: upstage-custom-openai
+[INFO] vectorstore: /home/uuser/mdm/data/vectorstore/upstage/custom/openai
+[INFO] loader_strategy: upstage
+[INFO] embedding_provider: openai
+[INFO] chunker_strategy: custom
+[INFO] retriever_strategy: ensemble_parent
+[INFO] reranker_strategy: cross-encoder
+[INFO] k: 3
+[INFO] ensemble_bm25_weight: 0.1
+[INFO] ensemble_candidate_k: 20
+[INFO] ensemble_use_chunk_id: True
+[INFO] candidate_k: 30
+[INFO] LangSmith skipped. Local result files were written.
+[INFO] local CSV: /home/uuser/mdm/evaluation/results/langsmith/20260504-174419-upstage-custom-openai-ensemble_parent-cross-encoder.csv
+[INFO] local summary: /home/uuser/mdm/evaluation/results/langsmith/20260504-174419-upstage-custom-openai-ensemble_parent-cross-encoder.summary.json
+
+[DONE] cross more weights
+Mon May  4 17:44:20 KST 2026

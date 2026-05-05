@@ -31,10 +31,10 @@ Hybrid query 실험은 이 문제를 줄이기 위한 것이다.
 | 후보 수 | `top-30` |
 | 병합 방식 | Reciprocal Rank Fusion |
 
-재실행 스크립트는 `evaluation/evaluate_hybrid_query.py`에 추가했다. 같은 조건은 아래 명령으로 다시 돌릴 수 있다.
+재실행 스크립트는 `evaluation/experiments/evaluate_hybrid_query.py`에 추가했다. 같은 조건은 아래 명령으로 다시 돌릴 수 있다.
 
 ```bash
-uv run python evaluation/evaluate_hybrid_query.py --k 30 --conditions raw_with_intake_filter,normalized_with_intake_filter,hybrid_rrf_with_intake_filter
+uv run python evaluation/experiments/evaluate_hybrid_query.py --k 30 --conditions raw_with_intake_filter,normalized_with_intake_filter,hybrid_rrf_with_intake_filter
 ```
 
 스크립트는 intake decision cache인 `evaluation/results/intake_query_normalization/intake_decisions_retrieval_eval.json`을 기본으로 재사용한다. LLM intake를 다시 호출하고 싶으면 `--refresh-intake`를 붙이면 된다.

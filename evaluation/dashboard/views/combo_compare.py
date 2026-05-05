@@ -5,7 +5,7 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
-from evaluation.dashboard.transforms import (
+from evaluation.dashboard.case_tables import (
     build_case_metric_comparison,
     build_case_value_comparison,
     case_question,

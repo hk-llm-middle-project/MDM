@@ -1,0 +1,21 @@
+{
+  "experiment_name": "MDM multiturn eval - local",
+  "dataset_name": "MDM multiturn testset",
+  "testset_path": "/home/uuser/mdm/data/testsets/langsmith/multiturn_eval.jsonl",
+  "evaluation_suite": "multiturn",
+  "run_name": "multiturn-local",
+  "loader_strategy": null,
+  "chunker_strategy": null,
+  "embedding_provider": null,
+  "retriever_strategy": null,
+  "reranker_strategy": null,
+  "row_count": 6,
+  "metrics": {
+    "state_sequence_match": 0.0,
+    "followup_questions_match": 0.0,
+    "final_metadata_match": 0.0,
+    "final_result_type_match": 0.0,
+    "turns_to_ready_match": 0.0,
+    "multiturn_overall": 0.0
+  }
+}

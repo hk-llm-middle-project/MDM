@@ -74,7 +74,16 @@ class RetrievalLangSmithEvalTest(unittest.TestCase):
         self.assertEqual(args.ensemble_bm25_weight, DEFAULT_ENSEMBLE_BM25_WEIGHT)
         self.assertEqual(args.ensemble_candidate_k, DEFAULT_ENSEMBLE_CANDIDATE_K)
         self.assertEqual(args.ensemble_use_chunk_id, DEFAULT_ENSEMBLE_USE_CHUNK_ID)
+        self.assertEqual(args.retrieval_input_mode, "raw")
         self.assertFalse(args.langsmith)
+
+    def test_with_intake_alias_selects_intake_retrieval_input_mode(self):
+        module = load_retrieval_eval_module()
+
+        with patch.object(sys, "argv", ["evaluate_retrieval_langsmith.py", "--with-intake"]):
+            args = module.parse_args()
+
+        self.assertEqual(args.retrieval_input_mode, "intake")
 
     def test_retriever_and_reranker_choices_follow_streamlit_options(self):
         module = load_retrieval_eval_module()
@@ -794,6 +803,63 @@ class RetrievalLangSmithEvalTest(unittest.TestCase):
         self.assertEqual(seen_configs[0].final_k, 3)
         self.assertEqual(outputs["candidate_k"], 10)
         self.assertEqual(outputs["k"], 3)
+
+    def test_build_retrieval_target_intake_mode_uses_intake_query_and_filters(self):
+        module = load_retrieval_eval_module()
+        from langchain_core.documents import Document
+        from rag.service.intake.schema import IntakeDecision, UserSearchMetadata
+
+        vectorstore_dir = Path("data/vectorstore/upstage/custom/openai")
+        seen_kwargs = []
+
+        def fake_run_retrieval_pipeline(**kwargs):
+            seen_kwargs.append(kwargs)
+            return [
+                Document(
+                    page_content="검색 결과",
+                    metadata={"diagram_id": "A1", "party_type": "자동차"},
+                )
+            ]
+
+        intake_decision = IntakeDecision(
+            is_sufficient=True,
+            normalized_description="정규화된 사고 설명",
+            search_metadata=UserSearchMetadata(
+                party_type="보행자",
+                location="횡단보도 내",
+                retrieval_query="정규화 검색 질의",
+            ),
+        )
+
+        with (
+            patch.object(module, "get_vectorstore_dir", return_value=vectorstore_dir),
+            patch.object(module, "vectorstore_exists", return_value=True),
+            patch.object(module, "load_vectorstore", return_value=object()),
+            patch.object(module, "build_retrieval_components", return_value=object()),
+            patch.object(module, "evaluate_input_sufficiency", return_value=intake_decision),
+            patch.object(module, "run_retrieval_pipeline", side_effect=fake_run_retrieval_pipeline),
+        ):
+            target = module.build_retrieval_target(
+                loader_strategy="upstage",
+                embedding_provider="openai",
+                chunker_strategy="custom",
+                retriever_strategy="similarity",
+                reranker_strategy="none",
+                k=3,
+                retrieval_input_mode="intake",
+            )
+            outputs = target({"question": "원래 질문"})
+
+        self.assertEqual(seen_kwargs[0]["query"], "정규화 검색 질의")
+        self.assertEqual(
+            seen_kwargs[0]["filters"],
+            {"$and": [{"party_type": "보행자"}, {"location": "횡단보도 내"}]},
+        )
+        self.assertEqual(outputs["retrieval_input_mode"], "intake")
+        self.assertEqual(outputs["raw_query"], "원래 질문")
+        self.assertEqual(outputs["query"], "정규화 검색 질의")
+        self.assertFalse(outputs["intake_needs_more_input"])
+        self.assertEqual(outputs["retrieved_metadata"][0]["diagram_id"], "A1")
 
     def test_build_retrieval_target_matches_streamlit_ensemble_defaults(self):
         module = load_retrieval_eval_module()

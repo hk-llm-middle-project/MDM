@@ -92,6 +92,33 @@ class DecisionSuiteEvalTest(unittest.TestCase):
         self.assertEqual(frame.loc[0, "feedback.route_type_match"], 1)
         self.assertEqual(frame.loc[0, "feedback.reason_category_match"], 1)
 
+    def test_evaluate_router_rows_requires_exact_reason_category(self):
+        module = load_decision_eval_module()
+
+        def router(question, chat_history, intake_state):
+            return RouteDecision(
+                route_type=RouteType.ACCIDENT_ANALYSIS,
+                confidence=0.91,
+                reason="critical_error",
+            )
+
+        frame = module.evaluate_router_rows(
+            [
+                {
+                    "id": "router_002",
+                    "question": "사고났어요",
+                    "expected_route_type": "accident_analysis",
+                    "expected_reason_category": "error",
+                    "chat_history": [],
+                    "intake_state": {},
+                }
+            ],
+            router=router,
+        )
+
+        self.assertEqual(frame.loc[0, "feedback.route_type_match"], 1)
+        self.assertEqual(frame.loc[0, "feedback.reason_category_match"], 0)
+
     def test_evaluate_metadata_filter_rows_scores_expected_filter_and_forbidden_fields(self):
         module = load_decision_eval_module()
 

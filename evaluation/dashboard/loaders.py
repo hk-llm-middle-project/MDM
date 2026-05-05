@@ -20,6 +20,14 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
+class ResultSet:
+    """A selectable folder containing local evaluation result exports."""
+
+    label: str
+    path: Path
+
+
+@dataclass(frozen=True)
 class ResultBundle:
     """A summary JSON file and its optional sibling CSV result export."""
 
@@ -44,7 +52,11 @@ class DashboardResults:
     summary: pd.DataFrame
     examples: pd.DataFrame
     metrics: pd.DataFrame
+    config: dict[str, Any] | None = None
     warnings: tuple[str, ...] = ()
+
+
+DASHBOARD_CONFIG_FILENAMES = ("dashboard.json", ".dashboard.json")
 
 
 def _read_summary(path: Path) -> dict[str, Any]:
@@ -52,6 +64,33 @@ def _read_summary(path: Path) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise ValueError(f"Summary file must contain a JSON object: {path}")
     return payload
+
+
+def discover_result_sets(result_root: Path) -> list[ResultSet]:
+    """Return folders that can be selected as one dashboard result set.
+
+    A result set is any directory under ``result_root`` that directly contains
+    one or more ``*.summary.json`` files. Discovery is recursive so grouped
+    folders such as ``experiments/k5`` are selectable, but files from sibling
+    folders are never merged unless the user selects that exact folder.
+    """
+
+    if not result_root.exists():
+        return []
+
+    result_sets: list[ResultSet] = []
+    result_directories = {path.parent for path in result_root.rglob("*.summary.json")}
+    for directory in sorted(
+        result_directories,
+        key=lambda path: (path.relative_to(result_root).parts if path != result_root else ()),
+    ):
+        relative = directory.relative_to(result_root)
+        parts = relative.parts
+        if parts and parts[0] == "archive":
+            continue
+        label = "." if str(relative) == "." else relative.as_posix()
+        result_sets.append(ResultSet(label=label, path=directory))
+    return result_sets
 
 
 def discover_result_bundles(
@@ -87,10 +126,39 @@ def discover_result_bundles(
     return bundles
 
 
+def _read_dashboard_config(
+    result_dir: Path,
+    warning_messages: list[str] | None = None,
+) -> dict[str, Any] | None:
+    """Read optional per-result-set dashboard configuration."""
+
+    for filename in DASHBOARD_CONFIG_FILENAMES:
+        config_path = result_dir / filename
+        if not config_path.exists():
+            continue
+        try:
+            payload = json.loads(config_path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+            message = f"Skipping invalid dashboard config {config_path.name}: {exc}"
+            logger.warning(message)
+            if warning_messages is not None:
+                warning_messages.append(message)
+            return None
+        if not isinstance(payload, dict):
+            message = f"Skipping invalid dashboard config {config_path.name}: JSON object required"
+            logger.warning(message)
+            if warning_messages is not None:
+                warning_messages.append(message)
+            return None
+        return payload
+    return None
+
+
 def load_results(result_dir: Path) -> DashboardResults:
     """Load all dashboard tables from a local result directory."""
 
     warnings: list[str] = []
+    config = _read_dashboard_config(result_dir, warning_messages=warnings)
     try:
         bundles = discover_result_bundles(result_dir, warning_messages=warnings)
     except OSError as exc:
@@ -98,6 +166,7 @@ def load_results(result_dir: Path) -> DashboardResults:
             summary=pd.DataFrame(),
             examples=pd.DataFrame(),
             metrics=pd.DataFrame(),
+            config=config,
             warnings=(str(exc),),
         )
 
@@ -112,5 +181,6 @@ def load_results(result_dir: Path) -> DashboardResults:
         summary=summary,
         examples=examples,
         metrics=metrics,
+        config=config,
         warnings=tuple(warnings),
     )

@@ -35,7 +35,7 @@ def _y_sort(metric: str) -> str:
 def _group_axis(group_by: str, metric: str, group_label: str | None = None) -> alt.Y:
     return alt.Y(
         f"{group_by}:N",
-        title=group_label or group_by,
+        title=None,
         sort=_y_sort(metric),
         axis=alt.Axis(labelLimit=GROUP_AXIS_LABEL_LIMIT),
     )
