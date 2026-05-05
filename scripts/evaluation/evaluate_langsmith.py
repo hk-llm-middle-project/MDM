@@ -13,4 +13,4 @@ if str(PROJECT_ROOT) not in sys.path:
 
 
 if __name__ == "__main__":
-    runpy.run_module("evaluation.evaluate_langsmith", run_name="__main__")
+    runpy.run_module("evaluation.experiments.evaluate_langsmith", run_name="__main__")
