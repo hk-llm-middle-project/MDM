@@ -1,0 +1,28 @@
+{
+  "experiment_name": "MDM retrieval eval - upstage-custom-openai-ensemble-none-cdf3879e",
+  "dataset_name": "MDM embedding query cache eval - upstage custom openai - 20260504",
+  "testset_path": "/Users/user/IdeaProjects/MDM/data/testsets/langsmith/retrieval_eval.jsonl",
+  "evaluation_suite": null,
+  "run_name": "upstage-custom-openai",
+  "loader_strategy": "upstage",
+  "chunker_strategy": "custom",
+  "embedding_provider": "openai",
+  "retriever_strategy": "ensemble",
+  "reranker_strategy": "none",
+  "final_k": 3,
+  "candidate_k": null,
+  "ensemble_bm25_weight": 0.5,
+  "ensemble_candidate_k": 20,
+  "ensemble_use_chunk_id": true,
+  "row_count": 30,
+  "metrics": {
+    "diagram_id_hit": 0.6333333333333333,
+    "location_match": 1.0,
+    "party_type_match": 1.0,
+    "chunk_type_match": 1.0,
+    "keyword_coverage": 0.5561111111111112,
+    "near_miss_not_above_expected": 0.4482758620689655,
+    "retrieval_relevance": 0.8378888888888888,
+    "critical_error": 0.36666666666666664
+  }
+}
