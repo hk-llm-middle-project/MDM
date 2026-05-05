@@ -507,6 +507,24 @@ def build_expected_actual_case_table(
 
 CASE_TABLE_MATCH_STYLE = "background-color: #dcfce7; color: #166534;"
 CASE_TABLE_MISMATCH_STYLE = "background-color: #fee2e2; color: #991b1b;"
+CASE_TABLE_SCORE_METRICS = {
+    "diagram": "diagram_id_hit",
+    "허용 diagram": "diagram_id_hit",
+    "near-miss diagram": "near_miss_not_above_expected",
+    "location": "location_match",
+    "party_type": "party_type_match",
+    "chunk_type": "chunk_type_match",
+    "keyword": "keyword_coverage",
+}
+
+
+def _case_table_style_for_pair(row: pd.Series, suffix: str, expected: str, actual: str) -> str:
+    metric = CASE_TABLE_SCORE_METRICS.get(suffix)
+    if metric is not None and metric in row.index:
+        score = pd.to_numeric([row.get(metric)], errors="coerce")[0]
+        if not pd.isna(score):
+            return CASE_TABLE_MATCH_STYLE if float(score) >= 1 else CASE_TABLE_MISMATCH_STYLE
+    return CASE_TABLE_MATCH_STYLE if actual == expected else CASE_TABLE_MISMATCH_STYLE
 
 
 def build_expected_actual_case_table_styles(table: pd.DataFrame) -> pd.DataFrame:
@@ -523,11 +541,7 @@ def build_expected_actual_case_table_styles(table: pd.DataFrame) -> pd.DataFrame
             actual = str(row.get(actual_column)).strip()
             if expected == "-" and actual == "-":
                 continue
-            style = (
-                CASE_TABLE_MATCH_STYLE
-                if actual == expected
-                else CASE_TABLE_MISMATCH_STYLE
-            )
+            style = _case_table_style_for_pair(row, suffix, expected, actual)
             styles.loc[index, expected_column] = style
             styles.loc[index, actual_column] = style
     return styles

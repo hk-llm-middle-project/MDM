@@ -30,6 +30,7 @@ GROUP_BY_LABELS = {
     "reranker_strategy": "reranker",
     "retriever_reranker": "retriever + reranker",
 }
+FILTER_OPERATORS = ("==", "!=", "<=", ">=", "<", ">")
 SUITE_DEFAULT_METRICS = {
     "retrieval": (
         "diagram_id_hit",
@@ -182,6 +183,74 @@ def metric_caption(metric: str) -> str:
     return caption
 
 
+def _metric_filter_mask(values: pd.Series, operator: str, threshold: float) -> pd.Series:
+    numeric = pd.to_numeric(values, errors="coerce")
+    valid = numeric.notna()
+    if operator == "==":
+        return valid & (numeric == threshold)
+    if operator == "!=":
+        return valid & (numeric != threshold)
+    if operator == "<=":
+        return valid & (numeric <= threshold)
+    if operator == ">=":
+        return valid & (numeric >= threshold)
+    if operator == "<":
+        return valid & (numeric < threshold)
+    if operator == ">":
+        return valid & (numeric > threshold)
+    raise ValueError(f"Unknown metric filter operator: {operator}")
+
+
+def _metrics_for_summary_rows(
+    metrics: pd.DataFrame,
+    filtered_summary: pd.DataFrame,
+) -> pd.DataFrame:
+    if filtered_summary.empty:
+        return metrics.iloc[0:0].copy()
+
+    if "result_stem" in metrics.columns and "result_stem" in filtered_summary.columns:
+        result_stems = filtered_summary["result_stem"].dropna().astype(str)
+        return metrics[metrics["result_stem"].astype(str).isin(set(result_stems))].copy()
+
+    fallback_keys = [
+        column
+        for column in (
+            "run_label",
+            "run_name",
+            "loader_strategy",
+            "chunker_strategy",
+            "embedding_provider",
+            "retriever_strategy",
+            "reranker_strategy",
+            "retrieval_input_mode",
+        )
+        if column in metrics.columns and column in filtered_summary.columns
+    ]
+    if not fallback_keys:
+        return metrics.copy()
+
+    keys = filtered_summary[fallback_keys].drop_duplicates()
+    return metrics.merge(keys, on=fallback_keys, how="inner")
+
+
+def filter_metric_frames(
+    summary: pd.DataFrame,
+    metrics: pd.DataFrame,
+    metric: str,
+    operator: str,
+    threshold: float,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Filter summary and long-form metric rows by a summary metric condition."""
+
+    if metric not in summary.columns:
+        empty_summary = summary.iloc[0:0].copy()
+        return empty_summary, metrics.iloc[0:0].copy()
+
+    mask = _metric_filter_mask(summary[metric], operator, threshold).fillna(False)
+    filtered_summary = summary[mask].copy()
+    return filtered_summary, _metrics_for_summary_rows(metrics, filtered_summary)
+
+
 def render(
     summary: pd.DataFrame,
     metrics: pd.DataFrame,
@@ -194,7 +263,36 @@ def render(
         st.info("No metric data to compare.")
         return
 
-    group_by_options = available_group_by_options(metrics)
+    filtered_summary = summary
+    filtered_metrics = metrics
+    with st.expander("Metric filters", expanded=False):
+        use_metric_filter = st.checkbox("Filter by metric value")
+        if use_metric_filter:
+            default_filter_index = (
+                available.index("critical_error") if "critical_error" in available else 0
+            )
+            filter_metric = st.selectbox(
+                "Filter metric",
+                available,
+                index=default_filter_index,
+            )
+            operator = st.selectbox("Condition", FILTER_OPERATORS, index=0)
+            threshold = st.number_input("Value", value=0.0)
+            filtered_summary, filtered_metrics = filter_metric_frames(
+                summary,
+                metrics,
+                filter_metric,
+                operator,
+                float(threshold),
+            )
+            st.caption(f"{len(filtered_summary)} / {len(summary)} runs matched.")
+
+    filtered_available = _available_metrics(filtered_summary)
+    if filtered_summary.empty or filtered_metrics.empty or not filtered_available:
+        st.info("No metric data matched the selected filters.")
+        return
+
+    group_by_options = available_group_by_options(filtered_metrics)
     if not group_by_options:
         st.info("No grouping columns found.")
         return
@@ -207,8 +305,8 @@ def render(
     )
     selected_metrics = st.multiselect(
         "Metrics",
-        available,
-        default=default_metric_selection(available, result_set_label, config),
+        filtered_available,
+        default=default_metric_selection(filtered_available, result_set_label, config),
     )
     if not selected_metrics:
         st.info("No metrics selected.")
@@ -219,7 +317,7 @@ def render(
         st.caption(metric_caption(metric))
         st.altair_chart(
             metric_bar_chart(
-                metrics,
+                filtered_metrics,
                 metric=metric,
                 group_by=group_by,
                 group_label=group_by_label(group_by),

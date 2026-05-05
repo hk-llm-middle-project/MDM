@@ -422,6 +422,7 @@ def build_metric_frame(summary_frame: pd.DataFrame) -> pd.DataFrame:
                 "retriever_reranker",
                 "combo",
                 "run_label",
+                "result_stem",
                 "metric",
                 "score",
             ]
@@ -459,6 +460,7 @@ def build_metric_frame(summary_frame: pd.DataFrame) -> pd.DataFrame:
         "retriever_reranker",
         "combo",
         "run_label",
+        "result_stem",
     ]
     id_columns = [column for column in id_columns if column in summary_frame.columns]
     value_columns = [
