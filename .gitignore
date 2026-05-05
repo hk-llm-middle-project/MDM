@@ -17,6 +17,7 @@ data/embedding_cache/
 .tmp_tests/
 .tmp_unittest/
 tests/results/
+evaluation/results/archive/
 
 # Parser experiment image artifacts
 experiments/parser/llamaparser/**/images/
