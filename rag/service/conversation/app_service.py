@@ -14,6 +14,7 @@ from rag.service.conversation.pipelines.accident_analysis import (
 )
 from rag.service.intake.intake_service import evaluate_input_sufficiency
 from rag.service.intake.schema import IntakeState
+from rag.service.progress import ProgressCallback
 from rag.service.session.schema import ChatMessage
 from rag.service.tracing import TraceContext
 
@@ -27,6 +28,7 @@ def answer_question_with_intake(
     embedding_provider: str = DEFAULT_EMBEDDING_PROVIDER,
     chat_history: list[ChatMessage] | None = None,
     trace_context: TraceContext | None = None,
+    progress_callback: ProgressCallback | None = None,
 ) -> AnswerResult:
     """intake, 일반 대화, RAG 분석을 조율해 답변을 반환합니다."""
     if chat_history is None:
@@ -41,6 +43,7 @@ def answer_question_with_intake(
             trace_context=trace_context,
             intake_evaluator=evaluate_input_sufficiency,
             analyzer=analyze_question,
+            progress_callback=progress_callback,
         )
         return AnswerResult(
             answer=pipeline_result.answer,
@@ -64,6 +67,7 @@ def answer_question_with_intake(
         trace_context=trace_context,
         intake_evaluator=evaluate_input_sufficiency,
         analyzer=analyze_question,
+        progress_callback=progress_callback,
     )
 
 

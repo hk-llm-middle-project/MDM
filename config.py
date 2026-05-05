@@ -52,9 +52,9 @@ DEFAULT_ENSEMBLE_USE_CHUNK_ID = True
 ENSEMBLE_ID_KEY = "chunk_id"
 
 DEFAULT_EMBEDDING_PROVIDER = "bge"
-DEFAULT_MODE = "fast"
+DEFAULT_MODE = "Pro"
 MODE_PRESETS = {
-    "fast": {
+    "Fast": {
         "loader_strategy": "llamaparser",
         "chunker_strategy": "case-boundary",
         "embedding_provider": DEFAULT_EMBEDDING_PROVIDER,
@@ -64,7 +64,7 @@ MODE_PRESETS = {
         "ensemble_candidate_k": DEFAULT_ENSEMBLE_CANDIDATE_K,
         "ensemble_use_chunk_id": DEFAULT_ENSEMBLE_USE_CHUNK_ID,
     },
-    "thinking": {
+    "Thinking": {
         "loader_strategy": "llamaparser",
         "chunker_strategy": "case-boundary",
         "embedding_provider": DEFAULT_EMBEDDING_PROVIDER,
@@ -74,7 +74,7 @@ MODE_PRESETS = {
         "ensemble_candidate_k": DEFAULT_ENSEMBLE_CANDIDATE_K,
         "ensemble_use_chunk_id": DEFAULT_ENSEMBLE_USE_CHUNK_ID,
     },
-    "pro": {
+    "Pro": {
         "loader_strategy": "upstage",
         "chunker_strategy": "custom",
         "embedding_provider": DEFAULT_EMBEDDING_PROVIDER,
@@ -127,6 +127,12 @@ def get_session_ttl_seconds() -> int | None:
     except ValueError:
         return None
     return ttl if ttl > 0 else None
+
+
+def get_debug_progress_enabled() -> bool:
+    """Streamlit 진행 상태를 개발자용 상세 박스로 표시할지 반환합니다."""
+    value = _optional_env("DEBUG_PROGRESS", "false")
+    return value is not None and value.lower() in {"1", "true", "yes", "on"}
 
 
 def get_embedding_query_cache_enabled() -> bool:

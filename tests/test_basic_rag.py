@@ -444,6 +444,55 @@ class BasicRagTest(unittest.TestCase):
             strategy_config=pipeline_config.reranker_config,
         )
 
+    def test_run_retrieval_pipeline_reports_rerank_progress_only_when_needed(self):
+        components = build_retrieval_components(MagicMock())
+        progress_events: list[str] = []
+
+        with (
+            patch(
+                "rag.pipeline.retrieval.retrieve",
+                return_value=[Document(page_content="candidate")],
+            ),
+            patch(
+                "rag.pipeline.retrieval.rerank",
+                return_value=[Document(page_content="final")],
+            ),
+        ):
+            run_retrieval_pipeline(
+                components,
+                "query",
+                pipeline_config=RetrievalPipelineConfig(
+                    reranker_strategy="flashrank",
+                    final_k=1,
+                ),
+                progress_callback=progress_events.append,
+            )
+
+        self.assertEqual(progress_events, ["관련 근거를 정렬하는 중"])
+
+        progress_events.clear()
+        with (
+            patch(
+                "rag.pipeline.retrieval.retrieve",
+                return_value=[Document(page_content="candidate")],
+            ),
+            patch(
+                "rag.pipeline.retrieval.rerank",
+                return_value=[Document(page_content="final")],
+            ),
+        ):
+            run_retrieval_pipeline(
+                components,
+                "query",
+                pipeline_config=RetrievalPipelineConfig(
+                    reranker_strategy="none",
+                    final_k=1,
+                ),
+                progress_callback=progress_events.append,
+            )
+
+        self.assertEqual(progress_events, [])
+
     def test_run_retrieval_pipeline_skips_cross_encoder_prewarm_in_subprocess_mode(self):
         events = []
         candidate_documents = [Document(page_content="candidate")]
@@ -2195,6 +2244,44 @@ class BasicRagTest(unittest.TestCase):
         self.assertEqual(langchain_config["metadata"]["session_id"], "session-1")
         self.assertEqual(langchain_config["metadata"]["user_id"], "local")
         self.assertEqual(langchain_config["tags"], ["mdm", "pdfplumber", "bge"])
+
+    def test_analyze_question_reports_search_and_answer_progress(self):
+        from rag.service.analysis.analysis_service import analyze_question
+
+        fake_document = Document(page_content="context")
+        fake_llm = MagicMock()
+        fake_llm.invoke.return_value = MagicMock(
+            content='{"fault_ratio_a":70,"fault_ratio_b":30,"response":"answer"}'
+        )
+        progress_events: list[str] = []
+        progress_details: list[str] = []
+
+        class FakeProgress:
+            def __call__(self, label: str) -> None:
+                progress_events.append(label)
+
+            def detail(self, detail: str) -> None:
+                progress_details.append(detail)
+
+        with (
+            patch("rag.service.analysis.analysis_service.get_retrieval_components", return_value="components"),
+            patch("rag.service.analysis.analysis_service.run_retrieval_pipeline", return_value=[fake_document]),
+            patch("rag.service.analysis.analysis_service.ChatOpenAI", return_value=fake_llm),
+        ):
+            answer, contexts = analyze_question(
+                "query",
+                progress_callback=FakeProgress(),
+            )
+
+        self.assertEqual(answer, "answer")
+        self.assertEqual(contexts, ["context"])
+        self.assertEqual(
+            progress_events,
+            ["과실비율 기준 문서를 검색하는 중", "과실비율 판단을 정리하는 중"],
+        )
+        self.assertIn("검색 질의: query", progress_details)
+        self.assertIn("검색 결과: 1개", progress_details)
+        self.assertIn("과실비율: A 70% / B 30%", progress_details)
 
     def test_analyze_question_logs_embedding_query_cache_hit(self):
         from rag.service.analysis.analysis_service import analyze_question, logger

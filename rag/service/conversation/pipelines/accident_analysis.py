@@ -9,6 +9,13 @@ from rag.service.analysis.answer_schema import AnalysisResult, RetrievedContext
 from rag.service.conversation.schema import TurnResultType
 from rag.service.intake.intake_service import build_default_follow_up_questions
 from rag.service.intake.schema import IntakeDecision, IntakeState, QuerySlots, UserSearchMetadata
+from rag.service.progress import (
+    PROGRESS_INTAKE,
+    PROGRESS_NEEDS_CHECK,
+    ProgressCallback,
+    report_progress,
+    report_progress_detail,
+)
 from rag.service.session.schema import ChatMessage
 from rag.service.tracing import TraceContext
 
@@ -221,6 +228,44 @@ def build_fallback_notice(answer: str) -> str:
     return f"입력 정보가 충분하지 않아 정확도가 낮을 수 있습니다. 현재 설명만으로 가능한 범위에서 찾아봤습니다.\n\n{answer}"
 
 
+def report_metadata_progress(
+    progress_callback: ProgressCallback | None,
+    metadata: UserSearchMetadata,
+) -> None:
+    """개발자용 진행 박스에 intake 결과를 요약합니다."""
+    report_progress_detail(
+        progress_callback,
+        f"사고 대상: {metadata.party_type or '미확인'}",
+    )
+    report_progress_detail(
+        progress_callback,
+        f"사고 유형: {metadata.location or '미확인'}",
+    )
+    if metadata.retrieval_query:
+        report_progress_detail(progress_callback, f"검색 질의 후보: {metadata.retrieval_query}")
+
+    slot_values = {
+        "road_control": metadata.query_slots.road_control,
+        "relation": metadata.query_slots.relation,
+        "a_signal": metadata.query_slots.a_signal,
+        "b_signal": metadata.query_slots.b_signal,
+        "a_movement": metadata.query_slots.a_movement,
+        "b_movement": metadata.query_slots.b_movement,
+        "road_priority": metadata.query_slots.road_priority,
+        "special_condition": metadata.query_slots.special_condition,
+    }
+    filled_slots = [
+        f"{key}={value}"
+        for key, value in slot_values.items()
+        if value is not None
+    ]
+    if filled_slots:
+        report_progress_detail(
+            progress_callback,
+            f"세부 단서: {', '.join(filled_slots)}",
+        )
+
+
 def reset_intake_progress(search_metadata: UserSearchMetadata) -> IntakeState:
     """완료된 사고 metadata는 남기고 진행 중인 follow-up 상태만 초기화합니다."""
     return IntakeState(search_metadata=search_metadata)
@@ -258,9 +303,11 @@ def answer_accident_analysis(
     trace_context: TraceContext | None = None,
     intake_evaluator: IntakeEvaluator,
     analyzer: Analyzer,
+    progress_callback: ProgressCallback | None = None,
 ) -> AccidentAnalysisResult:
     """사고 분석 흐름을 처리하고 답변, context, 상태, 결과 타입을 반환합니다."""
     current_state = intake_state or IntakeState()
+    report_progress(progress_callback, PROGRESS_INTAKE)
     intake_decision = evaluate_with_optional_context(
         intake_evaluator,
         question,
@@ -274,7 +321,16 @@ def answer_accident_analysis(
         question,
         current_state.last_missing_fields,
     )
+    report_metadata_progress(progress_callback, merged_metadata)
+    report_progress(progress_callback, PROGRESS_NEEDS_CHECK)
     missing_field_names = get_missing_search_fields(merged_metadata)
+    if missing_field_names:
+        report_progress_detail(
+            progress_callback,
+            f"추가 정보 필요: {', '.join(missing_field_names)}",
+        )
+    else:
+        report_progress_detail(progress_callback, "추가 정보: 충분")
 
     if missing_field_names:
         if current_state.attempt_count < MAX_FOLLOW_UP_ATTEMPTS:
@@ -308,6 +364,8 @@ def answer_accident_analysis(
             analysis_kwargs["chat_history"] = chat_history
         if trace_context is not None:
             analysis_kwargs["trace_context"] = trace_context
+        if progress_callback is not None:
+            analysis_kwargs["progress_callback"] = progress_callback
         analysis_result = normalize_analysis_result(
             analyzer(
                 intake_decision.normalized_description or question,
@@ -342,6 +400,8 @@ def answer_accident_analysis(
         analysis_kwargs["chat_history"] = chat_history
     if trace_context is not None:
         analysis_kwargs["trace_context"] = trace_context
+    if progress_callback is not None:
+        analysis_kwargs["progress_callback"] = progress_callback
     analysis_result = normalize_analysis_result(
         analyzer(
             intake_decision.normalized_description,
