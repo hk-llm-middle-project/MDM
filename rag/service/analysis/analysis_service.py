@@ -1,5 +1,7 @@
 """사고 질의를 분석하고 RAG 답변을 생성합니다."""
 
+import logging
+
 from langchain_openai import ChatOpenAI
 
 from config import (
@@ -9,6 +11,7 @@ from config import (
     LLM_MODEL,
 )
 from rag.pipeline.retrieval import RetrievalPipelineConfig, run_retrieval_pipeline
+from rag.pipeline.retriever.common import get_embedding_function_from_vectorstore
 from rag.service.analysis.answer_schema import AnalysisResult, RetrievedContext, parse_structured_answer
 from rag.service.analysis.prompt import build_prompt
 from rag.service.intake.filter_service import build_metadata_filters
@@ -16,6 +19,19 @@ from rag.service.intake.schema import UserSearchMetadata
 from rag.service.session.schema import ChatMessage
 from rag.service.tracing import TraceContext
 from rag.service.vectorstore.vectorstore_service import get_retrieval_components
+
+
+logger = logging.getLogger(__name__)
+
+
+def _get_query_cache_stats(components) -> tuple[object | None, int, int]:
+    try:
+        embedding_function = get_embedding_function_from_vectorstore(components.vectorstore)
+    except (AttributeError, ValueError):
+        return None, 0, 0
+    hits = int(getattr(embedding_function, "query_cache_hits", 0) or 0)
+    misses = int(getattr(embedding_function, "query_cache_misses", 0) or 0)
+    return embedding_function, hits, misses
 
 
 def analyze_question(
@@ -46,7 +62,21 @@ def analyze_question(
     }
     if trace_context is not None:
         retrieval_kwargs["trace_context"] = trace_context
+    embedding_function, cache_hits_before, cache_misses_before = _get_query_cache_stats(components)
     documents = run_retrieval_pipeline(components, retrieval_query, **retrieval_kwargs)
+    if embedding_function is not None:
+        cache_hits_after = int(getattr(embedding_function, "query_cache_hits", 0) or 0)
+        cache_misses_after = int(getattr(embedding_function, "query_cache_misses", 0) or 0)
+        cache_hits = cache_hits_after - cache_hits_before
+        cache_misses = cache_misses_after - cache_misses_before
+        if cache_hits > 0:
+            logger.info(
+                "[embedding-query-cache] hit provider=%s query=%s hits=%s misses=%s",
+                embedding_provider,
+                retrieval_query,
+                cache_hits,
+                cache_misses,
+            )
     retrieved_contexts = [
         RetrievedContext(
             content=document.page_content,
@@ -55,9 +85,6 @@ def analyze_question(
         for document in documents
     ]
     contexts = [context.content for context in retrieved_contexts]
-    import logging
-
-    logger = logging.getLogger(__name__)
     logger.info(f"[retrieved] question={question}")
     if retrieval_query != question:
         logger.info(f"[retrieved] retrieval_query={retrieval_query}")

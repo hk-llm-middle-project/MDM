@@ -45,6 +45,27 @@ def prewarm_reranker_model(config: RetrievalPipelineConfig) -> None:
     get_cross_encoder_model(reranker_config.model_name)
 
 
+def extract_party_type_filter(filters: dict[str, object] | None) -> dict[str, object] | None:
+    """복합 metadata filter에서 party_type 조건만 완화 fallback용으로 추출합니다."""
+    if not filters:
+        return None
+    party_type = filters.get("party_type")
+    if party_type is not None:
+        return {"party_type": party_type}
+
+    clauses = filters.get("$and")
+    if not isinstance(clauses, list):
+        return None
+    for clause in clauses:
+        if isinstance(clause, dict) and clause.get("party_type") is not None:
+            return {"party_type": clause["party_type"]}
+    return None
+
+
+def is_same_filter(left: dict[str, object] | None, right: dict[str, object] | None) -> bool:
+    return left == right
+
+
 def run_retrieval_pipeline(
     components: RetrievalComponents,
     query: str,
@@ -68,13 +89,24 @@ def run_retrieval_pipeline(
         retrieve_kwargs["trace_context"] = trace_context
     candidate_documents = retrieve(**retrieve_kwargs)
     if filters is not None and not candidate_documents:
-        fallback_documents = retrieve(**{**retrieve_kwargs, "filters": None})
-        candidate_documents = mark_retrieval_fallback(
-            fallback_documents,
-            fallback_from=f"{config.retriever_strategy}:filtered",
-            fallback_to=f"{config.retriever_strategy}:unfiltered",
-            reason="no documents matched metadata filter",
-        )
+        relaxed_filters = extract_party_type_filter(filters)
+        if relaxed_filters is not None and not is_same_filter(relaxed_filters, filters):
+            fallback_documents = retrieve(**{**retrieve_kwargs, "filters": relaxed_filters})
+            candidate_documents = mark_retrieval_fallback(
+                fallback_documents,
+                fallback_from=f"{config.retriever_strategy}:filtered",
+                fallback_to=f"{config.retriever_strategy}:party_type",
+                reason="no documents matched full metadata filter",
+            )
+
+        if not candidate_documents:
+            fallback_documents = retrieve(**{**retrieve_kwargs, "filters": None})
+            candidate_documents = mark_retrieval_fallback(
+                fallback_documents,
+                fallback_from=f"{config.retriever_strategy}:filtered",
+                fallback_to=f"{config.retriever_strategy}:unfiltered",
+                reason="no documents matched metadata filter",
+            )
 
     rerank_kwargs = {
         "query": query,

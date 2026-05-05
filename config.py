@@ -8,6 +8,8 @@ BASE_DIR = Path(__file__).resolve().parent
 PDF_PATH = BASE_DIR / "data" / "raw" / "230630_자동차사고 과실비율 인정기준_최종.pdf"
 VECTORSTORE_DIR = BASE_DIR / "data" / "vectorstore"
 CHUNK_CACHE_DIR = BASE_DIR / "data" / "chunks"
+EMBEDDING_QUERY_CACHE_DIR = BASE_DIR / "data" / "embedding_cache"
+EMBEDDING_QUERY_CACHE_ENABLED = True
 PAGE_METADATA_DIR = BASE_DIR / "data" / "metadata"
 PAGE_METADATA_PATH = PAGE_METADATA_DIR / "main_pdf_page_metadata.json"
 LLAMA_MD_DIR = BASE_DIR / "data" / "llama_md"
@@ -85,6 +87,7 @@ MODE_PRESETS = {
 }
 OPENAI_EMBEDDING_MODEL = "text-embedding-3-small"
 GOOGLE_EMBEDDING_MODEL = "models/gemini-embedding-001"
+EMBEDDING_QUERY_CACHE_SCHEMA_VERSION = "v1"
 LLM_MODEL = "gpt-5-mini"
 INTAKE_MODEL = "gpt-4o-mini"
 ROUTER_MODEL = "gpt-4o-mini"
@@ -124,6 +127,18 @@ def get_session_ttl_seconds() -> int | None:
     except ValueError:
         return None
     return ttl if ttl > 0 else None
+
+
+def get_embedding_query_cache_enabled() -> bool:
+    """검색 질의 임베딩 캐시를 사용할지 반환합니다."""
+    default = "true" if EMBEDDING_QUERY_CACHE_ENABLED else "false"
+    value = _optional_env("EMBEDDING_QUERY_CACHE_ENABLED", default)
+    return value is not None and value.lower() in {"1", "true", "yes", "on"}
+
+
+def get_embedding_query_cache_dir() -> Path:
+    """검색 질의 임베딩 캐시 디렉터리를 반환합니다."""
+    return EMBEDDING_QUERY_CACHE_DIR
 
 
 def get_vectorstore_dir(

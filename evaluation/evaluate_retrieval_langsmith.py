@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import os
 import re
 import sys
@@ -44,6 +45,7 @@ from rag.indexer import load_vectorstore, vectorstore_exists
 from rag.pipeline.reranker import RERANKER_STRATEGIES
 from rag.pipeline.retrieval import run_retrieval_pipeline
 from rag.pipeline.retriever import RETRIEVAL_STRATEGIES, build_retrieval_components
+from rag.pipeline.retriever.common import get_embedding_function_from_vectorstore
 
 
 DEFAULT_TESTSET_PATH = (
@@ -71,6 +73,7 @@ RERANKER_STRATEGY_INPUT_CHOICES = tuple(
     [*RERANKER_STRATEGY_CHOICES, *RERANKER_STRATEGY_ALIASES]
 )
 CONTENT_PREVIEW_CHARS = 500
+logger = logging.getLogger(__name__)
 EXAMPLE_METADATA_FIELDS = (
     "suite",
     "case_type_codes",
@@ -646,6 +649,7 @@ def build_retrieval_target(
 
     vectorstore = load_vectorstore(vectorstore_dir, embedding_provider=embedding_provider)
     components = build_retrieval_components(vectorstore)
+    embedding_function = get_embedding_function_from_vectorstore(vectorstore)
 
     def retrieval_target(inputs: dict[str, Any]) -> dict[str, Any]:
         question = inputs["question"]
@@ -670,11 +674,25 @@ def build_retrieval_target(
                 else streamlit_config.candidate_k
             ),
         )
+        cache_hits_before = int(getattr(embedding_function, "query_cache_hits", 0) or 0)
+        cache_misses_before = int(getattr(embedding_function, "query_cache_misses", 0) or 0)
         documents = run_retrieval_pipeline(
             components=components,
             query=question,
             pipeline_config=pipeline_config,
         )
+        cache_hits_after = int(getattr(embedding_function, "query_cache_hits", 0) or 0)
+        cache_misses_after = int(getattr(embedding_function, "query_cache_misses", 0) or 0)
+        cache_hits = cache_hits_after - cache_hits_before
+        cache_misses = cache_misses_after - cache_misses_before
+        cache_enabled = bool(getattr(embedding_function, "enabled", False))
+        cache_hit = cache_hits > 0
+        if cache_hit:
+            logger.info(
+                "[embedding-query-cache] hit provider=%s query=%s",
+                embedding_provider,
+                question,
+            )
         retrieved = [
             serialize_document(document, rank)
             for rank, document in enumerate(documents, start=1)
@@ -691,6 +709,10 @@ def build_retrieval_target(
             "ensemble_bm25_weight": ensemble_bm25_weight,
             "ensemble_candidate_k": ensemble_candidate_k,
             "ensemble_use_chunk_id": ensemble_use_chunk_id,
+            "embedding_query_cache_enabled": cache_enabled,
+            "embedding_query_cache_hit": cache_hit,
+            "embedding_query_cache_hits": cache_hits,
+            "embedding_query_cache_misses": cache_misses,
             "retrieved": retrieved,
             "retrieved_metadata": [item["metadata"] for item in retrieved],
             "contexts": [item["page_content"] for item in retrieved],
@@ -1047,6 +1069,45 @@ def summarize_feedback_metrics(dataframe) -> dict[str, float | None]:
     return metrics
 
 
+def summarize_embedding_query_cache(dataframe) -> dict[str, Any]:
+    """Summarize query embedding cache usage recorded in eval outputs."""
+    enabled_column = "outputs.embedding_query_cache_enabled"
+    hit_column = "outputs.embedding_query_cache_hit"
+    hits_column = "outputs.embedding_query_cache_hits"
+    misses_column = "outputs.embedding_query_cache_misses"
+
+    def parse_bool(value: Any) -> bool:
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, str):
+            return value.strip().lower() in {"1", "true", "yes", "on"}
+        return bool(value)
+
+    def numeric_sum(column: str) -> int:
+        if column not in dataframe.columns:
+            return 0
+        try:
+            values = dataframe[column].astype(float).dropna()
+        except (TypeError, ValueError):
+            return 0
+        return int(values.sum()) if len(values) else 0
+
+    enabled = None
+    if enabled_column in dataframe.columns and len(dataframe[enabled_column].dropna()):
+        enabled = parse_bool(dataframe[enabled_column].dropna().iloc[0])
+
+    hit_rows = 0
+    if hit_column in dataframe.columns:
+        hit_rows = int(dataframe[hit_column].fillna(False).map(parse_bool).sum())
+
+    return {
+        "enabled": enabled,
+        "hit_rows": hit_rows,
+        "hits": numeric_sum(hits_column),
+        "misses": numeric_sum(misses_column),
+    }
+
+
 def save_experiment_dataframe(
     dataframe,
     experiment_name: str,
@@ -1092,6 +1153,7 @@ def save_experiment_dataframe(
         "ensemble_bm25_weight": ensemble_bm25_weight,
         "ensemble_candidate_k": ensemble_candidate_k,
         "ensemble_use_chunk_id": ensemble_use_chunk_id,
+        "embedding_query_cache": summarize_embedding_query_cache(dataframe),
         "row_count": int(len(dataframe)),
         "metrics": summarize_feedback_metrics(dataframe),
     }

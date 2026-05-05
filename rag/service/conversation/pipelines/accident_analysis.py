@@ -55,13 +55,54 @@ def normalize_analysis_result(result: AnalysisResult | tuple[str, list[str]]) ->
 def merge_search_metadata(
     previous: UserSearchMetadata,
     current: UserSearchMetadata,
+    current_text: str = "",
+    last_missing_fields: Sequence[str] | None = None,
 ) -> UserSearchMetadata:
     """이전 intake metadata와 이번 입력에서 새로 추출한 값을 병합합니다."""
     return UserSearchMetadata(
-        party_type=current.party_type or previous.party_type,
+        party_type=merge_party_type(
+            previous.party_type,
+            current.party_type,
+            current_text,
+            last_missing_fields,
+        ),
         location=current.location or previous.location,
         retrieval_query=current.retrieval_query or previous.retrieval_query,
         query_slots=merge_query_slots(previous.query_slots, current.query_slots),
+    )
+
+
+def merge_party_type(
+    previous_party_type: str | None,
+    current_party_type: str | None,
+    current_text: str = "",
+    last_missing_fields: Sequence[str] | None = None,
+) -> str | None:
+    """follow-up 답변의 내 차량 표현이 사고 상대 유형을 덮어쓰지 않게 병합합니다."""
+    if previous_party_type is None:
+        return current_party_type
+    if current_party_type is None or current_party_type == previous_party_type:
+        return previous_party_type
+
+    missing_fields = set(last_missing_fields or [])
+    if "party_type" in missing_fields or mentions_counterparty(current_text):
+        return current_party_type
+    return previous_party_type
+
+
+def mentions_counterparty(text: str) -> bool:
+    """사용자가 사고 상대를 명시적으로 다시 말하는지 확인합니다."""
+    normalized = text.replace(" ", "")
+    return any(
+        marker in normalized
+        for marker in (
+            "상대는",
+            "상대가",
+            "상대방은",
+            "상대방이",
+            "부딪힌상대",
+            "사고상대",
+        )
     )
 
 
@@ -230,6 +271,8 @@ def answer_accident_analysis(
     merged_metadata = merge_search_metadata(
         current_state.search_metadata,
         intake_decision.search_metadata,
+        question,
+        current_state.last_missing_fields,
     )
     missing_field_names = get_missing_search_fields(merged_metadata)
 
