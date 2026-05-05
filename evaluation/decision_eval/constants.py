@@ -6,7 +6,7 @@ from config import BASE_DIR
 
 
 DEFAULT_TESTSET_DIR = BASE_DIR / "data" / "testsets" / "langsmith"
-DEFAULT_OUTPUT_DIR = BASE_DIR / "evaluation" / "results" / "langsmith"
+DEFAULT_OUTPUT_DIR = BASE_DIR / "evaluation" / "results" / "uncategorized"
 SUITE_FILES = {
     "intake": "intake_eval.jsonl",
     "router": "router_eval.jsonl",
