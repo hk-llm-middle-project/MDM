@@ -492,7 +492,7 @@ def build_expected_actual_case_table(
                     value_columns.append(column)
         for metric in METRIC_COLUMNS:
             if metric in row.index and _has_display_value(row.get(metric)):
-                record[metric] = pd.to_numeric([row.get(metric)], errors="coerce")[0]
+                record[metric] = pd.to_numeric(row.get(metric), errors="coerce")
         records.append(record)
 
     if not records:
@@ -521,7 +521,7 @@ CASE_TABLE_SCORE_METRICS = {
 def _case_table_style_for_pair(row: pd.Series, suffix: str, expected: str, actual: str) -> str:
     metric = CASE_TABLE_SCORE_METRICS.get(suffix)
     if metric is not None and metric in row.index:
-        score = pd.to_numeric([row.get(metric)], errors="coerce")[0]
+        score = pd.to_numeric(row.get(metric), errors="coerce")
         if not pd.isna(score):
             return CASE_TABLE_MATCH_STYLE if float(score) >= 1 else CASE_TABLE_MISMATCH_STYLE
     return CASE_TABLE_MATCH_STYLE if actual == expected else CASE_TABLE_MISMATCH_STYLE

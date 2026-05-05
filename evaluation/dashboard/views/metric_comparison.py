@@ -246,7 +246,7 @@ def filter_metric_frames(
         empty_summary = summary.iloc[0:0].copy()
         return empty_summary, metrics.iloc[0:0].copy()
 
-    mask = _metric_filter_mask(summary[metric], operator, threshold).fillna(False)
+    mask = _metric_filter_mask(summary[metric], operator, threshold)
     filtered_summary = summary[mask].copy()
     return filtered_summary, _metrics_for_summary_rows(metrics, filtered_summary)
 
