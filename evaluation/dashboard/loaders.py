@@ -20,6 +20,14 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
+class ResultSet:
+    """A selectable folder containing local evaluation result exports."""
+
+    label: str
+    path: Path
+
+
+@dataclass(frozen=True)
 class ResultBundle:
     """A summary JSON file and its optional sibling CSV result export."""
 
@@ -52,6 +60,33 @@ def _read_summary(path: Path) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise ValueError(f"Summary file must contain a JSON object: {path}")
     return payload
+
+
+def discover_result_sets(result_root: Path) -> list[ResultSet]:
+    """Return folders that can be selected as one dashboard result set.
+
+    A result set is any directory under ``result_root`` that directly contains
+    one or more ``*.summary.json`` files. Discovery is recursive so grouped
+    folders such as ``experiments/k5`` are selectable, but files from sibling
+    folders are never merged unless the user selects that exact folder.
+    """
+
+    if not result_root.exists():
+        return []
+
+    result_sets: list[ResultSet] = []
+    result_directories = {path.parent for path in result_root.rglob("*.summary.json")}
+    for directory in sorted(
+        result_directories,
+        key=lambda path: (path.relative_to(result_root).parts if path != result_root else ()),
+    ):
+        relative = directory.relative_to(result_root)
+        parts = relative.parts
+        if parts and parts[0] == "archive":
+            continue
+        label = "." if str(relative) == "." else relative.as_posix()
+        result_sets.append(ResultSet(label=label, path=directory))
+    return result_sets
 
 
 def discover_result_bundles(

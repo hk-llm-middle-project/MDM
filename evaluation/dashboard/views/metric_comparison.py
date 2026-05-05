@@ -5,11 +5,12 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
-from evaluation.dashboard.charts import metric_bar_chart, parser_chunker_heatmap
-from evaluation.dashboard.transforms import COMPARISON_METRIC_COLUMNS, describe_metric
+from evaluation.dashboard.charts import metric_bar_chart
+from evaluation.dashboard.metrics import COMPARISON_METRIC_COLUMNS, describe_metric
 
 
 GROUP_BY_COLUMNS = (
+    "nickname",
     "retriever_strategy",
     "reranker_strategy",
     "retriever_reranker",
@@ -20,6 +21,7 @@ GROUP_BY_COLUMNS = (
     "embedding_provider",
 )
 GROUP_BY_LABELS = {
+    "nickname": "nickname",
     "retriever_strategy": "retriever",
     "reranker_strategy": "reranker",
     "retriever_reranker": "retriever + reranker",
@@ -31,7 +33,17 @@ def _available_metrics(frame: pd.DataFrame) -> list[str]:
 
 
 def available_group_by_options(frame: pd.DataFrame) -> list[str]:
-    return [column for column in GROUP_BY_COLUMNS if column in frame.columns]
+    options: list[str] = []
+    for column in GROUP_BY_COLUMNS:
+        if column not in frame.columns:
+            continue
+        if column == "nickname":
+            values = frame[column].dropna().astype(str).str.strip()
+            if not values[~values.str.lower().isin({"", "nan", "none", "null"})].empty:
+                options.append(column)
+            continue
+        options.append(column)
+    return options
 
 
 def group_by_label(column: str) -> str:
@@ -39,6 +51,8 @@ def group_by_label(column: str) -> str:
 
 
 def default_group_by_index(options: list[str]) -> int:
+    if "nickname" in options:
+        return options.index("nickname")
     if "retriever_reranker" in options:
         return options.index("retriever_reranker")
     if "run_label" in options:
@@ -117,23 +131,3 @@ def render(summary: pd.DataFrame, metrics: pd.DataFrame) -> None:
             ),
             use_container_width=True,
         )
-
-
-def render_matrix(summary: pd.DataFrame) -> None:
-    st.subheader("Parser × Chunker Matrix")
-    available = _available_metrics(summary)
-    if summary.empty or not available:
-        st.info("No summary data to display.")
-        return
-
-    metric = st.selectbox(
-        "Heatmap metric",
-        available,
-        index=available.index("critical_error") if "critical_error" in available else 0,
-    )
-    st.altair_chart(
-        parser_chunker_heatmap(summary, metric=metric),
-        use_container_width=True,
-    )
-    if metric == "critical_error":
-        st.caption("critical_error는 낮을수록 좋습니다.")

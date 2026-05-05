@@ -12,25 +12,72 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from evaluation.dashboard.loaders import DashboardResults, load_results
+from evaluation.dashboard.loaders import DashboardResults, discover_result_sets, load_results
 from evaluation.dashboard.transforms import filter_frame
 from evaluation.dashboard.views import (
     case_detail,
+    case_matrix,
     combo_compare,
+    decision_suites,
     failure_explorer,
     metric_comparison,
+    metric_matrix,
     overview,
-    test_case_matrix,
 )
 
 
-DEFAULT_RESULT_DIR = PROJECT_ROOT / "evaluation" / "results" / "langsmith"
-TAB_LABELS = ["Overview", "Metrics", "Matrix", "Test Cases", "Failures", "Case Detail", "Compare"]
+DEFAULT_RESULT_ROOT = PROJECT_ROOT / "evaluation" / "results"
+DEFAULT_RESULT_ROOT_INPUT = "evaluation/results"
+HIDE_TEXT_INPUT_INSTRUCTIONS_CSS = """
+<style>
+div[data-testid="InputInstructions"] {
+    display: none;
+}
+</style>
+"""
+TAB_LABELS = [
+    "Overview",
+    "Decision Suites",
+    "Metrics",
+    "Matrix",
+    "Test Cases",
+    "Failures",
+    "Case Detail",
+    "Compare",
+]
 
 
 @st.cache_data(show_spinner=False)
 def cached_load_results(result_dir: str) -> DashboardResults:
     return load_results(Path(result_dir))
+
+
+def resolve_result_root(result_root_value: str) -> Path:
+    """Resolve dashboard result roots relative to the project root."""
+
+    raw_value = (result_root_value or DEFAULT_RESULT_ROOT_INPUT).strip()
+    result_root = Path(raw_value).expanduser()
+    if result_root.is_absolute():
+        return result_root
+    return (PROJECT_ROOT / result_root).resolve()
+
+
+def result_set_options(result_root: Path) -> list[tuple[str, Path]]:
+    """Return single-select result folders under the configured root."""
+
+    return [(result_set.label, result_set.path) for result_set in discover_result_sets(result_root)]
+
+
+def display_result_set_path(result_path: Path, result_root: Path) -> str:
+    """Display result-set paths without the common result root prefix."""
+
+    try:
+        relative = result_path.resolve().relative_to(result_root.resolve())
+    except ValueError:
+        return str(result_path)
+    if str(relative) == ".":
+        return "."
+    return relative.as_posix()
 
 
 def option_values(frame: pd.DataFrame, column: str) -> list[str]:
@@ -49,12 +96,24 @@ def main() -> None:
     st.title("MDM Evaluation Dashboard")
 
     with st.sidebar:
+        st.markdown(HIDE_TEXT_INPUT_INSTRUCTIONS_CSS, unsafe_allow_html=True)
         st.header("Filters")
-        result_dir = st.text_input("Result directory", str(DEFAULT_RESULT_DIR))
+        result_root_value = st.text_input("Result root", DEFAULT_RESULT_ROOT_INPUT)
+        result_root = resolve_result_root(result_root_value)
+        available_result_sets = result_set_options(result_root)
+        if available_result_sets:
+            result_set_labels = [label for label, _ in available_result_sets]
+            selected_result_set = st.selectbox("Result set", result_set_labels, index=0)
+            selected_result_path = dict(available_result_sets)[selected_result_set]
+            st.caption(display_result_set_path(selected_result_path, result_root))
+        else:
+            selected_result_set = None
+            selected_result_path = result_root
+            st.info("No result sets found under the selected root.")
         if st.button("Reload"):
             cached_load_results.clear()
 
-    results = cached_load_results(result_dir)
+    results = cached_load_results(str(selected_result_path))
     for warning in results.warnings:
         st.warning(warning)
 
@@ -138,16 +197,18 @@ def main() -> None:
     with tabs[0]:
         overview.render(summary)
     with tabs[1]:
-        metric_comparison.render(summary, metrics)
+        decision_suites.render(summary, examples, metrics)
     with tabs[2]:
-        metric_comparison.render_matrix(summary)
+        metric_comparison.render(summary, metrics)
     with tabs[3]:
-        test_case_matrix.render(examples)
+        metric_matrix.render(summary)
     with tabs[4]:
-        failure_explorer.render(examples)
+        case_matrix.render(examples)
     with tabs[5]:
-        case_detail.render(examples)
+        failure_explorer.render(examples)
     with tabs[6]:
+        case_detail.render(examples)
+    with tabs[7]:
         combo_compare.render(examples)
 
 

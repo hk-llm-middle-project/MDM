@@ -1,15 +1,16 @@
-"""Test-case by run metric matrix view."""
+"""Case-by-run metric matrix view."""
 
 from __future__ import annotations
 
 import pandas as pd
 import streamlit as st
 
-from evaluation.dashboard.transforms import METRIC_COLUMNS, build_case_metric_matrix
+from evaluation.dashboard.metrics import METRIC_COLUMNS
+from evaluation.dashboard.case_tables import build_case_metric_matrix
 
 
 def render(examples: pd.DataFrame) -> None:
-    st.subheader("Test Case Matrix")
+    st.subheader("Case Matrix")
     if examples.empty:
         st.info("No example-level results found.")
         return

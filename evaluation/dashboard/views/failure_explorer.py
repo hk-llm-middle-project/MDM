@@ -5,12 +5,8 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
-from evaluation.dashboard.transforms import (
-    METRIC_COLUMNS,
-    build_failure_breakdown,
-    describe_metric,
-    filter_failed_examples,
-)
+from evaluation.dashboard.metrics import METRIC_COLUMNS, describe_metric
+from evaluation.dashboard.transforms import build_failure_breakdown, filter_failed_examples
 
 
 def render(examples: pd.DataFrame) -> None:
