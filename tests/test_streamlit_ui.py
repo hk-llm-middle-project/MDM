@@ -1,4 +1,6 @@
+import os
 import unittest
+from unittest.mock import patch
 
 from langchain_core.documents import Document
 from main import (
@@ -11,10 +13,12 @@ from main import (
     build_ensemble_weight_caption_html,
     build_ensemble_weight_label,
     build_pipeline_config,
+    create_progress_reporter,
     delete_session_and_select_fallback,
     get_chunker_strategy_options,
     normalize_chunker_strategy,
 )
+from config import get_debug_progress_enabled
 from rag.pipeline.reranker import (
     CrossEncoderRerankerConfig,
     FlashrankRerankerConfig,
@@ -32,6 +36,54 @@ class FakeCrossEncoder:
     def score(self, pairs):
         self.pairs = pairs
         return [0.2, 0.9]
+
+
+class FakeProgressSlot:
+    def __init__(self):
+        self.markdowns = []
+        self.markdown_kwargs = []
+
+    def markdown(self, label, **kwargs):
+        self.markdowns.append(label)
+        self.markdown_kwargs.append(kwargs)
+
+
+class FakeStatusBox:
+    def __init__(self):
+        self.writes = []
+        self.updates = []
+        self.status_boxes = []
+        self.status_calls = []
+
+    def write(self, label):
+        self.writes.append(label)
+
+    def update(self, **kwargs):
+        self.updates.append(kwargs)
+
+    def status(self, label, expanded=False):
+        self.status_calls.append({"label": label, "expanded": expanded})
+        status_box = FakeStatusBox()
+        self.status_boxes.append(status_box)
+        return status_box
+
+
+class FakeStreamlit:
+    def __init__(self):
+        self.slot = FakeProgressSlot()
+        self.status_boxes = []
+        self.status_calls = []
+        self.empty_calls = 0
+
+    def empty(self):
+        self.empty_calls += 1
+        return self.slot
+
+    def status(self, label, expanded=False):
+        self.status_calls.append({"label": label, "expanded": expanded})
+        status_box = FakeStatusBox()
+        self.status_boxes.append(status_box)
+        return status_box
 
 
 class StreamlitUiTest(unittest.TestCase):
@@ -203,6 +255,87 @@ class StreamlitUiTest(unittest.TestCase):
         self.assertIn("[data-testid=\"stTickBar\"]", css)
         self.assertIn("display: none", css)
 
+    def test_debug_progress_env_flag_controls_verbose_status_box(self):
+        with patch.dict(os.environ, {"DEBUG_PROGRESS": "true"}):
+            self.assertTrue(get_debug_progress_enabled())
+
+        with patch.dict(os.environ, {"DEBUG_PROGRESS": "false"}):
+            self.assertFalse(get_debug_progress_enabled())
+
+    def test_progress_reporter_uses_plain_text_when_debug_is_off(self):
+        fake_st = FakeStreamlit()
+
+        reporter = create_progress_reporter(False, streamlit_module=fake_st)
+        reporter.update("대화 의도를 판단하는 중")
+        reporter.detail("대화 의도: 사고 분석")
+        reporter.complete()
+
+        self.assertEqual(fake_st.status_calls, [])
+        self.assertEqual(fake_st.empty_calls, 1)
+        self.assertEqual(len(fake_st.slot.markdowns), 3)
+        self.assertTrue(all("progress-spinner" in html for html in fake_st.slot.markdowns))
+        self.assertTrue(all("progress-line" in html for html in fake_st.slot.markdowns))
+        self.assertIn("사고 설명을 확인하는 중", fake_st.slot.markdowns[0])
+        self.assertIn("대화 의도를 판단하는 중", fake_st.slot.markdowns[1])
+        self.assertIn("참고 근거를 준비하는 중", fake_st.slot.markdowns[2])
+        self.assertTrue(
+            all(
+                kwargs == {"unsafe_allow_html": True}
+                for kwargs in fake_st.slot.markdown_kwargs
+            )
+        )
+
+    def test_progress_reporter_uses_collapsible_status_steps_when_debug_is_on(self):
+        fake_st = FakeStreamlit()
+
+        reporter = create_progress_reporter(True, streamlit_module=fake_st)
+        reporter.update("대화 의도를 판단하는 중")
+        reporter.detail("대화 의도: 사고 분석")
+        reporter.update("사고 단서를 추출하는 중")
+        reporter.detail("사고 대상: 자동차")
+        reporter.complete()
+
+        self.assertEqual(
+            fake_st.status_calls,
+            [
+                {"label": "분석 진행 상황", "expanded": True},
+            ],
+        )
+        self.assertEqual(fake_st.empty_calls, 0)
+        self.assertEqual(
+            fake_st.status_boxes[0].status_calls,
+            [
+                {"label": "사고 설명을 확인하는 중", "expanded": True},
+                {"label": "대화 의도를 판단하는 중", "expanded": True},
+                {"label": "사고 단서를 추출하는 중", "expanded": True},
+                {"label": "참고 근거를 준비하는 중", "expanded": True},
+            ],
+        )
+        inner_status_boxes = fake_st.status_boxes[0].status_boxes
+        self.assertEqual(
+            inner_status_boxes[1].writes,
+            ["대화 의도: 사고 분석"],
+        )
+        self.assertEqual(
+            inner_status_boxes[2].writes,
+            ["사고 대상: 자동차"],
+        )
+        self.assertEqual(
+            inner_status_boxes[0].updates[-1],
+            {"state": "complete", "expanded": False},
+        )
+        self.assertEqual(
+            inner_status_boxes[1].updates[-1],
+            {"state": "complete", "expanded": False},
+        )
+        self.assertEqual(
+            inner_status_boxes[-1].updates[-1],
+            {"state": "complete", "expanded": False},
+        )
+        self.assertEqual(
+            fake_st.status_boxes[0].updates[-1],
+            {"state": "complete", "expanded": False},
+        )
 
 if __name__ == "__main__":
     unittest.main()

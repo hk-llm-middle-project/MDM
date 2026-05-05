@@ -129,6 +129,12 @@ def get_session_ttl_seconds() -> int | None:
     return ttl if ttl > 0 else None
 
 
+def get_debug_progress_enabled() -> bool:
+    """Streamlit 진행 상태를 개발자용 상세 박스로 표시할지 반환합니다."""
+    value = _optional_env("DEBUG_PROGRESS", "false")
+    return value is not None and value.lower() in {"1", "true", "yes", "on"}
+
+
 def get_embedding_query_cache_enabled() -> bool:
     """검색 질의 임베딩 캐시를 사용할지 반환합니다."""
     default = "true" if EMBEDDING_QUERY_CACHE_ENABLED else "false"

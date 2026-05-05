@@ -29,6 +29,7 @@ from config import (
     ENSEMBLE_ID_KEY,
     ENSEMBLE_RETRIEVER_STRATEGIES,
     MODE_PRESETS,
+    get_debug_progress_enabled,
 )
 from rag.embeddings import EMBEDDING_STRATEGIES
 from rag.pipeline.reranker import (
@@ -41,6 +42,7 @@ from rag.pipeline.retriever import EnsembleRetrieverConfig, RETRIEVAL_STRATEGIES
 from rag.service.analysis.answer_schema import RetrievedContext
 from rag.service.conversation.app_service import answer_question_with_intake
 from rag.service.presentation.result_service import truncate_context
+from rag.service.progress import PROGRESS_INPUT, PROGRESS_RESULT
 from rag.service.session import ConversationStore, get_conversation_store
 from rag.service.tracing import TraceContext
 
@@ -63,6 +65,102 @@ MAX_DONUT_PERCENT = 99
 MARKDOWN_HEADING_RE = re.compile(r"^(#{1,6})\s+(?!■\s)(.+)$")
 MARKDOWN_IMAGE_RE = re.compile(r"!\[[^\]]*\]\(([^)]+)\)")
 logger = logging.getLogger(__name__)
+
+
+def render_progress_html(label: str, *, loading: bool = True) -> str:
+    spinner = '<span class="progress-spinner" aria-hidden="true"></span>' if loading else ""
+    return (
+        '<div class="progress-line">'
+        f"{spinner}"
+        f'<span>{escape(label)}</span>'
+        "</div>"
+    )
+
+
+class ProgressReporter:
+    """Render user progress as plain text or debug details."""
+
+    def __init__(self, *, debug_enabled: bool, streamlit_module=st):
+        self.debug_enabled = debug_enabled
+        self._streamlit = streamlit_module
+        self._last_label = PROGRESS_INPUT
+        if debug_enabled:
+            self._outer_container = streamlit_module.status(
+                "분석 진행 상황",
+                expanded=True,
+            )
+            self._container = self._outer_container.status(PROGRESS_INPUT, expanded=True)
+        else:
+            self._outer_container = None
+            self._container = streamlit_module.empty()
+            self._container.markdown(
+                render_progress_html(PROGRESS_INPUT),
+                unsafe_allow_html=True,
+            )
+
+    def __call__(self, label: str) -> None:
+        self.update(label)
+
+    def update(self, label: str) -> None:
+        if label == self._last_label:
+            return
+        if self.debug_enabled:
+            self._container.update(state="complete", expanded=False)
+            self._container = self._outer_container.status(label, expanded=True)
+        else:
+            self._container.markdown(
+                render_progress_html(label),
+                unsafe_allow_html=True,
+            )
+        self._last_label = label
+
+    def detail(self, detail: str) -> None:
+        if self.debug_enabled:
+            self._container.write(detail)
+
+    def complete(self) -> None:
+        already_showing_result = self._last_label == PROGRESS_RESULT
+        if self.debug_enabled:
+            if not already_showing_result:
+                self._container.update(state="complete", expanded=False)
+                self._container = self._outer_container.status(
+                    PROGRESS_RESULT,
+                    expanded=True,
+                )
+            self._container.update(state="complete", expanded=False)
+            self._outer_container.update(state="complete", expanded=False)
+        elif not already_showing_result:
+            self._container.markdown(
+                render_progress_html(PROGRESS_RESULT),
+                unsafe_allow_html=True,
+            )
+        self._last_label = PROGRESS_RESULT
+
+    def error(self) -> None:
+        self._last_label = "오류가 발생했습니다"
+        if self.debug_enabled:
+            self._container.update(
+                label="오류가 발생했습니다",
+                state="error",
+                expanded=True,
+            )
+            self._outer_container.update(state="error", expanded=True)
+        else:
+            self._container.markdown(
+                render_progress_html("오류가 발생했습니다", loading=False),
+                unsafe_allow_html=True,
+            )
+
+
+def create_progress_reporter(
+    debug_enabled: bool,
+    *,
+    streamlit_module=st,
+) -> ProgressReporter:
+    return ProgressReporter(
+        debug_enabled=debug_enabled,
+        streamlit_module=streamlit_module,
+    )
 
 
 def ensure_active_session(store: ConversationStore) -> str:
@@ -651,6 +749,25 @@ def render_app_css() -> None:
   padding-top: 0;
   font-weight: 750;
 }
+.progress-line {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0.25rem 0 1rem;
+  color: inherit;
+  font-size: 0.98rem;
+  font-weight: 850;
+  opacity: 0.78;
+}
+.progress-spinner {
+  width: 0.9rem;
+  height: 0.9rem;
+  flex: 0 0 auto;
+  border: 2px solid rgba(220, 38, 38, 0.22);
+  border-top-color: #dc2626;
+  border-radius: 999px;
+  animation: mdmSpin 720ms linear infinite;
+}
 .donut-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(74px, 1fr));
@@ -784,6 +901,11 @@ def render_app_css() -> None:
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+@keyframes mdmSpin {
+  to {
+    transform: rotate(360deg);
   }
 }
 [data-testid="stImage"] {
@@ -1167,38 +1289,45 @@ def render_chat(
         },
     )
 
-    with st.spinner("키워드 추출 중"):
-        try:
-            result = answer_question_with_intake(
-                pending_question,
-                intake_state=store.get_intake_state(
-                    USER_ID,
-                    active_session,
-                ),
-                loader_strategy=request_loader_strategy,
-                chunker_strategy=request_chunker_strategy,
-                chat_history=chat_history,
-                embedding_provider=request_embedding_provider,
-                pipeline_config=build_pipeline_config(
-                    request_retriever_strategy,
-                    request_ensemble_bm25_weight,
-                    request_ensemble_candidate_k,
-                    request_ensemble_use_chunk_id,
-                    request_reranker_strategy,
-                ),
-                trace_context=trace_context,
-            )
-            answer = result.answer
-            assistant_metadata = build_assistant_metadata(
-                result,
-                pending_question,
+    progress_reporter = create_progress_reporter(get_debug_progress_enabled())
+    try:
+        result = answer_question_with_intake(
+            pending_question,
+            intake_state=store.get_intake_state(
+                USER_ID,
+                active_session,
+            ),
+            loader_strategy=request_loader_strategy,
+            chunker_strategy=request_chunker_strategy,
+            chat_history=chat_history,
+            embedding_provider=request_embedding_provider,
+            pipeline_config=build_pipeline_config(
+                request_retriever_strategy,
+                request_ensemble_bm25_weight,
+                request_ensemble_candidate_k,
+                request_ensemble_use_chunk_id,
                 request_reranker_strategy,
-            )
-            store.set_intake_state(USER_ID, active_session, result.intake_state)
-        except Exception:
-            logger.exception("Failed to answer question")
-            answer = "오류가 발생했습니다. 잠시 후 다시 시도해 주세요."
-            assistant_metadata = {}
+            ),
+            trace_context=trace_context,
+            progress_callback=progress_reporter,
+        )
+        answer = result.answer
+        progress_reporter.update(PROGRESS_RESULT)
+        assistant_metadata = build_assistant_metadata(
+            result,
+            pending_question,
+            request_reranker_strategy,
+        )
+        retrieved_contexts = assistant_metadata.get("retrieved_contexts")
+        if isinstance(retrieved_contexts, list):
+            progress_reporter.detail(f"참고 근거: {len(retrieved_contexts)}개")
+        store.set_intake_state(USER_ID, active_session, result.intake_state)
+        progress_reporter.complete()
+    except Exception:
+        logger.exception("Failed to answer question")
+        progress_reporter.error()
+        answer = "오류가 발생했습니다. 잠시 후 다시 시도해 주세요."
+        assistant_metadata = {}
 
     store.append_message(
         USER_ID,
