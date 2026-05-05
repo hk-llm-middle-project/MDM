@@ -42,6 +42,7 @@ from evaluation.retrieval_eval.cli import (
     build_execution_plan,
     configure_tracing,
     effective_candidate_k,
+    effective_final_k,
     ensemble_bm25_weight_from_args,
     ensemble_candidate_k_from_args,
     ensemble_use_chunk_id_from_args,
@@ -399,7 +400,8 @@ def run_retrieval_experiment(
     print(f"[INFO] reranker_strategy: {args.reranker_strategy}")
     retrieval_input_mode = getattr(args, "retrieval_input_mode", DEFAULT_RETRIEVAL_INPUT_MODE)
     print(f"[INFO] retrieval_input_mode: {retrieval_input_mode}")
-    print(f"[INFO] k: {args.k}")
+    final_k = effective_final_k(args.reranker_strategy, args.k)
+    print(f"[INFO] k: {final_k}")
     ensemble_bm25_weight = ensemble_bm25_weight_from_args(args)
     ensemble_candidate_k = ensemble_candidate_k_from_args(args)
     ensemble_use_chunk_id = ensemble_use_chunk_id_from_args(args)
@@ -417,7 +419,7 @@ def run_retrieval_experiment(
             chunker_strategy=run["chunker_strategy"],
             retriever_strategy=args.retriever_strategy,
             reranker_strategy=args.reranker_strategy,
-            k=args.k,
+            k=final_k,
             candidate_k=candidate_k,
             ensemble_bm25_weight=ensemble_bm25_weight,
             ensemble_candidate_k=ensemble_candidate_k,
@@ -444,7 +446,7 @@ def run_retrieval_experiment(
             testset_path=args.testset_path,
             retriever_strategy=args.retriever_strategy,
             reranker_strategy=args.reranker_strategy,
-            final_k=args.k,
+            final_k=final_k,
             candidate_k=candidate_k,
             ensemble_bm25_weight=ensemble_bm25_weight,
             ensemble_candidate_k=ensemble_candidate_k,
@@ -472,7 +474,7 @@ def run_retrieval_experiment(
         chunker_strategy=run["chunker_strategy"],
         retriever_strategy=args.retriever_strategy,
         reranker_strategy=args.reranker_strategy,
-        k=args.k,
+        k=final_k,
         candidate_k=candidate_k,
         ensemble_bm25_weight=ensemble_bm25_weight,
         ensemble_candidate_k=ensemble_candidate_k,
@@ -503,7 +505,7 @@ def run_retrieval_experiment(
             "retriever_strategy": args.retriever_strategy,
             "reranker_strategy": args.reranker_strategy,
             "retrieval_input_mode": retrieval_input_mode,
-            "k": args.k,
+            "k": final_k,
             "candidate_k": candidate_k,
             "ensemble_bm25_weight": ensemble_bm25_weight,
             "ensemble_candidate_k": ensemble_candidate_k,
@@ -520,7 +522,7 @@ def run_retrieval_experiment(
             testset_path=args.testset_path,
             retriever_strategy=args.retriever_strategy,
             reranker_strategy=args.reranker_strategy,
-            final_k=args.k,
+            final_k=final_k,
             candidate_k=candidate_k,
             ensemble_bm25_weight=ensemble_bm25_weight,
             ensemble_candidate_k=ensemble_candidate_k,

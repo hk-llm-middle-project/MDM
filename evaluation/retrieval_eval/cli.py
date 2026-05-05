@@ -26,7 +26,7 @@ from evaluation.retrieval_eval.constants import (
     RETRIEVAL_INPUT_MODE_CHOICES,
     RETRIEVER_STRATEGY_CHOICES,
 )
-from config import DEFAULT_RERANKER_CANDIDATE_K
+from config import DEFAULT_RERANKER_CANDIDATE_K, DEFAULT_RERANKER_FINAL_K
 
 
 def parse_args() -> argparse.Namespace:
@@ -125,8 +125,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--k",
         type=int,
-        default=DEFAULT_K,
-        help="Number of final retrieved documents to evaluate.",
+        default=None,
+        help=(
+            "Number of final retrieved documents to evaluate. "
+            "Defaults to Streamlit behavior: 5 without reranker, 3 with reranker."
+        ),
     )
     parser.add_argument(
         "--candidate-k",
@@ -335,6 +338,14 @@ def effective_candidate_k(reranker_strategy: str, candidate_k: int) -> int | Non
     return None
 
 
+def effective_final_k(reranker_strategy: str, k: int | None) -> int:
+    if k is not None:
+        return k
+    if reranker_strategy != "none":
+        return DEFAULT_RERANKER_FINAL_K
+    return DEFAULT_K
+
+
 def ensemble_bm25_weight_from_args(args: argparse.Namespace) -> float:
     return float(getattr(args, "ensemble_bm25_weight", DEFAULT_ENSEMBLE_BM25_WEIGHT))
 
@@ -348,7 +359,7 @@ def ensemble_use_chunk_id_from_args(args: argparse.Namespace) -> bool:
 
 
 def validate_run_args(args: argparse.Namespace) -> None:
-    if args.k <= 0:
+    if args.k is not None and args.k <= 0:
         raise ValueError("--k must be greater than 0")
     if args.candidate_k < 0:
         raise ValueError("--candidate-k must be greater than or equal to 0")
