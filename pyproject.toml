@@ -10,6 +10,7 @@ dependencies = [
     "langchain-experimental>=0,<1",
     "langchain-community>=0,<1",
     "langchain-openai>=0,<1",
+    "langchain-upstage>=0,<1",
     "langchain-anthropic>=0,<1",
     "langchain-text-splitters>=0,<1",
     "langchain-elasticsearch>=0,<1",
@@ -82,4 +83,5 @@ dependencies = [
     "chardet<6",
     "jq>=1.11.0",
     "ipython>=9.10.1",
+    "sentence-transformers>=5.4.1",
 ]

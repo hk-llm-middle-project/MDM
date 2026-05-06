@@ -1,0 +1,2402 @@
+{
+  "1": {
+    "party_type": null,
+    "location": null
+  },
+  "2": {
+    "party_type": null,
+    "location": null
+  },
+  "3": {
+    "party_type": null,
+    "location": null
+  },
+  "4": {
+    "party_type": null,
+    "location": null
+  },
+  "5": {
+    "party_type": null,
+    "location": null
+  },
+  "6": {
+    "party_type": null,
+    "location": null
+  },
+  "7": {
+    "party_type": null,
+    "location": null
+  },
+  "8": {
+    "party_type": null,
+    "location": null
+  },
+  "9": {
+    "party_type": null,
+    "location": null
+  },
+  "10": {
+    "party_type": null,
+    "location": null
+  },
+  "11": {
+    "party_type": null,
+    "location": null
+  },
+  "12": {
+    "party_type": null,
+    "location": null
+  },
+  "13": {
+    "party_type": null,
+    "location": null
+  },
+  "14": {
+    "party_type": null,
+    "location": null
+  },
+  "15": {
+    "party_type": null,
+    "location": null
+  },
+  "16": {
+    "party_type": null,
+    "location": null
+  },
+  "17": {
+    "party_type": null,
+    "location": null
+  },
+  "18": {
+    "party_type": null,
+    "location": null
+  },
+  "19": {
+    "party_type": null,
+    "location": null
+  },
+  "20": {
+    "party_type": null,
+    "location": null
+  },
+  "21": {
+    "party_type": null,
+    "location": null
+  },
+  "22": {
+    "party_type": null,
+    "location": null
+  },
+  "23": {
+    "party_type": null,
+    "location": null
+  },
+  "24": {
+    "party_type": null,
+    "location": null
+  },
+  "25": {
+    "party_type": null,
+    "location": null
+  },
+  "26": {
+    "party_type": null,
+    "location": null
+  },
+  "27": {
+    "party_type": null,
+    "location": null
+  },
+  "28": {
+    "party_type": null,
+    "location": null
+  },
+  "29": {
+    "party_type": null,
+    "location": null
+  },
+  "30": {
+    "party_type": null,
+    "location": null
+  },
+  "31": {
+    "party_type": null,
+    "location": null
+  },
+  "32": {
+    "party_type": null,
+    "location": null
+  },
+  "33": {
+    "party_type": null,
+    "location": null
+  },
+  "34": {
+    "party_type": null,
+    "location": null
+  },
+  "35": {
+    "party_type": null,
+    "location": null
+  },
+  "36": {
+    "party_type": null,
+    "location": null
+  },
+  "37": {
+    "party_type": null,
+    "location": null
+  },
+  "38": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "39": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "40": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "41": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "42": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "43": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "44": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "45": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "46": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "47": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "48": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "49": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "50": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "51": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "52": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "53": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "54": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "55": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "56": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "57": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "58": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "59": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "60": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "61": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "62": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "63": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "64": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "65": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "66": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "67": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "68": {
+    "party_type": "보행자",
+    "location": "횡단보도 내"
+  },
+  "69": {
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
+  },
+  "70": {
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
+  },
+  "71": {
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
+  },
+  "72": {
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
+  },
+  "73": {
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
+  },
+  "74": {
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
+  },
+  "75": {
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
+  },
+  "76": {
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
+  },
+  "77": {
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
+  },
+  "78": {
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
+  },
+  "79": {
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
+  },
+  "80": {
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
+  },
+  "81": {
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
+  },
+  "82": {
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
+  },
+  "83": {
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
+  },
+  "84": {
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
+  },
+  "85": {
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
+  },
+  "86": {
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
+  },
+  "87": {
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
+  },
+  "88": {
+    "party_type": "보행자",
+    "location": "횡단보도 부근"
+  },
+  "89": {
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
+  },
+  "90": {
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
+  },
+  "91": {
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
+  },
+  "92": {
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
+  },
+  "93": {
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
+  },
+  "94": {
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
+  },
+  "95": {
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
+  },
+  "96": {
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
+  },
+  "97": {
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
+  },
+  "98": {
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
+  },
+  "99": {
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
+  },
+  "100": {
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
+  },
+  "101": {
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
+  },
+  "102": {
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
+  },
+  "103": {
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
+  },
+  "104": {
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
+  },
+  "105": {
+    "party_type": "보행자",
+    "location": "횡단보도 없음"
+  },
+  "106": {
+    "party_type": "보행자",
+    "location": "기타"
+  },
+  "107": {
+    "party_type": "보행자",
+    "location": "기타"
+  },
+  "108": {
+    "party_type": "보행자",
+    "location": "기타"
+  },
+  "109": {
+    "party_type": "보행자",
+    "location": "기타"
+  },
+  "110": {
+    "party_type": "보행자",
+    "location": "기타"
+  },
+  "111": {
+    "party_type": "보행자",
+    "location": "기타"
+  },
+  "112": {
+    "party_type": "보행자",
+    "location": "기타"
+  },
+  "113": {
+    "party_type": "보행자",
+    "location": "기타"
+  },
+  "114": {
+    "party_type": "보행자",
+    "location": "기타"
+  },
+  "115": {
+    "party_type": "보행자",
+    "location": "기타"
+  },
+  "116": {
+    "party_type": "보행자",
+    "location": "기타"
+  },
+  "117": {
+    "party_type": "보행자",
+    "location": "기타"
+  },
+  "118": {
+    "party_type": "보행자",
+    "location": "기타"
+  },
+  "119": {
+    "party_type": "보행자",
+    "location": "기타"
+  },
+  "120": {
+    "party_type": "보행자",
+    "location": "기타"
+  },
+  "121": {
+    "party_type": "보행자",
+    "location": "기타"
+  },
+  "122": {
+    "party_type": "보행자",
+    "location": "기타"
+  },
+  "123": {
+    "party_type": null,
+    "location": null
+  },
+  "124": {
+    "party_type": null,
+    "location": null
+  },
+  "125": {
+    "party_type": null,
+    "location": null
+  },
+  "126": {
+    "party_type": null,
+    "location": null
+  },
+  "127": {
+    "party_type": null,
+    "location": null
+  },
+  "128": {
+    "party_type": null,
+    "location": null
+  },
+  "129": {
+    "party_type": null,
+    "location": null
+  },
+  "130": {
+    "party_type": null,
+    "location": null
+  },
+  "131": {
+    "party_type": null,
+    "location": null
+  },
+  "132": {
+    "party_type": null,
+    "location": null
+  },
+  "133": {
+    "party_type": null,
+    "location": null
+  },
+  "134": {
+    "party_type": null,
+    "location": null
+  },
+  "135": {
+    "party_type": null,
+    "location": null
+  },
+  "136": {
+    "party_type": null,
+    "location": null
+  },
+  "137": {
+    "party_type": null,
+    "location": null
+  },
+  "138": {
+    "party_type": null,
+    "location": null
+  },
+  "139": {
+    "party_type": null,
+    "location": null
+  },
+  "140": {
+    "party_type": null,
+    "location": null
+  },
+  "141": {
+    "party_type": null,
+    "location": null
+  },
+  "142": {
+    "party_type": null,
+    "location": null
+  },
+  "143": {
+    "party_type": null,
+    "location": null
+  },
+  "144": {
+    "party_type": null,
+    "location": null
+  },
+  "145": {
+    "party_type": null,
+    "location": null
+  },
+  "146": {
+    "party_type": null,
+    "location": null
+  },
+  "147": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "148": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "149": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "150": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "151": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "152": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "153": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "154": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "155": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "156": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "157": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "158": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "159": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "160": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "161": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "162": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "163": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "164": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "165": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "166": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "167": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "168": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "169": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "170": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "171": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "172": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "173": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "174": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "175": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "176": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "177": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "178": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "179": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "180": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "181": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "182": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "183": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "184": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "185": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "186": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "187": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "188": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "189": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "190": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "191": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "192": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "193": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "194": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "195": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "196": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "197": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "198": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "199": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "200": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "201": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "202": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "203": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "204": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "205": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "206": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "207": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "208": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "209": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "210": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "211": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "212": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "213": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "214": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "215": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "216": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "217": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "218": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "219": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "220": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "221": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "222": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "223": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "224": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "225": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "226": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "227": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "228": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "229": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "230": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "231": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "232": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "233": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "234": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "235": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "236": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "237": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "238": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "239": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "240": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "241": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "242": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "243": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "244": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "245": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "246": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "247": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "248": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "249": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "250": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "251": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "252": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "253": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "254": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "255": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "256": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "257": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "258": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "259": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "260": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "261": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "262": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "263": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "264": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "265": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "266": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "267": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "268": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "269": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "270": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "271": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "272": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "273": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "274": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "275": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "276": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "277": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "278": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "279": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "280": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "281": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "282": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "283": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "284": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "285": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "286": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "287": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "288": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "289": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "290": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "291": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "292": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "293": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "294": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "295": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "296": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "297": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "298": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "299": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "300": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "301": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "302": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "303": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "304": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "305": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "306": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "307": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "308": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "309": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "310": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "311": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "312": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "313": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "314": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "315": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "316": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "317": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "318": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "319": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "320": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "321": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "322": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "323": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "324": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "325": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "326": {
+    "party_type": "자동차",
+    "location": "교차로 사고"
+  },
+  "327": {
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
+  },
+  "328": {
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
+  },
+  "329": {
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
+  },
+  "330": {
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
+  },
+  "331": {
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
+  },
+  "332": {
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
+  },
+  "333": {
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
+  },
+  "334": {
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
+  },
+  "335": {
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
+  },
+  "336": {
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
+  },
+  "337": {
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
+  },
+  "338": {
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
+  },
+  "339": {
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
+  },
+  "340": {
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
+  },
+  "341": {
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
+  },
+  "342": {
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
+  },
+  "343": {
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
+  },
+  "344": {
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
+  },
+  "345": {
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
+  },
+  "346": {
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
+  },
+  "347": {
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
+  },
+  "348": {
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
+  },
+  "349": {
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
+  },
+  "350": {
+    "party_type": "자동차",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
+  },
+  "351": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "352": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "353": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "354": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "355": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "356": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "357": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "358": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "359": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "360": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "361": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "362": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "363": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "364": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "365": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "366": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "367": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "368": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "369": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "370": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "371": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "372": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "373": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "374": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "375": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "376": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "377": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "378": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "379": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "380": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "381": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "382": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "383": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "384": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "385": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "386": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "387": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "388": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "389": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "390": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "391": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "392": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "393": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "394": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "395": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "396": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "397": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "398": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "399": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "400": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "401": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "402": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "403": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "404": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "405": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "406": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "407": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "408": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "409": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "410": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "411": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "412": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "413": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "414": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "415": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "416": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "417": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "418": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "419": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "420": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "421": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "422": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "423": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "424": {
+    "party_type": "자동차",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "425": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "426": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "427": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "428": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "429": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "430": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "431": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "432": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "433": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "434": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "435": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "436": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "437": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "438": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "439": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "440": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "441": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "442": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "443": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "444": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "445": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "446": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "447": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "448": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "449": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "450": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "451": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "452": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "453": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "454": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "455": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "456": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "457": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "458": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "459": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "460": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "461": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "462": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "463": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "464": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "465": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "466": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "467": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "468": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "469": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "470": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "471": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "472": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "473": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "474": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "475": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "476": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "477": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "478": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "479": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "480": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "481": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "482": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "483": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "484": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "485": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "486": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "487": {
+    "party_type": "자동차",
+    "location": "기타"
+  },
+  "488": {
+    "party_type": null,
+    "location": null
+  },
+  "489": {
+    "party_type": null,
+    "location": null
+  },
+  "490": {
+    "party_type": null,
+    "location": null
+  },
+  "491": {
+    "party_type": null,
+    "location": null
+  },
+  "492": {
+    "party_type": null,
+    "location": null
+  },
+  "493": {
+    "party_type": null,
+    "location": null
+  },
+  "494": {
+    "party_type": null,
+    "location": null
+  },
+  "495": {
+    "party_type": null,
+    "location": null
+  },
+  "496": {
+    "party_type": null,
+    "location": null
+  },
+  "497": {
+    "party_type": null,
+    "location": null
+  },
+  "498": {
+    "party_type": null,
+    "location": null
+  },
+  "499": {
+    "party_type": null,
+    "location": null
+  },
+  "500": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "501": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "502": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "503": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "504": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "505": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "506": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "507": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "508": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "509": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "510": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "511": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "512": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "513": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "514": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "515": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "516": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "517": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "518": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "519": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "520": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "521": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "522": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "523": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "524": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "525": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "526": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "527": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "528": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "529": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "530": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "531": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "532": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "533": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "534": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "535": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "536": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "537": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "538": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "539": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "540": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "541": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "542": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "543": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "544": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "545": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "546": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "547": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "548": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "549": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "550": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "551": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "552": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "553": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "554": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "555": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "556": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "557": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "558": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "559": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "560": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "561": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "562": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "563": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "564": {
+    "party_type": "자전거",
+    "location": "교차로 사고"
+  },
+  "565": {
+    "party_type": "자전거",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
+  },
+  "566": {
+    "party_type": "자전거",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
+  },
+  "567": {
+    "party_type": "자전거",
+    "location": "마주보는 방향 진행차량 상호 간의 사고"
+  },
+  "568": {
+    "party_type": "자전거",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "569": {
+    "party_type": "자전거",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "570": {
+    "party_type": "자전거",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "571": {
+    "party_type": "자전거",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "572": {
+    "party_type": "자전거",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "573": {
+    "party_type": "자전거",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "574": {
+    "party_type": "자전거",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "575": {
+    "party_type": "자전거",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "576": {
+    "party_type": "자전거",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "577": {
+    "party_type": "자전거",
+    "location": "같은 방향 진행차량 상호간의 사고"
+  },
+  "578": {
+    "party_type": "자전거",
+    "location": "기타"
+  },
+  "579": {
+    "party_type": "자전거",
+    "location": "기타"
+  },
+  "580": {
+    "party_type": "자전거",
+    "location": "기타"
+  },
+  "581": {
+    "party_type": "자전거",
+    "location": "기타"
+  },
+  "582": {
+    "party_type": "자전거",
+    "location": "기타"
+  },
+  "583": {
+    "party_type": "자전거",
+    "location": "기타"
+  },
+  "584": {
+    "party_type": "자전거",
+    "location": "기타"
+  },
+  "585": {
+    "party_type": "자전거",
+    "location": "기타"
+  },
+  "586": {
+    "party_type": "자전거",
+    "location": "기타"
+  },
+  "587": {
+    "party_type": "자전거",
+    "location": "기타"
+  },
+  "588": {
+    "party_type": "자전거",
+    "location": "기타"
+  },
+  "589": {
+    "party_type": "자전거",
+    "location": "기타"
+  },
+  "590": {
+    "party_type": "자전거",
+    "location": "기타"
+  },
+  "591": {
+    "party_type": "자전거",
+    "location": "기타"
+  },
+  "592": {
+    "party_type": "자전거",
+    "location": "기타"
+  },
+  "593": {
+    "party_type": "자전거",
+    "location": "기타"
+  },
+  "594": {
+    "party_type": "자전거",
+    "location": "기타"
+  },
+  "595": {
+    "party_type": "자전거",
+    "location": "기타"
+  },
+  "596": {
+    "party_type": "자전거",
+    "location": "기타"
+  },
+  "597": {
+    "party_type": "자전거",
+    "location": "기타"
+  },
+  "598": {
+    "party_type": "자전거",
+    "location": "기타"
+  },
+  "599": {
+    "party_type": "자전거",
+    "location": "기타"
+  },
+  "600": {
+    "party_type": "자전거",
+    "location": "기타"
+  }
+}

@@ -1,0 +1,8 @@
+
+[RUN] --retriever-strategies similarity,ensemble,ensemble_parent --reranker-strategies llm-score
+Mon May  4 16:03:34 KST 2026
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+/home/uuser/mdm/.venv/lib/python3.11/site-packages/langchain_core/globals.py:148: UserWarning: Importing debug from langchain root module is no longer supported. Please use langchain.globals.set_debug() / langchain.globals.get_debug() instead.
+  old_debug = langchain.debug
+Failed to send telemetry event CollectionQueryEvent: capture() takes 1 positional argument but 3 were given

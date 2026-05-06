@@ -1,0 +1,29 @@
+{
+  "experiment_name": "MDM retrieval eval - upstage-custom-bge-similarity-cross-encoder-local",
+  "dataset_name": "MDM retrieval testset - retrieval_eval",
+  "testset_path": "/home/uuser/mdm/data/testsets/langsmith/retrieval_eval.jsonl",
+  "evaluation_suite": "retrieval",
+  "run_name": "upstage-custom-bge",
+  "loader_strategy": "upstage",
+  "chunker_strategy": "custom",
+  "embedding_provider": "bge",
+  "retriever_strategy": "similarity",
+  "reranker_strategy": "cross-encoder",
+  "retrieval_input_mode": "raw",
+  "final_k": 3,
+  "candidate_k": 30,
+  "ensemble_bm25_weight": 0.5,
+  "ensemble_candidate_k": 20,
+  "ensemble_use_chunk_id": true,
+  "row_count": 30,
+  "metrics": {
+    "diagram_id_hit": 0.7,
+    "location_match": 1.0,
+    "party_type_match": 1.0,
+    "chunk_type_match": 1.0,
+    "keyword_coverage": 0.4094444444444444,
+    "near_miss_not_above_expected": 0.6551724137931034,
+    "retrieval_relevance": 0.8218888888888889,
+    "critical_error": 0.3
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "experiment_name": "MDM intake eval - local",
+  "dataset_name": "MDM intake testset",
+  "testset_path": "/home/uuser/mdm/data/testsets/langsmith/intake_eval.jsonl",
+  "evaluation_suite": "intake",
+  "run_name": "intake-local",
+  "loader_strategy": null,
+  "chunker_strategy": null,
+  "embedding_provider": null,
+  "retriever_strategy": null,
+  "reranker_strategy": null,
+  "row_count": 20,
+  "metrics": {
+    "intake_is_sufficient": 0.75,
+    "party_type_match": 0.95,
+    "location_match": 0.75,
+    "missing_fields_match": 0.75,
+    "follow_up_contains": 0.6,
+    "forbidden_filter_absent": 1.0,
+    "intake_overall": 0.8
+  },
+  "nickname": "version 0"
+}

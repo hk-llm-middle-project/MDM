@@ -1,0 +1,244 @@
+{
+  "default_preset": "upstage",
+  "presets": {
+    "upstage": [
+      "upstage-custom-bge",
+      "upstage-custom-openai",
+      "upstage-custom-google",
+      "upstage-raw-bge",
+      "upstage-raw-openai",
+      "upstage-raw-google"
+    ],
+    "bge-all": [
+      "pdfplumber-fixed-bge",
+      "pdfplumber-recursive-bge",
+      "pdfplumber-semantic-bge",
+      "llamaparser-fixed-bge",
+      "llamaparser-recursive-bge",
+      "llamaparser-markdown-bge",
+      "llamaparser-case-boundary-bge",
+      "llamaparser-semantic-bge",
+      "upstage-raw-bge",
+      "upstage-custom-bge"
+    ],
+    "parser-baseline": [
+      "upstage-custom-bge",
+      "pdfplumber-recursive-bge",
+      "llamaparser-case-boundary-bge"
+    ],
+    "all": [
+      "pdfplumber-fixed-openai",
+      "pdfplumber-fixed-bge",
+      "pdfplumber-fixed-google",
+      "pdfplumber-recursive-openai",
+      "pdfplumber-recursive-bge",
+      "pdfplumber-recursive-google",
+      "pdfplumber-semantic-openai",
+      "pdfplumber-semantic-bge",
+      "pdfplumber-semantic-google",
+      "llamaparser-fixed-openai",
+      "llamaparser-fixed-bge",
+      "llamaparser-fixed-google",
+      "llamaparser-recursive-openai",
+      "llamaparser-recursive-bge",
+      "llamaparser-recursive-google",
+      "llamaparser-markdown-openai",
+      "llamaparser-markdown-bge",
+      "llamaparser-markdown-google",
+      "llamaparser-case-boundary-openai",
+      "llamaparser-case-boundary-bge",
+      "llamaparser-case-boundary-google",
+      "llamaparser-semantic-openai",
+      "llamaparser-semantic-bge",
+      "llamaparser-semantic-google",
+      "upstage-raw-openai",
+      "upstage-raw-bge",
+      "upstage-raw-google",
+      "upstage-custom-openai",
+      "upstage-custom-bge",
+      "upstage-custom-google"
+    ]
+  },
+  "runs": [
+    {
+      "name": "pdfplumber-fixed-openai",
+      "loader_strategy": "pdfplumber",
+      "chunker_strategy": "fixed",
+      "embedding_provider": "openai"
+    },
+    {
+      "name": "pdfplumber-fixed-bge",
+      "loader_strategy": "pdfplumber",
+      "chunker_strategy": "fixed",
+      "embedding_provider": "bge"
+    },
+    {
+      "name": "pdfplumber-fixed-google",
+      "loader_strategy": "pdfplumber",
+      "chunker_strategy": "fixed",
+      "embedding_provider": "google"
+    },
+    {
+      "name": "pdfplumber-recursive-openai",
+      "loader_strategy": "pdfplumber",
+      "chunker_strategy": "recursive",
+      "embedding_provider": "openai"
+    },
+    {
+      "name": "pdfplumber-recursive-bge",
+      "loader_strategy": "pdfplumber",
+      "chunker_strategy": "recursive",
+      "embedding_provider": "bge"
+    },
+    {
+      "name": "pdfplumber-recursive-google",
+      "loader_strategy": "pdfplumber",
+      "chunker_strategy": "recursive",
+      "embedding_provider": "google"
+    },
+    {
+      "name": "pdfplumber-semantic-openai",
+      "loader_strategy": "pdfplumber",
+      "chunker_strategy": "semantic",
+      "embedding_provider": "openai"
+    },
+    {
+      "name": "pdfplumber-semantic-bge",
+      "loader_strategy": "pdfplumber",
+      "chunker_strategy": "semantic",
+      "embedding_provider": "bge"
+    },
+    {
+      "name": "pdfplumber-semantic-google",
+      "loader_strategy": "pdfplumber",
+      "chunker_strategy": "semantic",
+      "embedding_provider": "google"
+    },
+    {
+      "name": "llamaparser-fixed-openai",
+      "loader_strategy": "llamaparser",
+      "chunker_strategy": "fixed",
+      "embedding_provider": "openai"
+    },
+    {
+      "name": "llamaparser-fixed-bge",
+      "loader_strategy": "llamaparser",
+      "chunker_strategy": "fixed",
+      "embedding_provider": "bge"
+    },
+    {
+      "name": "llamaparser-fixed-google",
+      "loader_strategy": "llamaparser",
+      "chunker_strategy": "fixed",
+      "embedding_provider": "google"
+    },
+    {
+      "name": "llamaparser-recursive-openai",
+      "loader_strategy": "llamaparser",
+      "chunker_strategy": "recursive",
+      "embedding_provider": "openai"
+    },
+    {
+      "name": "llamaparser-recursive-bge",
+      "loader_strategy": "llamaparser",
+      "chunker_strategy": "recursive",
+      "embedding_provider": "bge"
+    },
+    {
+      "name": "llamaparser-recursive-google",
+      "loader_strategy": "llamaparser",
+      "chunker_strategy": "recursive",
+      "embedding_provider": "google"
+    },
+    {
+      "name": "llamaparser-markdown-openai",
+      "loader_strategy": "llamaparser",
+      "chunker_strategy": "markdown",
+      "embedding_provider": "openai"
+    },
+    {
+      "name": "llamaparser-markdown-bge",
+      "loader_strategy": "llamaparser",
+      "chunker_strategy": "markdown",
+      "embedding_provider": "bge"
+    },
+    {
+      "name": "llamaparser-markdown-google",
+      "loader_strategy": "llamaparser",
+      "chunker_strategy": "markdown",
+      "embedding_provider": "google"
+    },
+    {
+      "name": "llamaparser-case-boundary-openai",
+      "loader_strategy": "llamaparser",
+      "chunker_strategy": "case-boundary",
+      "embedding_provider": "openai"
+    },
+    {
+      "name": "llamaparser-case-boundary-bge",
+      "loader_strategy": "llamaparser",
+      "chunker_strategy": "case-boundary",
+      "embedding_provider": "bge"
+    },
+    {
+      "name": "llamaparser-case-boundary-google",
+      "loader_strategy": "llamaparser",
+      "chunker_strategy": "case-boundary",
+      "embedding_provider": "google"
+    },
+    {
+      "name": "llamaparser-semantic-openai",
+      "loader_strategy": "llamaparser",
+      "chunker_strategy": "semantic",
+      "embedding_provider": "openai"
+    },
+    {
+      "name": "llamaparser-semantic-bge",
+      "loader_strategy": "llamaparser",
+      "chunker_strategy": "semantic",
+      "embedding_provider": "bge"
+    },
+    {
+      "name": "llamaparser-semantic-google",
+      "loader_strategy": "llamaparser",
+      "chunker_strategy": "semantic",
+      "embedding_provider": "google"
+    },
+    {
+      "name": "upstage-raw-openai",
+      "loader_strategy": "upstage",
+      "chunker_strategy": "raw",
+      "embedding_provider": "openai"
+    },
+    {
+      "name": "upstage-raw-bge",
+      "loader_strategy": "upstage",
+      "chunker_strategy": "raw",
+      "embedding_provider": "bge"
+    },
+    {
+      "name": "upstage-raw-google",
+      "loader_strategy": "upstage",
+      "chunker_strategy": "raw",
+      "embedding_provider": "google"
+    },
+    {
+      "name": "upstage-custom-openai",
+      "loader_strategy": "upstage",
+      "chunker_strategy": "custom",
+      "embedding_provider": "openai"
+    },
+    {
+      "name": "upstage-custom-bge",
+      "loader_strategy": "upstage",
+      "chunker_strategy": "custom",
+      "embedding_provider": "bge"
+    },
+    {
+      "name": "upstage-custom-google",
+      "loader_strategy": "upstage",
+      "chunker_strategy": "custom",
+      "embedding_provider": "google"
+    }
+  ]
+}
