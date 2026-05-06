@@ -14,14 +14,17 @@ from main import (
     build_ensemble_weight_caption_html,
     build_ensemble_weight_label,
     build_pipeline_config,
+    build_retrieved_context_metadata,
     create_progress_reporter,
     delete_session_and_select_fallback,
     get_chunker_strategy_options,
     normalize_chunker_strategy,
+    render_app_css,
     render_answer_area,
+    render_sidebar,
     render_chat,
 )
-from config import get_debug_progress_enabled
+from config import DEFAULT_MODE, MODE_PRESETS, get_debug_progress_enabled
 from rag.pipeline.reranker import (
     CrossEncoderRerankerConfig,
     FlashrankRerankerConfig,
@@ -30,6 +33,7 @@ from rag.pipeline.reranker import (
 from rag.pipeline.reranker.strategies.cross_encoder import rerank_with_cross_encoder
 from rag.pipeline.retriever import EnsembleRetrieverConfig
 from rag.service.intake.schema import IntakeState
+from rag.service.analysis.answer_schema import RetrievedContext
 from rag.service.session.schema import ChatMessage
 from rag.service.session.memory_store import MemoryConversationStore
 
@@ -132,6 +136,38 @@ class FakeChatStreamlit:
         raise RuntimeError("rerun")
 
 
+class FakeSidebarForRender:
+    def __init__(self):
+        self.button_calls = []
+        self.markdowns = []
+        self.columns_calls = []
+
+    def markdown(self, body, **kwargs):
+        self.markdowns.append({"body": body, **kwargs})
+
+    def button(self, label, **kwargs):
+        self.button_calls.append({"label": label, **kwargs})
+        return False
+
+    def columns(self, spec):
+        self.columns_calls.append(spec)
+        return [FakeColumn(), FakeColumn()]
+
+
+class FakeRenderSidebarStreamlit:
+    def __init__(self, session_state):
+        self.session_state = session_state
+        self.sidebar = FakeSidebarForRender()
+        self.button_calls = []
+
+    def button(self, label, **kwargs):
+        self.button_calls.append({"label": label, **kwargs})
+        return False
+
+    def rerun(self):
+        raise RuntimeError("rerun")
+
+
 class FakeChatStore:
     def __init__(self):
         self.messages = [
@@ -156,6 +192,40 @@ class FakeChatStore:
 
 
 class StreamlitUiTest(unittest.TestCase):
+    def test_mode_presets_expose_fast_and_thinking_only(self):
+        self.assertEqual(DEFAULT_MODE, "Fast")
+        self.assertEqual(tuple(MODE_PRESETS), ("Fast", "Thinking"))
+
+    def test_fast_mode_uses_upstage_google_parent_without_reranker(self):
+        self.assertEqual(
+            MODE_PRESETS["Fast"],
+            {
+                "loader_strategy": "upstage",
+                "chunker_strategy": "custom",
+                "embedding_provider": "google",
+                "retriever_strategy": "parent",
+                "reranker_strategy": "none",
+                "ensemble_bm25_weight": 0.5,
+                "ensemble_candidate_k": 20,
+                "ensemble_use_chunk_id": True,
+            },
+        )
+
+    def test_thinking_mode_uses_llamaparser_bge_parent_with_llm_score(self):
+        self.assertEqual(
+            MODE_PRESETS["Thinking"],
+            {
+                "loader_strategy": "llamaparser",
+                "chunker_strategy": "case-boundary",
+                "embedding_provider": "bge",
+                "retriever_strategy": "parent",
+                "reranker_strategy": "llm-score",
+                "ensemble_bm25_weight": 0.5,
+                "ensemble_candidate_k": 20,
+                "ensemble_use_chunk_id": True,
+            },
+        )
+
     def test_build_pipeline_config_uses_selected_retriever_strategy(self):
         config = build_pipeline_config("ensemble")
 
@@ -184,6 +254,38 @@ class StreamlitUiTest(unittest.TestCase):
         self.assertEqual(len(sessions), 1)
         self.assertEqual(active_session, sessions[0].session_id)
         self.assertEqual(store.get_active_session("local"), sessions[0].session_id)
+
+    def test_render_sidebar_marks_active_session_as_primary(self):
+        store = MemoryConversationStore()
+        first = store.create_session("local", title="첫 세션")
+        second = store.create_session("local", title="현재 세션")
+        store.set_active_session("local", second.session_id)
+        fake_st = FakeRenderSidebarStreamlit(
+            FakeSessionState(
+                active_session=second.session_id,
+                selected_mode="Fast",
+                loader_strategy="upstage",
+                chunker_strategy="custom",
+                embedding_provider="google",
+                retriever_strategy="parent",
+                reranker_strategy="none",
+                ensemble_bm25_weight=0.5,
+                ensemble_candidate_k=20,
+                ensemble_use_chunk_id=True,
+            )
+        )
+
+        with patch("main.st", fake_st):
+            render_sidebar(store)
+
+        session_buttons = {
+            call["key"]: call
+            for call in fake_st.button_calls
+            if call["key"].startswith("session-")
+        }
+
+        self.assertEqual(session_buttons[f"session-{first.session_id}"]["type"], "secondary")
+        self.assertEqual(session_buttons[f"session-{second.session_id}"]["type"], "primary")
 
     def test_retriever_strategy_options_expose_similarity_instead_of_vectorstore(self):
         self.assertIn("similarity", RETRIEVER_STRATEGY_OPTIONS)
@@ -300,6 +402,22 @@ class StreamlitUiTest(unittest.TestCase):
         self.assertEqual(config.candidate_k, DEFAULT_RERANKER_CANDIDATE_K)
         self.assertEqual(config.final_k, DEFAULT_RERANKER_FINAL_K)
 
+    def test_retrieved_context_metadata_uses_similarity_score_without_reranker(self):
+        contexts = [
+            RetrievedContext(
+                content="본문에는 질문 키워드가 없습니다.",
+                metadata={"similarity_score": 0.82},
+            )
+        ]
+
+        rendered = build_retrieved_context_metadata(
+            contexts,
+            question="추돌 사고",
+            reranker_strategy="none",
+        )
+
+        self.assertEqual(rendered[0]["match_percent"], 81)
+
     def test_build_ensemble_weight_label_is_short(self):
         label = build_ensemble_weight_label(0.65)
 
@@ -323,6 +441,20 @@ class StreamlitUiTest(unittest.TestCase):
         self.assertIn("width: 4px", css)
         self.assertIn("[data-testid=\"stTickBar\"]", css)
         self.assertIn("display: none", css)
+
+    def test_chat_input_css_keeps_text_clear_of_rounded_edge(self):
+        rendered = []
+
+        with patch("main.st.markdown", side_effect=lambda body, **_: rendered.append(body)):
+            render_app_css()
+
+        css = rendered[0]
+
+        self.assertIn('[data-testid="stChatInput"] div[data-baseweb="textarea"]', css)
+        self.assertIn("border-radius: 14px !important", css)
+        self.assertIn("padding-left: 1rem !important", css)
+        self.assertIn("padding-right: 1rem !important", css)
+        self.assertNotIn('[data-testid="stChatInput"] textarea {\n  border-radius: 999px;', css)
 
     def test_debug_progress_env_flag_controls_verbose_status_box(self):
         with patch.dict(os.environ, {"DEBUG_PROGRESS": "true"}):

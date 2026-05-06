@@ -273,12 +273,14 @@ def render_sidebar(store: ConversationStore) -> tuple[str, str, str, str, float,
         st.session_state.active_session = session.session_id
         st.rerun()
 
+    active_session_id = st.session_state.get("active_session", store.get_active_session(USER_ID))
     for session in store.list_sessions(USER_ID):
         session_column, delete_column = st.sidebar.columns([0.8, 0.2])
         with session_column:
             if st.button(
                 session.title,
                 key=f"session-{session.session_id}",
+                type="primary" if session.session_id == active_session_id else "secondary",
                 use_container_width=True,
             ):
                 store.set_active_session(USER_ID, session.session_id)
@@ -514,10 +516,10 @@ def estimate_match_percent(
     reranker_strategy: str = DEFAULT_RERANKER_STRATEGY,
 ) -> int:
     """점수 metadata가 없을 때 화면 표시용 일치율을 보수적으로 추정합니다."""
-    if reranker_strategy in {"cross-encoder", "llm-score"}:
-        rerank_percent = estimate_rerank_match_percent(metadata)
-        if rerank_percent is not None:
-            return rerank_percent
+    del reranker_strategy
+    score_percent = estimate_rerank_match_percent(metadata)
+    if score_percent is not None:
+        return score_percent
     return estimate_keyword_match_percent(question, content)
 
 
@@ -912,8 +914,13 @@ def render_app_css() -> None:
 [data-testid="stImage"] {
   animation: fadeSlideIn 420ms ease both;
 }
+[data-testid="stChatInput"] div[data-baseweb="textarea"] {
+  border-radius: 14px !important;
+}
 [data-testid="stChatInput"] textarea {
-  border-radius: 999px;
+  border-radius: 14px !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
 }
 [data-testid="stSpinner"] > div {
   margin-top: 0.35rem;

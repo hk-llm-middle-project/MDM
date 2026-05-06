@@ -1,0 +1,13 @@
+{
+  "metric_comparison": {
+    "group_by": "nickname",
+    "metrics": [
+      "execution_time",
+      "critical_error",
+      "diagram_id_hit",
+      "retrieval_relevance",
+      "keyword_coverage",
+      "near_miss_not_above_expected"
+    ]
+  }
+}
