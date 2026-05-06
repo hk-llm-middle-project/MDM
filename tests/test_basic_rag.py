@@ -1617,6 +1617,26 @@ class BasicRagTest(unittest.TestCase):
         self.assertEqual(data["response"], "첫 줄\n둘째 줄")
         self.assertEqual(data["fault_ratio_a"], 0)
 
+    def test_extract_json_object_ignores_braces_after_first_complete_object(self):
+        data = extract_json_object(
+            '{"response": "판단 결과", "fault_ratio_a": null, "fault_ratio_b": null}\n\n'
+            '참고: {"extra": "not part of answer"}'
+        )
+
+        self.assertEqual(data["response"], "판단 결과")
+        self.assertIsNone(data["fault_ratio_a"])
+        self.assertIsNone(data["fault_ratio_b"])
+
+    def test_extract_json_object_handles_braces_inside_string_values(self):
+        data = extract_json_object(
+            '{"response": "문서 예시 {A100/B0}를 참고합니다.", '
+            '"fault_ratio_a": 100, "fault_ratio_b": 0}'
+        )
+
+        self.assertEqual(data["response"], "문서 예시 {A100/B0}를 참고합니다.")
+        self.assertEqual(data["fault_ratio_a"], 100)
+        self.assertEqual(data["fault_ratio_b"], 0)
+
     def test_normalize_metadata_response_accepts_confident_allowed_values(self):
         decision = normalize_metadata_response(
             {
