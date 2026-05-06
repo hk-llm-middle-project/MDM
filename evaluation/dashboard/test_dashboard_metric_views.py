@@ -224,6 +224,77 @@ class DashboardMetricViewTest(unittest.TestCase):
             ["critical_error"],
         )
 
+    def test_metric_comparison_filters_runs_by_metric_value(self) -> None:
+        from evaluation.dashboard.views import metric_comparison
+
+        summary = pd.DataFrame(
+            [
+                {
+                    "run_name": "run-a",
+                    "run_label": "same label",
+                    "result_stem": "run-a-stem",
+                    "critical_error": 0.0,
+                    "diagram_id_hit": 1.0,
+                },
+                {
+                    "run_name": "run-b",
+                    "run_label": "same label",
+                    "result_stem": "run-b-stem",
+                    "critical_error": 0.5,
+                    "diagram_id_hit": 0.0,
+                },
+            ]
+        )
+        metrics = transforms.build_metric_frame(summary)
+
+        filtered_summary, filtered_metrics = metric_comparison.filter_metric_frames(
+            summary,
+            metrics,
+            "critical_error",
+            "==",
+            0.0,
+        )
+
+        self.assertEqual(filtered_summary["run_name"].tolist(), ["run-a"])
+        self.assertEqual(set(filtered_metrics["result_stem"]), {"run-a-stem"})
+        self.assertEqual(
+            set(filtered_metrics["metric"]),
+            {"critical_error", "diagram_id_hit"},
+        )
+
+    def test_metric_comparison_filter_supports_range_operators(self) -> None:
+        from evaluation.dashboard.views import metric_comparison
+
+        summary = pd.DataFrame(
+            [
+                {"run_name": "run-a", "result_stem": "a", "critical_error": 0.0},
+                {"run_name": "run-b", "result_stem": "b", "critical_error": 0.25},
+                {"run_name": "run-c", "result_stem": "c", "critical_error": 0.75},
+                {"run_name": "run-d", "result_stem": "d", "critical_error": None},
+            ]
+        )
+        metrics = transforms.build_metric_frame(summary)
+
+        filtered_summary, filtered_metrics = metric_comparison.filter_metric_frames(
+            summary,
+            metrics,
+            "critical_error",
+            "<=",
+            0.25,
+        )
+
+        self.assertEqual(filtered_summary["run_name"].tolist(), ["run-a", "run-b"])
+        self.assertEqual(set(filtered_metrics["result_stem"]), {"a", "b"})
+
+        filtered_summary, _ = metric_comparison.filter_metric_frames(
+            summary,
+            metrics,
+            "critical_error",
+            "!=",
+            0.0,
+        )
+        self.assertEqual(filtered_summary["run_name"].tolist(), ["run-b", "run-c"])
+
     def test_metric_comparison_defaults_to_nickname_when_present(self) -> None:
         from evaluation.dashboard.views import metric_comparison
 

@@ -430,6 +430,55 @@ class DashboardCaseTableTest(unittest.TestCase):
         self.assertIn("#fee2e2", styles.loc[0, "모델 party_type"])
         self.assertIn("#fee2e2", styles.loc[0, "정답 party_type"])
 
+    def test_expected_actual_case_table_styles_retrieval_cells_by_metric_score(self) -> None:
+        table = pd.DataFrame(
+            [
+                {
+                    "query": "q1",
+                    "정답 diagram": "보1",
+                    "모델 diagram": "보1 | 보16 | 보18",
+                    "정답 location": "-",
+                    "모델 location": "횡단보도 내 | 횡단보도 부근",
+                    "정답 party_type": "-",
+                    "모델 party_type": "보행자",
+                    "diagram_id_hit": 1,
+                    "location_match": 1,
+                    "party_type_match": 1,
+                }
+            ]
+        )
+
+        styles = transforms.build_expected_actual_case_table_styles(table)
+
+        self.assertIn("#dcfce7", styles.loc[0, "정답 diagram"])
+        self.assertIn("#dcfce7", styles.loc[0, "모델 diagram"])
+        self.assertIn("#dcfce7", styles.loc[0, "정답 location"])
+        self.assertIn("#dcfce7", styles.loc[0, "모델 location"])
+        self.assertIn("#dcfce7", styles.loc[0, "정답 party_type"])
+        self.assertIn("#dcfce7", styles.loc[0, "모델 party_type"])
+
+    def test_expected_actual_case_table_styles_retrieval_failures_by_metric_score(self) -> None:
+        table = pd.DataFrame(
+            [
+                {
+                    "query": "q1",
+                    "정답 diagram": "보1",
+                    "모델 diagram": "보16 | 보18",
+                    "정답 keyword": "기본 과실비율 | 수정요소",
+                    "모델 keyword": "matched=['기본 과실비율'], total=2",
+                    "diagram_id_hit": 0,
+                    "keyword_coverage": 0.5,
+                }
+            ]
+        )
+
+        styles = transforms.build_expected_actual_case_table_styles(table)
+
+        self.assertIn("#fee2e2", styles.loc[0, "정답 diagram"])
+        self.assertIn("#fee2e2", styles.loc[0, "모델 diagram"])
+        self.assertIn("#fee2e2", styles.loc[0, "정답 keyword"])
+        self.assertIn("#fee2e2", styles.loc[0, "모델 keyword"])
+
 
 if __name__ == "__main__":
     unittest.main()
