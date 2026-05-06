@@ -273,12 +273,14 @@ def render_sidebar(store: ConversationStore) -> tuple[str, str, str, str, float,
         st.session_state.active_session = session.session_id
         st.rerun()
 
+    active_session_id = st.session_state.get("active_session", store.get_active_session(USER_ID))
     for session in store.list_sessions(USER_ID):
         session_column, delete_column = st.sidebar.columns([0.8, 0.2])
         with session_column:
             if st.button(
                 session.title,
                 key=f"session-{session.session_id}",
+                type="primary" if session.session_id == active_session_id else "secondary",
                 use_container_width=True,
             ):
                 store.set_active_session(USER_ID, session.session_id)

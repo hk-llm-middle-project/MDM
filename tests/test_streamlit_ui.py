@@ -21,6 +21,7 @@ from main import (
     normalize_chunker_strategy,
     render_app_css,
     render_answer_area,
+    render_sidebar,
     render_chat,
 )
 from config import DEFAULT_MODE, MODE_PRESETS, get_debug_progress_enabled
@@ -31,8 +32,8 @@ from rag.pipeline.reranker import (
 )
 from rag.pipeline.reranker.strategies.cross_encoder import rerank_with_cross_encoder
 from rag.pipeline.retriever import EnsembleRetrieverConfig
-from rag.service.analysis.answer_schema import RetrievedContext
 from rag.service.intake.schema import IntakeState
+from rag.service.analysis.answer_schema import RetrievedContext
 from rag.service.session.schema import ChatMessage
 from rag.service.session.memory_store import MemoryConversationStore
 
@@ -135,6 +136,38 @@ class FakeChatStreamlit:
         raise RuntimeError("rerun")
 
 
+class FakeSidebarForRender:
+    def __init__(self):
+        self.button_calls = []
+        self.markdowns = []
+        self.columns_calls = []
+
+    def markdown(self, body, **kwargs):
+        self.markdowns.append({"body": body, **kwargs})
+
+    def button(self, label, **kwargs):
+        self.button_calls.append({"label": label, **kwargs})
+        return False
+
+    def columns(self, spec):
+        self.columns_calls.append(spec)
+        return [FakeColumn(), FakeColumn()]
+
+
+class FakeRenderSidebarStreamlit:
+    def __init__(self, session_state):
+        self.session_state = session_state
+        self.sidebar = FakeSidebarForRender()
+        self.button_calls = []
+
+    def button(self, label, **kwargs):
+        self.button_calls.append({"label": label, **kwargs})
+        return False
+
+    def rerun(self):
+        raise RuntimeError("rerun")
+
+
 class FakeChatStore:
     def __init__(self):
         self.messages = [
@@ -221,6 +254,38 @@ class StreamlitUiTest(unittest.TestCase):
         self.assertEqual(len(sessions), 1)
         self.assertEqual(active_session, sessions[0].session_id)
         self.assertEqual(store.get_active_session("local"), sessions[0].session_id)
+
+    def test_render_sidebar_marks_active_session_as_primary(self):
+        store = MemoryConversationStore()
+        first = store.create_session("local", title="첫 세션")
+        second = store.create_session("local", title="현재 세션")
+        store.set_active_session("local", second.session_id)
+        fake_st = FakeRenderSidebarStreamlit(
+            FakeSessionState(
+                active_session=second.session_id,
+                selected_mode="Fast",
+                loader_strategy="upstage",
+                chunker_strategy="custom",
+                embedding_provider="google",
+                retriever_strategy="parent",
+                reranker_strategy="none",
+                ensemble_bm25_weight=0.5,
+                ensemble_candidate_k=20,
+                ensemble_use_chunk_id=True,
+            )
+        )
+
+        with patch("main.st", fake_st):
+            render_sidebar(store)
+
+        session_buttons = {
+            call["key"]: call
+            for call in fake_st.button_calls
+            if call["key"].startswith("session-")
+        }
+
+        self.assertEqual(session_buttons[f"session-{first.session_id}"]["type"], "secondary")
+        self.assertEqual(session_buttons[f"session-{second.session_id}"]["type"], "primary")
 
     def test_retriever_strategy_options_expose_similarity_instead_of_vectorstore(self):
         self.assertIn("similarity", RETRIEVER_STRATEGY_OPTIONS)
@@ -336,6 +401,7 @@ class StreamlitUiTest(unittest.TestCase):
         self.assertIsInstance(config.reranker_config, LLMScoreRerankerConfig)
         self.assertEqual(config.candidate_k, DEFAULT_RERANKER_CANDIDATE_K)
         self.assertEqual(config.final_k, DEFAULT_RERANKER_FINAL_K)
+
     def test_retrieved_context_metadata_uses_similarity_score_without_reranker(self):
         contexts = [
             RetrievedContext(
@@ -351,7 +417,6 @@ class StreamlitUiTest(unittest.TestCase):
         )
 
         self.assertEqual(rendered[0]["match_percent"], 81)
-
 
     def test_build_ensemble_weight_label_is_short(self):
         label = build_ensemble_weight_label(0.65)
