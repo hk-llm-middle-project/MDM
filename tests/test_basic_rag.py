@@ -784,6 +784,68 @@ class BasicRagTest(unittest.TestCase):
             {"$and": [{"party_type": "자전거"}, {"chunk_type": "child"}]},
         )
 
+    def test_parent_retriever_copies_child_relevance_score_to_parent_metadata(self):
+        from rag.pipeline.retriever.strategies.parent import retrieve_with_parent_documents
+
+        parent = Document(
+            page_content="차량 추돌 parent",
+            metadata={
+                "chunk_id": 10,
+                "chunk_type": "parent",
+                "diagram_id": "차41-1",
+            },
+        )
+        child = Document(
+            page_content="사고 상황 차량 추돌 child",
+            metadata={
+                "chunk_id": 11,
+                "parent_id": 10,
+                "chunk_type": "child",
+                "diagram_id": "차41-1",
+            },
+        )
+
+        class FakeVectorstore:
+            def similarity_search_with_relevance_scores(self, query, k, filter=None):
+                self.query = query
+                self.k = k
+                self.filter = filter
+                return [(child, 0.82)]
+
+            def as_retriever(self, search_kwargs):
+                self.search_kwargs = search_kwargs
+
+                class FakeRetriever:
+                    def invoke(self, query, config=None):
+                        del query, config
+                        return [child]
+
+                return FakeRetriever()
+
+        vectorstore = FakeVectorstore()
+        components = build_retrieval_components(
+            vectorstore,
+            source_documents=[parent, child],
+        )
+
+        results = retrieve_with_parent_documents(
+            components,
+            "추돌 사고",
+            k=1,
+            filters={"party_type": "자동차"},
+        )
+
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].page_content, "차량 추돌 parent")
+        self.assertIn("similarity_score", results[0].metadata)
+        self.assertEqual(results[0].metadata["similarity_score"], 0.82)
+        self.assertEqual(results[0].metadata["score_source"], "child_vector_relevance")
+        self.assertEqual(results[0].metadata["matched_child_chunk_id"], 11)
+        self.assertEqual(
+            vectorstore.filter,
+            {"$and": [{"party_type": "자동차"}, {"chunk_type": "child"}]},
+        )
+
     def test_vectorstore_exists_ignores_placeholder_files(self):
         self.assertFalse(vectorstore_exists(Path("missing-vectorstore")))
 

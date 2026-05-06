@@ -125,6 +125,55 @@ def _parent_child_candidate_k(final_k: int) -> int:
     )
 
 
+def _document_with_child_relevance_score(document: Document, score: float) -> Document:
+    metadata = dict(document.metadata)
+    metadata["similarity_score"] = float(score)
+    metadata["score_source"] = "child_vector_relevance"
+    return Document(page_content=document.page_content, metadata=metadata)
+
+
+def _copy_parent_with_child_match(parent: Document, child: Document) -> Document:
+    metadata = dict(parent.metadata)
+    child_metadata = child.metadata
+    similarity_score = child_metadata.get("similarity_score")
+    if isinstance(similarity_score, int | float):
+        metadata["similarity_score"] = float(similarity_score)
+        metadata["score_source"] = child_metadata.get("score_source", "child_vector_relevance")
+    child_chunk_id = child_metadata.get("chunk_id")
+    if child_chunk_id is not None:
+        metadata["matched_child_chunk_id"] = child_chunk_id
+    return Document(page_content=parent.page_content, metadata=metadata)
+
+
+def _retrieve_child_candidates_with_relevance_scores(
+    components: RetrievalComponents,
+    query: str,
+    candidate_k: int,
+    child_filter: dict[str, object],
+) -> list[Document] | None:
+    search_with_scores = getattr(
+        components.vectorstore,
+        "similarity_search_with_relevance_scores",
+        None,
+    )
+    if not callable(search_with_scores):
+        return None
+
+    try:
+        scored_documents = search_with_scores(
+            query,
+            k=candidate_k,
+            filter=child_filter,
+        )
+    except (AttributeError, NotImplementedError, TypeError):
+        return None
+
+    return [
+        _document_with_child_relevance_score(document, score)
+        for document, score in scored_documents
+    ]
+
+
 def _retrieve_child_candidates(
     components: RetrievalComponents,
     query: str,
@@ -134,6 +183,15 @@ def _retrieve_child_candidates(
 ) -> list[Document]:
     child_filter = _merge_filter(filters, {"chunk_type": "child"})
     candidate_k = _parent_child_candidate_k(k)
+    scored_candidates = _retrieve_child_candidates_with_relevance_scores(
+        components,
+        query,
+        candidate_k,
+        child_filter,
+    )
+    if scored_candidates is not None:
+        return scored_candidates
+
     search_kwargs: dict[str, object] = {"k": candidate_k, "filter": child_filter}
     retriever = components.vectorstore.as_retriever(search_kwargs=search_kwargs)
     config_dict = trace_context.langchain_config("mdm.retrieve.parent.child") if trace_context else None
@@ -196,7 +254,7 @@ def retrieve_with_parent_documents(
         key=lambda document: 0 if _is_accident_situation_child(document) else 1,
     )
     parent_documents = [
-        parent
+        _copy_parent_with_child_match(parent, child_document)
         for child_document in ordered_children
         if (parent := _parent_for_child(child_document, parents_by_chunk_id, parents_by_diagram_id))
         is not None

@@ -514,10 +514,10 @@ def estimate_match_percent(
     reranker_strategy: str = DEFAULT_RERANKER_STRATEGY,
 ) -> int:
     """점수 metadata가 없을 때 화면 표시용 일치율을 보수적으로 추정합니다."""
-    if reranker_strategy in {"cross-encoder", "llm-score"}:
-        rerank_percent = estimate_rerank_match_percent(metadata)
-        if rerank_percent is not None:
-            return rerank_percent
+    del reranker_strategy
+    score_percent = estimate_rerank_match_percent(metadata)
+    if score_percent is not None:
+        return score_percent
     return estimate_keyword_match_percent(question, content)
 
 

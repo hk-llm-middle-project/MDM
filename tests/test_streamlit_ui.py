@@ -14,6 +14,7 @@ from main import (
     build_ensemble_weight_caption_html,
     build_ensemble_weight_label,
     build_pipeline_config,
+    build_retrieved_context_metadata,
     create_progress_reporter,
     delete_session_and_select_fallback,
     get_chunker_strategy_options,
@@ -29,6 +30,7 @@ from rag.pipeline.reranker import (
 )
 from rag.pipeline.reranker.strategies.cross_encoder import rerank_with_cross_encoder
 from rag.pipeline.retriever import EnsembleRetrieverConfig
+from rag.service.analysis.answer_schema import RetrievedContext
 from rag.service.intake.schema import IntakeState
 from rag.service.session.schema import ChatMessage
 from rag.service.session.memory_store import MemoryConversationStore
@@ -333,6 +335,22 @@ class StreamlitUiTest(unittest.TestCase):
         self.assertIsInstance(config.reranker_config, LLMScoreRerankerConfig)
         self.assertEqual(config.candidate_k, DEFAULT_RERANKER_CANDIDATE_K)
         self.assertEqual(config.final_k, DEFAULT_RERANKER_FINAL_K)
+    def test_retrieved_context_metadata_uses_similarity_score_without_reranker(self):
+        contexts = [
+            RetrievedContext(
+                content="본문에는 질문 키워드가 없습니다.",
+                metadata={"similarity_score": 0.82},
+            )
+        ]
+
+        rendered = build_retrieved_context_metadata(
+            contexts,
+            question="추돌 사고",
+            reranker_strategy="none",
+        )
+
+        self.assertEqual(rendered[0]["match_percent"], 81)
+
 
     def test_build_ensemble_weight_label_is_short(self):
         label = build_ensemble_weight_label(0.65)
