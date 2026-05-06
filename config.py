@@ -52,15 +52,15 @@ DEFAULT_ENSEMBLE_USE_CHUNK_ID = True
 ENSEMBLE_ID_KEY = "chunk_id"
 
 DEFAULT_EMBEDDING_PROVIDER = "bge"
-DEFAULT_MODE = "Pro"
+DEFAULT_MODE = "Fast"
 MODE_PRESETS = {
     "Fast": {
-        "loader_strategy": "llamaparser",
-        "chunker_strategy": "case-boundary",
-        "embedding_provider": DEFAULT_EMBEDDING_PROVIDER,
-        "retriever_strategy": "ensemble",
+        "loader_strategy": "upstage",
+        "chunker_strategy": "custom",
+        "embedding_provider": "google",
+        "retriever_strategy": "parent",
         "reranker_strategy": "none",
-        "ensemble_bm25_weight": 0.5,
+        "ensemble_bm25_weight": DEFAULT_ENSEMBLE_BM25_WEIGHT,
         "ensemble_candidate_k": DEFAULT_ENSEMBLE_CANDIDATE_K,
         "ensemble_use_chunk_id": DEFAULT_ENSEMBLE_USE_CHUNK_ID,
     },
@@ -69,16 +69,6 @@ MODE_PRESETS = {
         "chunker_strategy": "case-boundary",
         "embedding_provider": DEFAULT_EMBEDDING_PROVIDER,
         "retriever_strategy": "parent",
-        "reranker_strategy": "cross-encoder",
-        "ensemble_bm25_weight": DEFAULT_ENSEMBLE_BM25_WEIGHT,
-        "ensemble_candidate_k": DEFAULT_ENSEMBLE_CANDIDATE_K,
-        "ensemble_use_chunk_id": DEFAULT_ENSEMBLE_USE_CHUNK_ID,
-    },
-    "Pro": {
-        "loader_strategy": "upstage",
-        "chunker_strategy": "custom",
-        "embedding_provider": DEFAULT_EMBEDDING_PROVIDER,
-        "retriever_strategy": "ensemble_parent",
         "reranker_strategy": "llm-score",
         "ensemble_bm25_weight": DEFAULT_ENSEMBLE_BM25_WEIGHT,
         "ensemble_candidate_k": DEFAULT_ENSEMBLE_CANDIDATE_K,

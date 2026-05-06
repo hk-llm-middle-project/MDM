@@ -21,7 +21,7 @@ from main import (
     render_answer_area,
     render_chat,
 )
-from config import get_debug_progress_enabled
+from config import DEFAULT_MODE, MODE_PRESETS, get_debug_progress_enabled
 from rag.pipeline.reranker import (
     CrossEncoderRerankerConfig,
     FlashrankRerankerConfig,
@@ -156,6 +156,40 @@ class FakeChatStore:
 
 
 class StreamlitUiTest(unittest.TestCase):
+    def test_mode_presets_expose_fast_and_thinking_only(self):
+        self.assertEqual(DEFAULT_MODE, "Fast")
+        self.assertEqual(tuple(MODE_PRESETS), ("Fast", "Thinking"))
+
+    def test_fast_mode_uses_upstage_google_parent_without_reranker(self):
+        self.assertEqual(
+            MODE_PRESETS["Fast"],
+            {
+                "loader_strategy": "upstage",
+                "chunker_strategy": "custom",
+                "embedding_provider": "google",
+                "retriever_strategy": "parent",
+                "reranker_strategy": "none",
+                "ensemble_bm25_weight": 0.5,
+                "ensemble_candidate_k": 20,
+                "ensemble_use_chunk_id": True,
+            },
+        )
+
+    def test_thinking_mode_uses_llamaparser_bge_parent_with_llm_score(self):
+        self.assertEqual(
+            MODE_PRESETS["Thinking"],
+            {
+                "loader_strategy": "llamaparser",
+                "chunker_strategy": "case-boundary",
+                "embedding_provider": "bge",
+                "retriever_strategy": "parent",
+                "reranker_strategy": "llm-score",
+                "ensemble_bm25_weight": 0.5,
+                "ensemble_candidate_k": 20,
+                "ensemble_use_chunk_id": True,
+            },
+        )
+
     def test_build_pipeline_config_uses_selected_retriever_strategy(self):
         config = build_pipeline_config("ensemble")
 
