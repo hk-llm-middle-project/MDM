@@ -806,10 +806,11 @@ class BasicRagTest(unittest.TestCase):
         )
 
         class FakeVectorstore:
-            def similarity_search_with_relevance_scores(self, query, k, filter=None):
+            def similarity_search_with_relevance_scores(self, query, k, filter=None, **kwargs):
                 self.query = query
                 self.k = k
                 self.filter = filter
+                self.kwargs = kwargs
                 return [(child, 0.82)]
 
             def as_retriever(self, search_kwargs):
@@ -833,6 +834,7 @@ class BasicRagTest(unittest.TestCase):
             "추돌 사고",
             k=1,
             filters={"party_type": "자동차"},
+            trace_context=TraceContext(thread_id="thread-1", user_id="user-1"),
         )
 
         self.assertEqual(len(results), 1)
@@ -844,6 +846,81 @@ class BasicRagTest(unittest.TestCase):
         self.assertEqual(
             vectorstore.filter,
             {"$and": [{"party_type": "자동차"}, {"chunk_type": "child"}]},
+        )
+        self.assertEqual(
+            vectorstore.kwargs,
+            {
+                "metadata": {
+                    "thread_id": "thread-1",
+                    "session_id": "thread-1",
+                    "user_id": "user-1",
+                },
+                "run_name": "mdm.retrieve.parent.child.scores",
+            },
+        )
+
+    def test_parent_retriever_falls_back_to_traced_retriever_when_scored_search_rejects_config(self):
+        from rag.pipeline.retriever.strategies.parent import retrieve_with_parent_documents
+
+        parent = Document(
+            page_content="차량 추돌 parent",
+            metadata={
+                "chunk_id": 10,
+                "chunk_type": "parent",
+                "diagram_id": "차41-1",
+            },
+        )
+        child = Document(
+            page_content="사고 상황 차량 추돌 child",
+            metadata={
+                "chunk_id": 11,
+                "parent_id": 10,
+                "chunk_type": "child",
+                "diagram_id": "차41-1",
+            },
+        )
+
+        class FakeRetriever:
+            def __init__(self):
+                self.config = None
+
+            def invoke(self, query, config=None):
+                del query
+                self.config = config
+                return [child]
+
+        class FakeVectorstore:
+            def __init__(self):
+                self.retriever = FakeRetriever()
+
+            def similarity_search_with_relevance_scores(self, query, k, filter=None):
+                del query, k, filter
+                return [(child, 0.82)]
+
+            def as_retriever(self, search_kwargs):
+                self.search_kwargs = search_kwargs
+                return self.retriever
+
+        vectorstore = FakeVectorstore()
+        components = build_retrieval_components(
+            vectorstore,
+            source_documents=[parent, child],
+        )
+
+        results = retrieve_with_parent_documents(
+            components,
+            "추돌 사고",
+            k=1,
+            filters={"party_type": "자동차"},
+            trace_context=TraceContext(thread_id="thread-1"),
+        )
+
+        self.assertEqual(len(results), 1)
+        self.assertNotIn("similarity_score", results[0].metadata)
+        self.assertEqual(vectorstore.retriever.config["run_name"], "mdm.retrieve.parent.child")
+        self.assertEqual(
+            vectorstore.retriever.config["metadata"],
+            {"thread_id": "thread-1", "session_id": "thread-1"},
         )
 
     def test_vectorstore_exists_ignores_placeholder_files(self):

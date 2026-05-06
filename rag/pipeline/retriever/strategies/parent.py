@@ -150,6 +150,7 @@ def _retrieve_child_candidates_with_relevance_scores(
     query: str,
     candidate_k: int,
     child_filter: dict[str, object],
+    trace_context: TraceContext | None = None,
 ) -> list[Document] | None:
     search_with_scores = getattr(
         components.vectorstore,
@@ -159,11 +160,17 @@ def _retrieve_child_candidates_with_relevance_scores(
     if not callable(search_with_scores):
         return None
 
+    config_dict = (
+        trace_context.langchain_config("mdm.retrieve.parent.child.scores")
+        if trace_context
+        else {}
+    )
     try:
         scored_documents = search_with_scores(
             query,
             k=candidate_k,
             filter=child_filter,
+            **config_dict,
         )
     except (AttributeError, NotImplementedError, TypeError):
         return None
@@ -188,6 +195,7 @@ def _retrieve_child_candidates(
         query,
         candidate_k,
         child_filter,
+        trace_context=trace_context,
     )
     if scored_candidates is not None:
         return scored_candidates
