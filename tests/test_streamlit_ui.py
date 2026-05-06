@@ -19,6 +19,7 @@ from main import (
     delete_session_and_select_fallback,
     get_chunker_strategy_options,
     normalize_chunker_strategy,
+    render_app_css,
     render_answer_area,
     render_chat,
 )
@@ -375,6 +376,20 @@ class StreamlitUiTest(unittest.TestCase):
         self.assertIn("width: 4px", css)
         self.assertIn("[data-testid=\"stTickBar\"]", css)
         self.assertIn("display: none", css)
+
+    def test_chat_input_css_keeps_text_clear_of_rounded_edge(self):
+        rendered = []
+
+        with patch("main.st.markdown", side_effect=lambda body, **_: rendered.append(body)):
+            render_app_css()
+
+        css = rendered[0]
+
+        self.assertIn('[data-testid="stChatInput"] div[data-baseweb="textarea"]', css)
+        self.assertIn("border-radius: 14px !important", css)
+        self.assertIn("padding-left: 1rem !important", css)
+        self.assertIn("padding-right: 1rem !important", css)
+        self.assertNotIn('[data-testid="stChatInput"] textarea {\n  border-radius: 999px;', css)
 
     def test_debug_progress_env_flag_controls_verbose_status_box(self):
         with patch.dict(os.environ, {"DEBUG_PROGRESS": "true"}):

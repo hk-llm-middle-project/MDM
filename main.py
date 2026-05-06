@@ -912,8 +912,13 @@ def render_app_css() -> None:
 [data-testid="stImage"] {
   animation: fadeSlideIn 420ms ease both;
 }
+[data-testid="stChatInput"] div[data-baseweb="textarea"] {
+  border-radius: 14px !important;
+}
 [data-testid="stChatInput"] textarea {
-  border-radius: 999px;
+  border-radius: 14px !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
 }
 [data-testid="stSpinner"] > div {
   margin-top: 0.35rem;
